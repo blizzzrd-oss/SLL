@@ -5,11 +5,11 @@ from config import (
 from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run, draw_player_hurt
 from rendering.ui import draw_hud
 
-def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None, hud_visible=True):
+def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None, hud_visible=True, fps=None):
     screen.fill(GAME_BG_COLOR)
     player = game.player
     if hud_visible:
-        draw_hud(screen, player)
+        draw_hud(screen, player, fps=fps)
     # Handle hurt animation (non-interruptible)
     if player.anim_state in ('hurt_hp', 'hurt_barrier'):
         # Determine number of frames for current hurt animation

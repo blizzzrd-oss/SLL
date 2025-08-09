@@ -133,7 +133,7 @@ def run_game(screen, slot, mode):
         if game.player.anim_lock:
             game.player.anim_timer += dt
 
-        draw_game(screen, game, last_move, time_accum, paused, pause_menu_selected, pause_menu_options, pause_menu_rects, hud_visible)
+        draw_game(screen, game, last_move, time_accum, paused, pause_menu_selected, pause_menu_options, pause_menu_rects, hud_visible, clock.get_fps())
         if should_exit:
             break
 

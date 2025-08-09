@@ -1,7 +1,7 @@
 """
 User interface rendering logic.
 """
-def draw_hud(screen, player):
+def draw_hud(screen, player, fps=None):
     import pygame
     from config import (
         HUD_TOP_HEIGHT, HUD_BOTTOM_HEIGHT, HUD_LEFT_WIDTH, HUD_RIGHT_WIDTH,
@@ -35,6 +35,12 @@ def draw_hud(screen, player):
     screen.blit(font.render("BOTTOM HUD", True, HUD_LABEL_COLOR), (width//2 - 80, height - HUD_BOTTOM_HEIGHT + 20))
     screen.blit(font.render("LEFT HUD", True, HUD_LABEL_COLOR), (10, height//2 - 20))
     screen.blit(font.render("RIGHT HUD", True, HUD_LABEL_COLOR), (width - HUD_RIGHT_WIDTH + 10, height//2 - 20))
+
+    # Show FPS in the top right corner
+    if fps is not None:
+        fps_text = font.render(f"FPS: {int(fps)}", True, HUD_LABEL_COLOR)
+        text_rect = fps_text.get_rect(topright=(width - 20, 10))
+        screen.blit(fps_text, text_rect)
 
 def draw_menu(screen):
     # Draw game menu
