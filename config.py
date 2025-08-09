@@ -1,3 +1,13 @@
+# Game loop UI and menu config
+GAME_BG_COLOR = (20, 20, 20)
+GAME_OVERLAY_COLOR = (0, 0, 0, 180)
+PAUSE_OVERLAY_COLOR = (0, 0, 0, 140)
+GAME_OVER_FONT_SIZE = 120
+PAUSE_FONT_SIZE = 80
+MENU_FONT_SIZE = 48
+PAUSE_MENU_HIGHLIGHT_COLOR = (255, 255, 0)
+PAUSE_MENU_TEXT_COLOR = (255, 255, 255)
+PAUSE_MENU_OPTIONS = ["Resume", "Surrender", "Settings", "Quit"]
 # Player hurt animation config
 PLAYER_HURT_HP_SPRITE = 'resources/images/player/Hurt/Slime1_Hurt_full_hp.png'
 PLAYER_HURT_BARRIER_SPRITE = 'resources/images/player/Hurt/Slime1_Hurt_full_barrier.png'

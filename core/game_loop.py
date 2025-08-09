@@ -7,7 +7,9 @@ import os
 from core.player_movement import handle_player_movement
 from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run, draw_player_hurt
 from core.game import Game
-from config import PLAYER_HURT_ANIMATION_FPS, PLAYER_SPRITE_FRAME_WIDTH
+from config import (
+    PLAYER_HURT_ANIMATION_FPS, PLAYER_SPRITE_FRAME_WIDTH, GAME_BG_COLOR, GAME_OVERLAY_COLOR, PAUSE_OVERLAY_COLOR, GAME_OVER_FONT_SIZE, PAUSE_FONT_SIZE, MENU_FONT_SIZE, PAUSE_MENU_HIGHLIGHT_COLOR, PAUSE_MENU_TEXT_COLOR, PAUSE_MENU_OPTIONS
+)
 from rendering.menu import Menu
 
 def run_game(screen, slot, mode):
@@ -19,7 +21,7 @@ def run_game(screen, slot, mode):
     clock = pygame.time.Clock()
     paused = False
     pause_menu_selected = 0
-    pause_menu_options = ["Resume", "Surrender", "Settings", "Quit"]
+    pause_menu_options = PAUSE_MENU_OPTIONS
     pause_menu_rects = []
     in_settings_menu = False
     settings_menu = None
@@ -133,7 +135,7 @@ def run_game(screen, slot, mode):
 
 
 def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None):
-    screen.fill((20, 20, 20))
+    screen.fill(GAME_BG_COLOR)
     player = game.player
     # Handle hurt animation (non-interruptible)
     if player.anim_state in ('hurt_hp', 'hurt_barrier'):
@@ -163,13 +165,13 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
     # Draw GAME OVER overlay if needed
     if getattr(game, 'game_over', False):
         overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 180))  # 180/255 alpha for half transparency
+        overlay.fill(GAME_OVERLAY_COLOR)
         screen.blit(overlay, (0, 0))
-        font = pygame.font.SysFont(None, 120)
+        font = pygame.font.SysFont(None, GAME_OVER_FONT_SIZE)
         text = font.render("GAME OVER", True, (255, 0, 0))
         text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
         screen.blit(text, text_rect)
-        font2 = pygame.font.SysFont(None, 48)
+        font2 = pygame.font.SysFont(None, MENU_FONT_SIZE)
         tip = font2.render("Press ESC or Enter to return to menu", True, (255, 255, 255))
         tip_rect = tip.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 + 100))
         screen.blit(tip, tip_rect)
@@ -177,16 +179,16 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
     # Draw pause menu overlay if paused
     if paused and not getattr(game, 'game_over', False):
         overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        overlay.fill((0, 0, 0, 140))
+        overlay.fill(PAUSE_OVERLAY_COLOR)
         screen.blit(overlay, (0, 0))
-        font = pygame.font.SysFont(None, 80)
-        text = font.render("Paused", True, (255, 255, 255))
+        font = pygame.font.SysFont(None, PAUSE_FONT_SIZE)
+        text = font.render("Paused", True, PAUSE_MENU_TEXT_COLOR)
         text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 120))
         screen.blit(text, text_rect)
-        font2 = pygame.font.SysFont(None, 48)
+        font2 = pygame.font.SysFont(None, MENU_FONT_SIZE)
         rects = []
         for i, option in enumerate(pause_menu_options or []):
-            color = (255, 255, 0) if i == pause_menu_selected else (255, 255, 255)
+            color = PAUSE_MENU_HIGHLIGHT_COLOR if i == pause_menu_selected else PAUSE_MENU_TEXT_COLOR
             opt_text = font2.render(option, True, color)
             opt_rect = opt_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 30 + i * 60))
             screen.blit(opt_text, opt_rect)
