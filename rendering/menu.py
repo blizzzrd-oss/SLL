@@ -30,7 +30,6 @@ class Menu:
         self.screen = screen
         self.state = 'main'  # 'main', 'savegame', 'settings'
         self.selected = 0
-        self.save_slots = [None, None, None]  # Placeholder for savegame slots
         self.font = pygame.font.SysFont(None, FONT_SIZE_LARGE)
         self.small_font = pygame.font.SysFont(None, FONT_SIZE_SMALL)
         self.main_menu_buttons = [
@@ -38,7 +37,17 @@ class Menu:
             Button((100, 180, 400, 60), 'Settings', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
             Button((100, 260, 400, 60), 'Quit', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
         ]
-        self.savegame_back_button = Button((100, 300, 200, 40), 'Back', self.small_font, COLOR_BACK, COLOR_HIGHLIGHT)
+        self.savegame_back_button = Button((100, 330, 200, 40), 'Back', self.small_font, COLOR_BACK, COLOR_HIGHLIGHT)
+        # Save slots: list of 3 slots, None or string for each slot
+        self.save_slots = [None, None, None]
+        # Gamemode menu
+        self.gamemode_buttons = [
+            Button((100, 100, 400, 60), 'Easy', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
+            Button((100, 180, 400, 60), 'Normal', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
+            Button((100, 260, 400, 60), 'Hard', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
+        ]
+        self.gamemode_back_button = Button((100, 340, 200, 40), 'Back', self.small_font, COLOR_BACK, COLOR_HIGHLIGHT)
+        self.selected_slot = None  # Track which slot was selected
         self.settings_back_button = Button((100, 240, 200, 40), 'Back', self.small_font, COLOR_BACK, COLOR_HIGHLIGHT)
         self.dragging_music = False
         self.dragging_sfx = False
@@ -53,24 +62,33 @@ class Menu:
         self.checkbox_y_start = self.sfx_label_y + 50
         self.checkbox_spacing = 40
         self.checkbox_size = 28
-        # Load settings from file
         self._settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings.json')
         self.load_settings()
+        # Ensure music volume matches loaded setting
+        try:
+            pygame.mixer.music.set_volume(self.music_volume / 100)
+        except Exception:
+            pass
 
     def load_settings(self):
         try:
             with open(self._settings_path, 'r') as f:
                 data = json.load(f)
-            self.music_volume = float(data.get('music_volume', MUSIC_VOLUME))
-            self.sfx_volume = float(data.get('sfx_volume', SFX_VOLUME))
+            # Always treat as percent int (0-100), round to nearest 5
+            mv = data.get('music_volume', MUSIC_VOLUME * 100)
+            sv = data.get('sfx_volume', SFX_VOLUME * 100)
+            self.music_volume = int(round(float(mv)))
+            self.music_volume = min(100, max(0, (self.music_volume // 5) * 5))
+            self.sfx_volume = int(round(float(sv)))
+            self.sfx_volume = min(100, max(0, (self.sfx_volume // 5) * 5))
             self.checkbox_options = [
                 {"label": "Auto Aim", "checked": bool(data.get('auto_aim', True))},
                 {"label": "Auto Attack", "checked": bool(data.get('auto_attack', True))},
                 {"label": "Auto Skills", "checked": bool(data.get('auto_skills', True))},
             ]
         except Exception:
-            self.music_volume = MUSIC_VOLUME
-            self.sfx_volume = SFX_VOLUME
+            self.music_volume = int(MUSIC_VOLUME * 100)
+            self.sfx_volume = int(SFX_VOLUME * 100)
             self.checkbox_options = [
                 {"label": "Auto Aim", "checked": True},
                 {"label": "Auto Attack", "checked": True},
@@ -79,8 +97,8 @@ class Menu:
 
     def save_settings(self):
         data = {
-            'music_volume': self.music_volume,
-            'sfx_volume': self.sfx_volume,
+            'music_volume': int(self.music_volume),
+            'sfx_volume': int(self.sfx_volume),
             'auto_aim': self.checkbox_options[0]["checked"],
             'auto_attack': self.checkbox_options[1]["checked"],
             'auto_skills': self.checkbox_options[2]["checked"]
@@ -89,7 +107,7 @@ class Menu:
             with open(self._settings_path, 'w') as f:
                 json.dump(data, f, indent=4)
         except Exception as e:
-            print(f"Failed to save settings: {e}")
+            pass
 
     def run(self):
         """Main menu loop. Handles events and drawing until quit."""
@@ -114,7 +132,19 @@ class Menu:
             self.draw_savegame_menu()
         elif self.state == 'settings':
             self.draw_settings_menu()
+        elif self.state == 'gamemode':
+            self.draw_gamemode_menu()
         pygame.display.flip()
+
+    def draw_gamemode_menu(self):
+        title = self.font.render('Select Game Mode', True, COLOR_TEXT)
+        self.screen.blit(title, (100, 40))
+        mouse_pos = pygame.mouse.get_pos()
+        for button in self.gamemode_buttons:
+            button.check_hover(mouse_pos)
+            button.draw(self.screen)
+        self.gamemode_back_button.check_hover(mouse_pos)
+        self.gamemode_back_button.draw(self.screen)
 
     def draw_main_menu(self):
         mouse_pos = pygame.mouse.get_pos()
@@ -123,24 +153,38 @@ class Menu:
             button.draw(self.screen)
 
     def draw_savegame_menu(self):
+        mouse_pos = pygame.mouse.get_pos()
+        self.slot_rects = []
         for i in range(3):
             slot = self.save_slots[i] or 'Empty Slot'
-            color = COLOR_HIGHLIGHT if i == self.selected else COLOR_TEXT
-            label = self.font.render(f'Slot {i+1}: {slot}', True, color)
-            self.screen.blit(label, (100, 100 + i * 60))
-        mouse_pos = pygame.mouse.get_pos()
+            y = 100 + i * 70
+            rect = pygame.Rect(100, y, 400, 60)
+            self.slot_rects.append(rect)
+            is_hovered = rect.collidepoint(mouse_pos)
+            # Button style: fill, border, highlight on hover/selection
+            fill_color = COLOR_HIGHLIGHT if is_hovered or i == self.selected else COLOR_BACK
+            border_color = COLOR_TEXT if not is_hovered else COLOR_HIGHLIGHT
+            pygame.draw.rect(self.screen, fill_color, rect, border_radius=8)
+            pygame.draw.rect(self.screen, border_color, rect, 3, border_radius=8)
+            # Draw label centered
+            label_color = COLOR_BLACK if is_hovered or i == self.selected else COLOR_TEXT
+            label = self.font.render(f'Slot {i+1}: {slot}', True, label_color)
+            label_rect = label.get_rect(center=rect.center)
+            self.screen.blit(label, label_rect)
+        # Always place back button well below the last slot
+        self.savegame_back_button.rect.y = 100 + 3 * 70 + 40
         self.savegame_back_button.check_hover(mouse_pos)
         self.savegame_back_button.draw(self.screen)
 
     def draw_settings_menu(self):
         # Render labels with %
-        music_label = self.small_font.render(f'Music Volume: {int(self.music_volume*100)}%', True, COLOR_TEXT)
-        sfx_label = self.small_font.render(f'SFX Volume: {int(self.sfx_volume*100)}%', True, COLOR_TEXT)
+        music_label = self.small_font.render(f'Music Volume: {int(self.music_volume)}%', True, COLOR_TEXT)
+        sfx_label = self.small_font.render(f'SFX Volume: {int(self.sfx_volume)}%', True, COLOR_TEXT)
         self.screen.blit(music_label, (self.slider_label_x, self.music_label_y))
         self.screen.blit(sfx_label, (self.slider_label_x, self.sfx_label_y))
         # Draw sliders (simple rectangles, no color)
-        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.music_label_y, int(self.music_volume*self.slider_width), self.slider_height))
-        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.sfx_label_y, int(self.sfx_volume*self.slider_width), self.slider_height))
+        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.music_label_y, int((self.music_volume/100)*self.slider_width), self.slider_height))
+        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.sfx_label_y, int((self.sfx_volume/100)*self.slider_width), self.slider_height))
         # Draw slider backgrounds for clarity
         pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.music_label_y, self.slider_width, self.slider_height), 2)
         pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.sfx_label_y, self.slider_width, self.slider_height), 2)
@@ -194,36 +238,66 @@ class Menu:
                     self.selected = (self.selected - 1) % 3
                 elif event.key == pygame.K_RETURN:
                     # Select save slot (start game or load)
-                    pass
+                    slot_val = self.save_slots[self.selected]
+                    if slot_val is None:
+                        self.selected_slot = self.selected
+                        self.state = 'gamemode'
+                    else:
+                        # TODO: Load game logic here
+                        pass
                 elif event.key == pygame.K_ESCAPE:
                     self.state = 'main'
                     self.selected = 0
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = event.pos
+                # Check slot clicks
+                for i, rect in enumerate(getattr(self, 'slot_rects', [])):
+                    if rect.collidepoint(mouse_pos):
+                        slot_val = self.save_slots[i]
+                        if slot_val is None:
+                            self.selected_slot = i
+                            self.state = 'gamemode'
+                        else:
+                            # TODO: Load game logic here
+                            pass
+                        return
                 if self.savegame_back_button.is_clicked(mouse_pos):
                     self.state = 'main'
                     self.selected = 0
+        elif self.state == 'gamemode':
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_pos = event.pos
+                for idx, button in enumerate(self.gamemode_buttons):
+                    if button.is_clicked(mouse_pos):
+                        # TODO: Start new game with selected mode (idx: 0=Easy, 1=Normal, 2=Hard)
+                        print(f"Start new game in slot {self.selected_slot+1} with mode: {button.text}")
+                        # Here you would transition to the game state
+                        self.state = 'main'  # For now, just return to main menu
+                        return
+                if self.gamemode_back_button.is_clicked(mouse_pos):
+                    self.state = 'savegame'
+                    self.selected = self.selected_slot if self.selected_slot is not None else 0
         elif self.state == 'settings':
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_DOWN:
                     self.selected = (self.selected + 1) % 2
                 elif event.key == pygame.K_UP:
                     self.selected = (self.selected - 1) % 2
-                elif event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT:
                     if self.selected == 0:
-                        self.music_volume = max(0, self.music_volume - 0.05)
-                        pygame.mixer.music.set_volume(self.music_volume)
+                        self.music_volume = max(0, self.music_volume - 5)
+                        pygame.mixer.music.set_volume(self.music_volume / 100)
                         self.save_settings()
                     elif self.selected == 1:
-                        self.sfx_volume = max(0, self.sfx_volume - 0.05)
+                        self.sfx_volume = max(0, self.sfx_volume - 5)
                         self.save_settings()
                 elif event.key == pygame.K_RIGHT:
                     if self.selected == 0:
-                        self.music_volume = min(1, self.music_volume + 0.05)
-                        pygame.mixer.music.set_volume(self.music_volume)
+                        self.music_volume = min(100, self.music_volume + 5)
+                        pygame.mixer.music.set_volume(self.music_volume / 100)
                         self.save_settings()
                     elif self.selected == 1:
-                        self.sfx_volume = min(1, self.sfx_volume + 0.05)
+                        self.sfx_volume = min(100, self.sfx_volume + 5)
                         self.save_settings()
                 elif event.key == pygame.K_ESCAPE:
                     self.state = 'main'
@@ -233,14 +307,16 @@ class Menu:
                 # Check if user clicked on the music volume slider
                 if self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width and self.music_label_y <= mouse_pos[1] <= self.music_label_y + self.slider_height:
                     rel_x = mouse_pos[0] - self.slider_x
-                    self.music_volume = min(1, max(0, rel_x / self.slider_width))
+                    percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                    self.music_volume = min(100, max(0, percent))
                     self.dragging_music = True
-                    pygame.mixer.music.set_volume(self.music_volume)
+                    pygame.mixer.music.set_volume(self.music_volume / 100)
                     self.save_settings()
                 # Check if user clicked on the sfx volume slider
                 elif self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width and self.sfx_label_y <= mouse_pos[1] <= self.sfx_label_y + self.slider_height:
                     rel_x = mouse_pos[0] - self.slider_x
-                    self.sfx_volume = min(1, max(0, rel_x / self.slider_width))
+                    percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                    self.sfx_volume = min(100, max(0, percent))
                     self.dragging_sfx = True
                     self.save_settings()
                 # Checkboxes
@@ -263,13 +339,15 @@ class Menu:
                 if self.dragging_music:
                     if self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width:
                         rel_x = mouse_pos[0] - self.slider_x
-                        self.music_volume = min(1, max(0, rel_x / self.slider_width))
-                        pygame.mixer.music.set_volume(self.music_volume)
+                        percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                        self.music_volume = min(100, max(0, percent))
+                        pygame.mixer.music.set_volume(self.music_volume / 100)
                         self.save_settings()
                 if self.dragging_sfx:
                     if self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width:
                         rel_x = mouse_pos[0] - self.slider_x
-                        self.sfx_volume = min(1, max(0, rel_x / self.slider_width))
+                        percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                        self.sfx_volume = min(100, max(0, percent))
                         self.save_settings()
 
 class Button:
