@@ -1,36 +1,47 @@
 """
 User interface rendering logic.
 """
+import pygame
+from config import (
+    HUD_TOP_HEIGHT, HUD_BOTTOM_HEIGHT, HUD_LEFT_WIDTH, HUD_RIGHT_WIDTH,
+    HUD_ALPHA, HUD_COLOR, HUD_LABEL_COLOR, HUD_LABEL_FONT_SIZE
+)
+
+# Cache for HUD surfaces and font
+_hud_cache = {
+    'size': None,
+    'top': None,
+    'bottom': None,
+    'left': None,
+    'right': None,
+    'font': None
+}
+
 def draw_hud(screen, player, fps=None):
-    import pygame
-    from config import (
-        HUD_TOP_HEIGHT, HUD_BOTTOM_HEIGHT, HUD_LEFT_WIDTH, HUD_RIGHT_WIDTH,
-        HUD_ALPHA, HUD_COLOR, HUD_LABEL_COLOR, HUD_LABEL_FONT_SIZE
-    )
     width, height = screen.get_size()
+    global _hud_cache
+    # Recreate surfaces only if size changed
+    if _hud_cache['size'] != (width, height):
+        _hud_cache['top'] = pygame.Surface((width, HUD_TOP_HEIGHT), pygame.SRCALPHA)
+        _hud_cache['top'].fill(HUD_COLOR)
+        _hud_cache['bottom'] = pygame.Surface((width, HUD_BOTTOM_HEIGHT), pygame.SRCALPHA)
+        _hud_cache['bottom'].fill(HUD_COLOR)
+        _hud_cache['left'] = pygame.Surface((HUD_LEFT_WIDTH, height - HUD_TOP_HEIGHT - HUD_BOTTOM_HEIGHT), pygame.SRCALPHA)
+        _hud_cache['left'].fill(HUD_COLOR)
+        _hud_cache['right'] = pygame.Surface((HUD_RIGHT_WIDTH, height - HUD_TOP_HEIGHT - HUD_BOTTOM_HEIGHT), pygame.SRCALPHA)
+        _hud_cache['right'].fill(HUD_COLOR)
+        _hud_cache['size'] = (width, height)
+    if _hud_cache['font'] is None:
+        _hud_cache['font'] = pygame.font.SysFont(None, HUD_LABEL_FONT_SIZE)
+    font = _hud_cache['font']
 
-    # Top HUD (full width, HUD_TOP_HEIGHT)
-    top_hud = pygame.Surface((width, HUD_TOP_HEIGHT), pygame.SRCALPHA)
-    top_hud.fill(HUD_COLOR)
-    screen.blit(top_hud, (0, 0))
-
-    # Bottom HUD (full width, HUD_BOTTOM_HEIGHT)
-    bottom_hud = pygame.Surface((width, HUD_BOTTOM_HEIGHT), pygame.SRCALPHA)
-    bottom_hud.fill(HUD_COLOR)
-    screen.blit(bottom_hud, (0, height - HUD_BOTTOM_HEIGHT))
-
-    # Left HUD (HUD_LEFT_WIDTH wide, full height minus top/bottom)
-    left_hud = pygame.Surface((HUD_LEFT_WIDTH, height - HUD_TOP_HEIGHT - HUD_BOTTOM_HEIGHT), pygame.SRCALPHA)
-    left_hud.fill(HUD_COLOR)
-    screen.blit(left_hud, (0, HUD_TOP_HEIGHT))
-
-    # Right HUD (HUD_RIGHT_WIDTH wide, full height minus top/bottom)
-    right_hud = pygame.Surface((HUD_RIGHT_WIDTH, height - HUD_TOP_HEIGHT - HUD_BOTTOM_HEIGHT), pygame.SRCALPHA)
-    right_hud.fill(HUD_COLOR)
-    screen.blit(right_hud, (width - HUD_RIGHT_WIDTH, HUD_TOP_HEIGHT))
+    # Blit cached surfaces
+    screen.blit(_hud_cache['top'], (0, 0))
+    screen.blit(_hud_cache['bottom'], (0, height - HUD_BOTTOM_HEIGHT))
+    screen.blit(_hud_cache['left'], (0, HUD_TOP_HEIGHT))
+    screen.blit(_hud_cache['right'], (width - HUD_RIGHT_WIDTH, HUD_TOP_HEIGHT))
 
     # Optionally, add labels for clarity
-    font = pygame.font.SysFont(None, HUD_LABEL_FONT_SIZE)
     screen.blit(font.render("TOP HUD", True, HUD_LABEL_COLOR), (width//2 - 60, 20))
     screen.blit(font.render("BOTTOM HUD", True, HUD_LABEL_COLOR), (width//2 - 80, height - HUD_BOTTOM_HEIGHT + 20))
     screen.blit(font.render("LEFT HUD", True, HUD_LABEL_COLOR), (10, height//2 - 20))
