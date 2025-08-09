@@ -1,6 +1,3 @@
- 
-
-
 from core.init import init_pygame
 from rendering.menu import Menu
 from core.game import Game

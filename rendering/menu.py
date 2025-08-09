@@ -236,6 +236,7 @@ class Menu:
         self.settings_back_button.draw(self.screen)
 
     def handle_event(self, event):
+        """Returns True if the settings menu should exit (e.g. back button or ESC), else False."""
         """Handles user input events for the menu."""
         if self.state == 'main':
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -334,6 +335,7 @@ class Menu:
                 elif event.key == pygame.K_ESCAPE:
                     self.state = 'main'
                     self.selected = 0
+                    return True
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = event.pos
                 # Check if user clicked on the music volume slider
@@ -370,6 +372,7 @@ class Menu:
                 if self.settings_back_button.is_clicked(mouse_pos):
                     self.state = 'main'
                     self.selected = 0
+                    return True
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 self.dragging_music = False
                 self.dragging_sfx = False
@@ -388,6 +391,7 @@ class Menu:
                         percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
                         self.sfx_volume = min(100, max(0, percent))
                         self.save_settings()
+            return False
 
 class Button:
     def __init__(self, rect, text, font, color, highlight_color):
