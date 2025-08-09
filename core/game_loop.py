@@ -8,9 +8,10 @@ from core.player_movement import handle_player_movement
 from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run, draw_player_hurt
 from core.game import Game
 from config import (
-    PLAYER_HURT_ANIMATION_FPS, PLAYER_SPRITE_FRAME_WIDTH, GAME_BG_COLOR, GAME_OVERLAY_COLOR, PAUSE_OVERLAY_COLOR, GAME_OVER_FONT_SIZE, PAUSE_FONT_SIZE, MENU_FONT_SIZE, PAUSE_MENU_HIGHLIGHT_COLOR, PAUSE_MENU_TEXT_COLOR, PAUSE_MENU_OPTIONS
+    PLAYER_HURT_ANIMATION_FPS, PLAYER_SPRITE_FRAME_WIDTH, GAME_BG_COLOR, GAME_OVERLAY_COLOR, PAUSE_OVERLAY_COLOR, GAME_OVER_FONT_SIZE, PAUSE_FONT_SIZE, MENU_FONT_SIZE, PAUSE_MENU_HIGHLIGHT_COLOR, PAUSE_MENU_TEXT_COLOR, PAUSE_MENU_OPTIONS, HUD_TOGGLE_KEY
 )
 from rendering.menu import Menu
+from rendering.ui import draw_hud
 
 def run_game(screen, slot, mode):
     game = Game(screen, slot, mode)
@@ -27,6 +28,7 @@ def run_game(screen, slot, mode):
     settings_menu = None
     # Always reset player state on new game
     game.reset()
+    hud_visible = True
     settings_path = os.path.join(os.path.dirname(__file__), '..', 'settings.json')
     while running:
         # Reload FPS from settings.json every frame
@@ -49,6 +51,9 @@ def run_game(screen, slot, mode):
             if game.game_over:
                 if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_RETURN):
                     should_exit = True
+            # HUD toggle
+            if event.type == pygame.KEYDOWN and event.key == HUD_TOGGLE_KEY:
+                hud_visible = not hud_visible
             # Pause menu logic
             elif not in_settings_menu and not game.game_over:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -109,6 +114,7 @@ def run_game(screen, slot, mode):
             settings_menu.draw()
             pygame.display.flip()
             continue
+
         # Game logic and movement
         if not game.game_over and not paused:
             keys = pygame.key.get_pressed()
@@ -129,14 +135,17 @@ def run_game(screen, slot, mode):
             game.update(dt)
         if game.player.anim_lock:
             game.player.anim_timer += dt
-        draw_game(screen, game, last_move, time_accum, paused, pause_menu_selected, pause_menu_options, pause_menu_rects)
+
+        draw_game(screen, game, last_move, time_accum, paused, pause_menu_selected, pause_menu_options, pause_menu_rects, hud_visible)
         if should_exit:
             break
 
 
-def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None):
+def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None, hud_visible=True):
     screen.fill(GAME_BG_COLOR)
     player = game.player
+    if hud_visible:
+        draw_hud(screen, player)
     # Handle hurt animation (non-interruptible)
     if player.anim_state in ('hurt_hp', 'hurt_barrier'):
         # Determine number of frames for current hurt animation
