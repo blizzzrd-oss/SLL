@@ -5,18 +5,40 @@ from config import (
 from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run, draw_player_hurt
 from rendering.ui import draw_hud
 
+
+# --- Resource cache ---
+_game_render_cache = {
+    'hurt_hp_img': None,
+    'hurt_barrier_img': None,
+    'game_over_font': None,
+    'menu_font': None,
+    'pause_font': None
+}
+
 def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None, hud_visible=True, fps=None):
     screen.fill(GAME_BG_COLOR)
     player = game.player
+    global _game_render_cache
+    if _game_render_cache['hurt_hp_img'] is None:
+        _game_render_cache['hurt_hp_img'] = pygame.image.load('resources/images/player/Hurt/Slime1_Hurt_full_hp.png').convert_alpha()
+    if _game_render_cache['hurt_barrier_img'] is None:
+        _game_render_cache['hurt_barrier_img'] = pygame.image.load('resources/images/player/Hurt/Slime1_Hurt_full_barrier.png').convert_alpha()
+    if _game_render_cache['game_over_font'] is None:
+        _game_render_cache['game_over_font'] = pygame.font.SysFont(None, GAME_OVER_FONT_SIZE)
+    if _game_render_cache['menu_font'] is None:
+        _game_render_cache['menu_font'] = pygame.font.SysFont(None, MENU_FONT_SIZE)
+    if _game_render_cache['pause_font'] is None:
+        _game_render_cache['pause_font'] = pygame.font.SysFont(None, PAUSE_FONT_SIZE)
+
     if hud_visible:
         draw_hud(screen, player, fps=fps)
     # Handle hurt animation (non-interruptible)
     if player.anim_state in ('hurt_hp', 'hurt_barrier'):
         # Determine number of frames for current hurt animation
         if player.anim_state == 'hurt_hp':
-            img = pygame.image.load('resources/images/player/Hurt/Slime1_Hurt_full_hp.png').convert_alpha()
+            img = _game_render_cache['hurt_hp_img']
         else:
-            img = pygame.image.load('resources/images/player/Hurt/Slime1_Hurt_full_barrier.png').convert_alpha()
+            img = _game_render_cache['hurt_barrier_img']
         num_frames = img.get_width() // PLAYER_SPRITE_FRAME_WIDTH
         duration = num_frames / PLAYER_HURT_ANIMATION_FPS
         draw_player_hurt(screen, player, player.anim_timer, barrier_damage=(player.anim_state=='hurt_barrier'))
@@ -40,11 +62,11 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
         overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         overlay.fill(GAME_OVERLAY_COLOR)
         screen.blit(overlay, (0, 0))
-        font = pygame.font.SysFont(None, GAME_OVER_FONT_SIZE)
+        font = _game_render_cache['game_over_font']
         text = font.render("GAME OVER", True, (255, 0, 0))
         text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
         screen.blit(text, text_rect)
-        font2 = pygame.font.SysFont(None, MENU_FONT_SIZE)
+        font2 = _game_render_cache['menu_font']
         tip = font2.render("Press ESC or Enter to return to menu", True, (255, 255, 255))
         tip_rect = tip.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 + 100))
         screen.blit(tip, tip_rect)
@@ -54,11 +76,11 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
         overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
         overlay.fill(PAUSE_OVERLAY_COLOR)
         screen.blit(overlay, (0, 0))
-        font = pygame.font.SysFont(None, PAUSE_FONT_SIZE)
+        font = _game_render_cache['pause_font']
         text = font.render("Paused", True, PAUSE_MENU_TEXT_COLOR)
         text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 120))
         screen.blit(text, text_rect)
-        font2 = pygame.font.SysFont(None, MENU_FONT_SIZE)
+        font2 = _game_render_cache['menu_font']
         rects = []
         for i, option in enumerate(pause_menu_options or []):
             color = PAUSE_MENU_HIGHLIGHT_COLOR if i == pause_menu_selected else PAUSE_MENU_TEXT_COLOR
