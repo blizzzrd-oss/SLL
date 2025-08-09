@@ -1,3 +1,10 @@
+# Player sprite/animation config
+PLAYER_IDLE_SPRITE = r'C:\Repos\SLL\resources\images\player\Idle\Slime1_Idle_full.png'
+PLAYER_WALK_SPRITE = r'C:\Repos\SLL\resources\images\player\Walk\Slime1_Walk_full.png'
+PLAYER_SPRITE_FRAME_WIDTH = 64  # Adjust to your sprite frame width
+PLAYER_SPRITE_FRAME_HEIGHT = 64 # Adjust to your sprite frame height
+PLAYER_IDLE_ANIMATION_FPS = 6   # Frames per second for idle
+PLAYER_WALK_ANIMATION_FPS = 10  # Frames per second for walk
 # General Colors
 COLOR_WHITE = (255, 255, 255)
 COLOR_BLACK = (0, 0, 0)
@@ -34,7 +41,7 @@ PLAYER_START_EXP = 0
 PLAYER_EXP_TO_NEXT_LEVEL_MULT = 1.02
 PLAYER_START_LEVEL = 1
 PLAYER_SIZE = 48
-PLAYER_MOVEMENT_SPEED = 5
+PLAYER_MOVEMENT_SPEED = 2
 PLAYER_DAMAGE_REDUCTION = 0.0
 PLAYER_COOLDOWN = 1.0
 PLAYER_ATTACK_SPEED = 1.0

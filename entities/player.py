@@ -12,6 +12,16 @@ from config import (
 )
 
 class Player:
+
+    def update(self, dt):
+        """Update player state (barrier decay, buffs, etc). dt is delta time in seconds."""
+        # Barrier decay (int only)
+        if self.barrier > 0:
+            decay = int(self.barrier * (self.barrier_decay_percent_per_sec / 100) * dt)
+            self.barrier = max(0, self.barrier - decay)
+        # TODO: barrier regen, buffs, debuffs, etc.
+
+
     def __init__(self):
         # Start in the middle of the game window
         self.x = WINDOW_WIDTH // 2
@@ -39,6 +49,7 @@ class Player:
         self.position = (self.x, self.y)
         self.damage_log = []
         self.recent_damage = []
+
 
     def take_damage(self, amount, source):
         self.health -= amount
