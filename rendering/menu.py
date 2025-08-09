@@ -26,7 +26,7 @@ class Menu:
     """
     Handles the main menu, savegame, and settings UI and logic.
     """
-    def __init__(self, screen):
+    def __init__(self, screen, start_game_callback=None):
         self.screen = screen
         self.state = 'main'  # 'main', 'savegame', 'settings'
         self.selected = 0
@@ -64,6 +64,7 @@ class Menu:
         self.checkbox_size = 28
         self._settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings.json')
         self.load_settings()
+        self.start_game_callback = start_game_callback
         # Ensure music volume matches loaded setting
         try:
             pygame.mixer.music.set_volume(self.music_volume / 100)
@@ -269,10 +270,10 @@ class Menu:
                 mouse_pos = event.pos
                 for idx, button in enumerate(self.gamemode_buttons):
                     if button.is_clicked(mouse_pos):
-                        # TODO: Start new game with selected mode (idx: 0=Easy, 1=Normal, 2=Hard)
-                        print(f"Start new game in slot {self.selected_slot+1} with mode: {button.text}")
-                        # Here you would transition to the game state
-                        self.state = 'main'  # For now, just return to main menu
+                        # Start new game with selected mode
+                        if self.start_game_callback:
+                            self.start_game_callback(self.selected_slot, button.text)
+                        self.state = 'main'  # Optionally reset menu state
                         return
                 if self.gamemode_back_button.is_clicked(mouse_pos):
                     self.state = 'savegame'

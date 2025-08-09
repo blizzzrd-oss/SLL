@@ -8,7 +8,7 @@ from rendering.menu import resource_path
 def init_pygame():
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Roguelike Hack & Slash")
+    pygame.display.set_caption("SLL")
     # Load and play background music
     pygame.mixer.init()
     music_path = resource_path(BG_MUSIC_PATH)

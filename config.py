@@ -24,8 +24,35 @@ WINDOW_HEIGHT = 1080
 """
 Game configuration constants and settings.
 """
+
+# Player attribute defaults
 PLAYER_START_HEALTH = 100
-ENEMY_START_HEALTH = 50
+PLAYER_START_BARRIER = 50
+PLAYER_BARRIER_DECAY_PERCENT_PER_SEC = 10  # percent per second
+PLAYER_BARRIER_REGEN = 0
+PLAYER_START_EXP = 0
+PLAYER_EXP_TO_NEXT_LEVEL_MULT = 1.02
+PLAYER_START_LEVEL = 1
+PLAYER_SIZE = 48
+PLAYER_MOVEMENT_SPEED = 5
+PLAYER_DAMAGE_REDUCTION = 0.0
+PLAYER_COOLDOWN = 1.0
+PLAYER_ATTACK_SPEED = 1.0
+PLAYER_CRIT_CHANCE = 0.05
+PLAYER_CRIT_DAMAGE = 1.5
+PLAYER_START_SKILL_POINTS = 0
+PLAYER_PASSIVE_SKILLS = {
+	'toughness': 0,
+	'regeneration': 0,
+	'barrier_boost': 0,
+	# Add more passives as needed
+}
+PLAYER_ACTIVE_SKILLS = {
+	'slash': 0,
+	'dash': 0,
+	'barrier_burst': 0,
+	# Add more actives as needed
+}
 SAVEGAME_PATH = "savegame.sav"
 
 # Audio settings
