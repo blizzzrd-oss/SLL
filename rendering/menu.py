@@ -4,6 +4,7 @@ Menu UI logic for main menu, savegame selection, and settings.
 import pygame
 import os
 import sys
+import json
 from config import (
     MUSIC_VOLUME, SFX_VOLUME, BG_MUSIC_PATH,
     COLOR_BG, COLOR_TEXT, COLOR_HIGHLIGHT, COLOR_SLIDER_MUSIC, COLOR_SLIDER_SFX, COLOR_BACK,
@@ -17,7 +18,7 @@ def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     try:
         base_path = sys._MEIPASS
-    except Exception:
+    except AttributeError:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
@@ -30,8 +31,6 @@ class Menu:
         self.state = 'main'  # 'main', 'savegame', 'settings'
         self.selected = 0
         self.save_slots = [None, None, None]  # Placeholder for savegame slots
-        self.music_volume = MUSIC_VOLUME
-        self.sfx_volume = SFX_VOLUME
         self.font = pygame.font.SysFont(None, FONT_SIZE_LARGE)
         self.small_font = pygame.font.SysFont(None, FONT_SIZE_SMALL)
         self.main_menu_buttons = [
@@ -50,16 +49,47 @@ class Menu:
         self.slider_x = 380
         self.slider_width = 200
         self.slider_height = 20
-        # Checkbox options
-        self.checkbox_options = [
-            {"label": "Auto Aim", "checked": True},
-            {"label": "Auto Attack", "checked": True},
-            {"label": "Auto Skills", "checked": True},
-        ]
         self.checkbox_x = self.slider_x
         self.checkbox_y_start = self.sfx_label_y + 50
         self.checkbox_spacing = 40
         self.checkbox_size = 28
+        # Load settings from file
+        self._settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings.json')
+        self.load_settings()
+
+    def load_settings(self):
+        try:
+            with open(self._settings_path, 'r') as f:
+                data = json.load(f)
+            self.music_volume = float(data.get('music_volume', MUSIC_VOLUME))
+            self.sfx_volume = float(data.get('sfx_volume', SFX_VOLUME))
+            self.checkbox_options = [
+                {"label": "Auto Aim", "checked": bool(data.get('auto_aim', True))},
+                {"label": "Auto Attack", "checked": bool(data.get('auto_attack', True))},
+                {"label": "Auto Skills", "checked": bool(data.get('auto_skills', True))},
+            ]
+        except Exception:
+            self.music_volume = MUSIC_VOLUME
+            self.sfx_volume = SFX_VOLUME
+            self.checkbox_options = [
+                {"label": "Auto Aim", "checked": True},
+                {"label": "Auto Attack", "checked": True},
+                {"label": "Auto Skills", "checked": True},
+            ]
+
+    def save_settings(self):
+        data = {
+            'music_volume': self.music_volume,
+            'sfx_volume': self.sfx_volume,
+            'auto_aim': self.checkbox_options[0]["checked"],
+            'auto_attack': self.checkbox_options[1]["checked"],
+            'auto_skills': self.checkbox_options[2]["checked"]
+        }
+        try:
+            with open(self._settings_path, 'w') as f:
+                json.dump(data, f, indent=4)
+        except Exception as e:
+            print(f"Failed to save settings: {e}")
 
     def run(self):
         """Main menu loop. Handles events and drawing until quit."""
@@ -183,14 +213,18 @@ class Menu:
                     if self.selected == 0:
                         self.music_volume = max(0, self.music_volume - 0.05)
                         pygame.mixer.music.set_volume(self.music_volume)
+                        self.save_settings()
                     elif self.selected == 1:
                         self.sfx_volume = max(0, self.sfx_volume - 0.05)
+                        self.save_settings()
                 elif event.key == pygame.K_RIGHT:
                     if self.selected == 0:
                         self.music_volume = min(1, self.music_volume + 0.05)
                         pygame.mixer.music.set_volume(self.music_volume)
+                        self.save_settings()
                     elif self.selected == 1:
                         self.sfx_volume = min(1, self.sfx_volume + 0.05)
+                        self.save_settings()
                 elif event.key == pygame.K_ESCAPE:
                     self.state = 'main'
                     self.selected = 0
@@ -202,11 +236,13 @@ class Menu:
                     self.music_volume = min(1, max(0, rel_x / self.slider_width))
                     self.dragging_music = True
                     pygame.mixer.music.set_volume(self.music_volume)
+                    self.save_settings()
                 # Check if user clicked on the sfx volume slider
                 elif self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width and self.sfx_label_y <= mouse_pos[1] <= self.sfx_label_y + self.slider_height:
                     rel_x = mouse_pos[0] - self.slider_x
                     self.sfx_volume = min(1, max(0, rel_x / self.slider_width))
                     self.dragging_sfx = True
+                    self.save_settings()
                 # Checkboxes
                 else:
                     for i, opt in enumerate(self.checkbox_options):
@@ -214,6 +250,7 @@ class Menu:
                         if (self.checkbox_x <= mouse_pos[0] <= self.checkbox_x + self.checkbox_size and
                             box_y <= mouse_pos[1] <= box_y + self.checkbox_size):
                             opt["checked"] = not opt["checked"]
+                            self.save_settings()
                             break
                 if self.settings_back_button.is_clicked(mouse_pos):
                     self.state = 'main'
@@ -228,10 +265,12 @@ class Menu:
                         rel_x = mouse_pos[0] - self.slider_x
                         self.music_volume = min(1, max(0, rel_x / self.slider_width))
                         pygame.mixer.music.set_volume(self.music_volume)
+                        self.save_settings()
                 if self.dragging_sfx:
                     if self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width:
                         rel_x = mouse_pos[0] - self.slider_x
                         self.sfx_volume = min(1, max(0, rel_x / self.slider_width))
+                        self.save_settings()
 
 class Button:
     def __init__(self, rect, text, font, color, highlight_color):
