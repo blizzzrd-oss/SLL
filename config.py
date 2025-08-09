@@ -1,6 +1,11 @@
+# FPS options
+GAME_FPS_OPTIONS = [60, 120, 240]
+GAME_DEFAULT_FPS = 60
 # Player sprite/animation config
-PLAYER_IDLE_SPRITE = r'C:\Repos\SLL\resources\images\player\Idle\Slime1_Idle_full.png'
-PLAYER_WALK_SPRITE = r'C:\Repos\SLL\resources\images\player\Walk\Slime1_Walk_full.png'
+PLAYER_IDLE_SPRITE = 'resources/images/player/Idle/Slime1_Idle_full.png'
+PLAYER_WALK_SPRITE = 'resources/images/player/Walk/Slime1_Walk_full.png'
+PLAYER_RUN_SPRITE = 'resources/images/player/Run/Slime1_Run_full.png'
+PLAYER_RUN_ANIMATION_FPS = 14  # Frames per second for run
 PLAYER_SPRITE_FRAME_WIDTH = 64  # Adjust to your sprite frame width
 PLAYER_SPRITE_FRAME_HEIGHT = 64 # Adjust to your sprite frame height
 PLAYER_IDLE_ANIMATION_FPS = 6   # Frames per second for idle

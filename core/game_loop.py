@@ -3,7 +3,7 @@ Game main loop and event handling.
 """
 import pygame
 from core.player_movement import handle_player_movement
-from rendering.player_render import draw_player_idle, draw_player_walk
+from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run
 from .game import Game
 
 def run_game(screen, slot, mode):
@@ -41,7 +41,10 @@ def run_game(screen, slot, mode):
 def draw_game(screen, game, last_move, time_accum):
     screen.fill((20, 20, 20))
     if last_move != (0, 0):
-        draw_player_walk(screen, game.player, time_accum)
+        if getattr(game.player, 'movement_speed', 0) >= 5:
+            draw_player_run(screen, game.player, time_accum)
+        else:
+            draw_player_walk(screen, game.player, time_accum)
     else:
         draw_player_idle(screen, game.player, time_accum)
     # TODO: Draw monsters, loot, UI, etc.

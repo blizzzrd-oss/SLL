@@ -62,7 +62,10 @@ class Menu:
         self.checkbox_y_start = self.sfx_label_y + 50
         self.checkbox_spacing = 40
         self.checkbox_size = 28
+        from config import GAME_FPS_OPTIONS, GAME_DEFAULT_FPS
         self._settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings.json')
+        self.fps_options = GAME_FPS_OPTIONS
+        self.fps = GAME_DEFAULT_FPS
         self.load_settings()
         self.start_game_callback = start_game_callback
         # Ensure music volume matches loaded setting
@@ -82,6 +85,7 @@ class Menu:
             self.music_volume = min(100, max(0, (self.music_volume // 5) * 5))
             self.sfx_volume = int(round(float(sv)))
             self.sfx_volume = min(100, max(0, (self.sfx_volume // 5) * 5))
+            self.fps = int(data.get('fps', self.fps_options[0]))
             self.checkbox_options = [
                 {"label": "Auto Aim", "checked": bool(data.get('auto_aim', True))},
                 {"label": "Auto Attack", "checked": bool(data.get('auto_attack', True))},
@@ -90,6 +94,7 @@ class Menu:
         except Exception:
             self.music_volume = int(MUSIC_VOLUME * 100)
             self.sfx_volume = int(SFX_VOLUME * 100)
+            self.fps = self.fps_options[0]
             self.checkbox_options = [
                 {"label": "Auto Aim", "checked": True},
                 {"label": "Auto Attack", "checked": True},
@@ -100,6 +105,7 @@ class Menu:
         data = {
             'music_volume': int(self.music_volume),
             'sfx_volume': int(self.sfx_volume),
+            'fps': int(self.fps),
             'auto_aim': self.checkbox_options[0]["checked"],
             'auto_attack': self.checkbox_options[1]["checked"],
             'auto_skills': self.checkbox_options[2]["checked"]
@@ -178,20 +184,45 @@ class Menu:
         self.savegame_back_button.draw(self.screen)
 
     def draw_settings_menu(self):
-        # Render labels with %
+        # Layout constants
+        top_y = 60
+        spacing_y = 60
+        slider_offset = 40
+        # FPS label and buttons
+        fps_label = self.small_font.render(f'FPS:', True, COLOR_TEXT)
+        fps_label_x = self.slider_label_x
+        fps_label_y = top_y
+        self.screen.blit(fps_label, (fps_label_x, fps_label_y))
+        # Draw FPS options as buttons right next to label
+        fps_btn_x = fps_label_x + 60
+        fps_btn_y = fps_label_y - 6
+        btn_w, btn_h = 70, 36
+        self.fps_rects = []
+        for i, fps in enumerate(self.fps_options):
+            rect = pygame.Rect(fps_btn_x + i*(btn_w+10), fps_btn_y, btn_w, btn_h)
+            color = COLOR_HIGHLIGHT if self.fps == fps else COLOR_GRAY
+            pygame.draw.rect(self.screen, color, rect, border_radius=6)
+            label = self.small_font.render(str(fps), True, COLOR_BLACK if self.fps == fps else COLOR_TEXT)
+            label_rect = label.get_rect(center=rect.center)
+            self.screen.blit(label, label_rect)
+            self.fps_rects.append(rect)
+        # Music/SFX sliders and labels (move down)
+        music_label_y = top_y + spacing_y
+        sfx_label_y = music_label_y + spacing_y
         music_label = self.small_font.render(f'Music Volume: {int(self.music_volume)}%', True, COLOR_TEXT)
         sfx_label = self.small_font.render(f'SFX Volume: {int(self.sfx_volume)}%', True, COLOR_TEXT)
-        self.screen.blit(music_label, (self.slider_label_x, self.music_label_y))
-        self.screen.blit(sfx_label, (self.slider_label_x, self.sfx_label_y))
+        self.screen.blit(music_label, (self.slider_label_x, music_label_y))
+        self.screen.blit(sfx_label, (self.slider_label_x, sfx_label_y))
         # Draw sliders (simple rectangles, no color)
-        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.music_label_y, int((self.music_volume/100)*self.slider_width), self.slider_height))
-        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.sfx_label_y, int((self.sfx_volume/100)*self.slider_width), self.slider_height))
+        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, music_label_y, int((self.music_volume/100)*self.slider_width), self.slider_height))
+        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, sfx_label_y, int((self.sfx_volume/100)*self.slider_width), self.slider_height))
         # Draw slider backgrounds for clarity
-        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.music_label_y, self.slider_width, self.slider_height), 2)
-        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.sfx_label_y, self.slider_width, self.slider_height), 2)
-        # Draw checkboxes
+        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, music_label_y, self.slider_width, self.slider_height), 2)
+        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, sfx_label_y, self.slider_width, self.slider_height), 2)
+        # Draw checkboxes (move down)
+        checkbox_y_start = sfx_label_y + slider_offset
         for i, opt in enumerate(self.checkbox_options):
-            box_y = self.checkbox_y_start + i * self.checkbox_spacing
+            box_y = checkbox_y_start + i * self.checkbox_spacing
             # Draw box
             pygame.draw.rect(self.screen, COLOR_GRAY, (self.checkbox_x, box_y, self.checkbox_size, self.checkbox_size), 2)
             # Fill if checked
@@ -320,6 +351,13 @@ class Menu:
                     self.sfx_volume = min(100, max(0, percent))
                     self.dragging_sfx = True
                     self.save_settings()
+                # FPS buttons
+                elif hasattr(self, 'fps_rects') and any(r.collidepoint(mouse_pos) for r in self.fps_rects):
+                    for i, rect in enumerate(self.fps_rects):
+                        if rect.collidepoint(mouse_pos):
+                            self.fps = self.fps_options[i]
+                            self.save_settings()
+                            break
                 # Checkboxes
                 else:
                     for i, opt in enumerate(self.checkbox_options):
