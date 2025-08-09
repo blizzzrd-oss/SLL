@@ -27,7 +27,8 @@ Pygame and audio initialization logic.
 """
 def init_pygame():
     pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    flags = pygame.HWSURFACE | pygame.DOUBLEBUF
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), flags)
     pygame.display.set_caption("SLL")
     # Load and play background music
     pygame.mixer.init()
