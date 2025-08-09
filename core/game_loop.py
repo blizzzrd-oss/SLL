@@ -3,6 +3,7 @@
 Game main loop and event handling.
 """
 import pygame
+import time
 import json
 #import os
 from core.player_movement import handle_player_movement, get_movement_vector
@@ -114,6 +115,8 @@ def run_game(screen, slot, mode):
 
     ###### MAIN GAME LOOP ######
     while running:
+        # profiling if needed
+        #frame_start = time.perf_counter()
         dt, time_accum, fps = get_frame_timing(clock, settings_path, time_accum)
         move_dx, move_dy = 0, 0
 
@@ -136,4 +139,7 @@ def run_game(screen, slot, mode):
         draw_game(screen, game, last_move, time_accum, paused, pause_menu_selected, pause_menu_options, pause_menu_rects, hud_visible, clock.get_fps())
         if should_exit:
             break
+        # Simple profiling: print frame time in ms
+        #frame_end = time.perf_counter()
+        #print(f"Frame time: {(frame_end - frame_start) * 1000:.2f} ms")
 
