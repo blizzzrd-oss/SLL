@@ -1,7 +1,34 @@
+# General Colors
+COLOR_WHITE = (255, 255, 255)
+COLOR_BLACK = (0, 0, 0)
+COLOR_RED = (255, 0, 0)
+COLOR_GREEN = (0, 255, 0)
+COLOR_BLUE = (0, 0, 255)
+COLOR_YELLOW = (255, 255, 0)
+COLOR_GRAY = (128, 128, 128)
+# UI Colors
+COLOR_BG = (30, 30, 30)
+COLOR_TEXT = (200, 200, 200)
+COLOR_HIGHLIGHT = (200, 200, 50)
+COLOR_SLIDER_MUSIC = (100, 100, 255)
+COLOR_SLIDER_SFX = (100, 255, 100)
+COLOR_BACK = (180, 180, 180)
+
+# UI Font Sizes
+FONT_SIZE_LARGE = 48
+FONT_SIZE_SMALL = 32
+
+# Window size
+WINDOW_WIDTH = 1920
+WINDOW_HEIGHT = 1080
 """
 Game configuration constants and settings.
 """
 PLAYER_START_HEALTH = 100
 ENEMY_START_HEALTH = 50
 SAVEGAME_PATH = "savegame.sav"
-# ...add more as needed...
+
+# Audio settings
+MUSIC_VOLUME = 0.1  # 10%
+SFX_VOLUME = 0.1    # 10%
+BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"

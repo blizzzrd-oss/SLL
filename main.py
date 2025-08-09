@@ -1,11 +1,12 @@
-"""
-Main entry point for the game. Initializes and runs the game loop.
-"""
-from core.game import Game
+ 
+
+from core.init import init_pygame
+from rendering.menu import Menu
 
 def main():
-    game = Game()
-    game.run()
+    screen = init_pygame()
+    menu = Menu(screen)
+    menu.run()  # Handles menu loop and transitions
 
 if __name__ == "__main__":
     main()
