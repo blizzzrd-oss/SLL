@@ -207,22 +207,22 @@ class Menu:
             self.screen.blit(label, label_rect)
             self.fps_rects.append(rect)
         # Music/SFX sliders and labels (move down)
-        music_label_y = top_y + spacing_y
-        sfx_label_y = music_label_y + spacing_y
+        self.music_label_y = top_y + spacing_y
+        self.sfx_label_y = self.music_label_y + spacing_y
         music_label = self.small_font.render(f'Music Volume: {int(self.music_volume)}%', True, COLOR_TEXT)
         sfx_label = self.small_font.render(f'SFX Volume: {int(self.sfx_volume)}%', True, COLOR_TEXT)
-        self.screen.blit(music_label, (self.slider_label_x, music_label_y))
-        self.screen.blit(sfx_label, (self.slider_label_x, sfx_label_y))
+        self.screen.blit(music_label, (self.slider_label_x, self.music_label_y))
+        self.screen.blit(sfx_label, (self.slider_label_x, self.sfx_label_y))
         # Draw sliders (simple rectangles, no color)
-        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, music_label_y, int((self.music_volume/100)*self.slider_width), self.slider_height))
-        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, sfx_label_y, int((self.sfx_volume/100)*self.slider_width), self.slider_height))
+        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.music_label_y, int((self.music_volume/100)*self.slider_width), self.slider_height))
+        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.sfx_label_y, int((self.sfx_volume/100)*self.slider_width), self.slider_height))
         # Draw slider backgrounds for clarity
-        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, music_label_y, self.slider_width, self.slider_height), 2)
-        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, sfx_label_y, self.slider_width, self.slider_height), 2)
+        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.music_label_y, self.slider_width, self.slider_height), 2)
+        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.sfx_label_y, self.slider_width, self.slider_height), 2)
         # Draw checkboxes (move down)
-        checkbox_y_start = sfx_label_y + slider_offset
+        self.checkbox_y_start = self.sfx_label_y + slider_offset
         for i, opt in enumerate(self.checkbox_options):
-            box_y = checkbox_y_start + i * self.checkbox_spacing
+            box_y = self.checkbox_y_start + i * self.checkbox_spacing
             # Draw box
             pygame.draw.rect(self.screen, COLOR_GRAY, (self.checkbox_x, box_y, self.checkbox_size, self.checkbox_size), 2)
             # Fill if checked
@@ -311,6 +311,9 @@ class Menu:
                     self.state = 'savegame'
                     self.selected = self.selected_slot if self.selected_slot is not None else 0
         elif self.state == 'settings':
+            # Always update slider/fps rects before handling events
+            self.draw_settings_menu()
+            pygame.display.flip()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_DOWN:
                     self.selected = (self.selected + 1) % 2
@@ -379,18 +382,16 @@ class Menu:
             elif event.type == pygame.MOUSEMOTION:
                 mouse_pos = event.pos
                 if self.dragging_music:
-                    if self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width:
-                        rel_x = mouse_pos[0] - self.slider_x
-                        percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
-                        self.music_volume = min(100, max(0, percent))
-                        pygame.mixer.music.set_volume(self.music_volume / 100)
-                        self.save_settings()
+                    rel_x = mouse_pos[0] - self.slider_x
+                    percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                    self.music_volume = min(100, max(0, percent))
+                    pygame.mixer.music.set_volume(self.music_volume / 100)
+                    self.save_settings()
                 if self.dragging_sfx:
-                    if self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width:
-                        rel_x = mouse_pos[0] - self.slider_x
-                        percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
-                        self.sfx_volume = min(100, max(0, percent))
-                        self.save_settings()
+                    rel_x = mouse_pos[0] - self.slider_x
+                    percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                    self.sfx_volume = min(100, max(0, percent))
+                    self.save_settings()
             return False
 
 class Button:

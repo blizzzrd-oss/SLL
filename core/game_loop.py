@@ -2,10 +2,13 @@
 Game main loop and event handling.
 """
 import pygame
+import json
+import os
 from core.player_movement import handle_player_movement
 from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run, draw_player_hurt
-from .game import Game
+from core.game import Game
 from config import PLAYER_HURT_ANIMATION_FPS, PLAYER_SPRITE_FRAME_WIDTH
+from rendering.menu import Menu
 
 def run_game(screen, slot, mode):
     game = Game(screen, slot, mode)
@@ -19,10 +22,19 @@ def run_game(screen, slot, mode):
     pause_menu_options = ["Resume", "Surrender", "Settings", "Quit"]
     pause_menu_rects = []
     in_settings_menu = False
+    settings_menu = None
     # Always reset player state on new game
     game.reset()
+    settings_path = os.path.join(os.path.dirname(__file__), '..', 'settings.json')
     while running:
-        dt = clock.tick(60) / 1000.0
+        # Reload FPS from settings.json every frame
+        try:
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            fps = int(settings.get('fps', 60))
+        except Exception:
+            fps = 60
+        dt = clock.tick(fps) / 1000.0
         time_accum += dt
         move_dx, move_dy = 0, 0
         mouse_pos = pygame.mouse.get_pos()
@@ -53,6 +65,9 @@ def run_game(screen, slot, mode):
                                 should_exit = True
                             elif option == "Settings":
                                 in_settings_menu = True
+                                if settings_menu is None:
+                                    settings_menu = Menu(screen)
+                                    settings_menu.state = 'settings'
                             elif option == "Quit":
                                 pygame.quit()
                                 exit()
@@ -70,22 +85,26 @@ def run_game(screen, slot, mode):
                                     should_exit = True
                                 elif option == "Settings":
                                     in_settings_menu = True
+                                    if settings_menu is None:
+                                        settings_menu = Menu(screen)
+                                        settings_menu.state = 'settings'
                                 elif option == "Quit":
                                     pygame.quit()
                                     exit()
             # Settings menu logic (modal, but non-blocking)
             elif in_settings_menu:
-                from rendering.menu import Menu
-                menu = Menu(screen)
-                menu.state = 'settings'
-                if menu.handle_event(event):
+                if settings_menu is None:
+                    settings_menu = Menu(screen)
+                    settings_menu.state = 'settings'
+                if settings_menu.handle_event(event):
                     in_settings_menu = False
+                    settings_menu = None
         # Draw settings menu if active
         if in_settings_menu:
-            from rendering.menu import Menu
-            menu = Menu(screen)
-            menu.state = 'settings'
-            menu.draw()
+            if settings_menu is None:
+                settings_menu = Menu(screen)
+                settings_menu.state = 'settings'
+            settings_menu.draw()
             pygame.display.flip()
             continue
         # Game logic and movement
