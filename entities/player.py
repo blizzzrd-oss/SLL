@@ -11,16 +11,21 @@ from config import (
     PLAYER_START_SKILL_POINTS, PLAYER_PASSIVE_SKILLS, PLAYER_ACTIVE_SKILLS
 )
 
+
 class Player:
 
     def update(self, dt):
-        """Update player state (barrier decay, buffs, etc). dt is delta time in seconds."""
         # Barrier decay (int only)
         if self.barrier > 0:
             decay = int(self.barrier * (self.barrier_decay_percent_per_sec / 100) * dt)
             self.barrier = max(0, self.barrier - decay)
         # TODO: barrier regen, buffs, debuffs, etc.
-
+    # Animation states
+    ANIM_IDLE = 'idle'
+    ANIM_WALK = 'walk'
+    ANIM_RUN = 'run'
+    ANIM_HURT_HP = 'hurt_hp'
+    ANIM_HURT_BARRIER = 'hurt_barrier'
 
     def __init__(self):
         # Start in the middle of the game window
@@ -45,14 +50,38 @@ class Player:
         self.attack_speed = PLAYER_ATTACK_SPEED
         self.crit_chance = PLAYER_CRIT_CHANCE
         self.crit_damage = PLAYER_CRIT_DAMAGE
+
         # For compatibility with old code
         self.position = (self.x, self.y)
         self.damage_log = []
         self.recent_damage = []
 
+        # Animation state
+        self.anim_state = self.ANIM_IDLE
+        self.anim_timer = 0.0  # Time since animation started
+        self.anim_lock = False  # If True, animation cannot be interrupted
 
-    def take_damage(self, amount, source):
-        self.health -= amount
-        self.damage_log.append((amount, source))
-        self.recent_damage.append((amount, source))
-        # ...handle death, clear recent_damage, etc...
+        # For compatibility with old code
+        self.position = (self.x, self.y)
+        self.damage_log = []
+        self.recent_damage = []
+
+        # Animation state
+        self.anim_state = self.ANIM_IDLE
+        self.anim_timer = 0.0  # Time since animation started
+        self.anim_lock = False  # If True, animation cannot be interrupted
+
+
+        def take_damage(self, amount, source, barrier_damage=False):
+            # If anim_lock is True, ignore new hurt animation triggers
+            if not self.anim_lock:
+                if barrier_damage:
+                    self.anim_state = self.ANIM_HURT_BARRIER
+                else:
+                    self.anim_state = self.ANIM_HURT_HP
+                self.anim_timer = 0.0
+                self.anim_lock = True
+            self.health -= amount
+            self.damage_log.append((amount, source))
+            self.recent_damage.append((amount, source))
+            # ...handle death, clear recent_damage, etc...

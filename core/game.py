@@ -14,8 +14,19 @@ class Game:
         self.slot = slot  # Save slot index
         self.mode = mode  # 'Easy', 'Normal', 'Hard'
         self.player = Player()
+        self.game_over = False
         # TODO: Initialize monsters, loot, map, etc.
 
+    def reset(self):
+        """Reset the game state except for settings."""
+        self.player = Player()
+        self.game_over = False
+        # TODO: Reset monsters, loot, map, etc.
+
     def update(self, dt):
-        self.player.update(dt)
+        if not self.game_over:
+            self.player.update(dt)
+            # Check for player death
+            if self.player.health <= 0:
+                self.game_over = True
         # TODO: Update monsters, loot, etc.

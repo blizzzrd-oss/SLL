@@ -1,3 +1,7 @@
+# Player hurt animation config
+PLAYER_HURT_HP_SPRITE = 'resources/images/player/Hurt/Slime1_Hurt_full_hp.png'
+PLAYER_HURT_BARRIER_SPRITE = 'resources/images/player/Hurt/Slime1_Hurt_full_barrier.png'
+PLAYER_HURT_ANIMATION_FPS = 12  # Frames per second for hurt
 # FPS options
 GAME_FPS_OPTIONS = [60, 120, 240]
 GAME_DEFAULT_FPS = 60
