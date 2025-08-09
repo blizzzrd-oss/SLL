@@ -1,37 +1,104 @@
+
 """
 Game main loop and event handling.
 """
 import pygame
 import json
-import os
-from core.player_movement import handle_player_movement
-from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run, draw_player_hurt
+#import os
+from core.player_movement import handle_player_movement, get_movement_vector
+from core.init import initialize_game_state
+#from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run, draw_player_hurt
+from rendering.game_render import draw_game
 from core.game import Game
-from config import (
-    PLAYER_HURT_ANIMATION_FPS, PLAYER_SPRITE_FRAME_WIDTH, GAME_BG_COLOR, GAME_OVERLAY_COLOR, PAUSE_OVERLAY_COLOR, GAME_OVER_FONT_SIZE, PAUSE_FONT_SIZE, MENU_FONT_SIZE, PAUSE_MENU_HIGHLIGHT_COLOR, PAUSE_MENU_TEXT_COLOR, PAUSE_MENU_OPTIONS, HUD_TOGGLE_KEY
-)
+#from config import (PLAYER_HURT_ANIMATION_FPS, PLAYER_SPRITE_FRAME_WIDTH, GAME_BG_COLOR, GAME_OVERLAY_COLOR, PAUSE_OVERLAY_COLOR, GAME_OVER_FONT_SIZE, PAUSE_FONT_SIZE, MENU_FONT_SIZE, PAUSE_MENU_HIGHLIGHT_COLOR, PAUSE_MENU_TEXT_COLOR, PAUSE_MENU_OPTIONS, HUD_TOGGLE_KEY)
+from config import (HUD_TOGGLE_KEY)
 from rendering.menu import Menu
-from rendering.ui import draw_hud
+#from rendering.ui import draw_hud
 
 def run_game(screen, slot, mode):
-    game = Game(screen, slot, mode)
-    running = True
-    should_exit = False
-    last_move = (0, 0)
-    time_accum = 0.0
-    clock = pygame.time.Clock()
-    paused = False
-    pause_menu_selected = 0
-    pause_menu_options = PAUSE_MENU_OPTIONS
-    pause_menu_rects = []
-    in_settings_menu = False
-    settings_menu = None
-    # Always reset player state on new game
-    game.reset()
-    hud_visible = True
-    settings_path = os.path.join(os.path.dirname(__file__), '..', 'settings.json')
-    while running:
-        # Reload FPS from settings.json every frame
+    (
+        game, running, should_exit, last_move, time_accum, clock, paused, pause_menu_selected,
+        pause_menu_options, pause_menu_rects, in_settings_menu, settings_menu, hud_visible, settings_path
+    ) = initialize_game_state(screen, slot, mode)
+
+    def handle_events():
+        nonlocal running, should_exit, paused, pause_menu_selected, in_settings_menu, settings_menu, hud_visible
+        mouse_pos = pygame.mouse.get_pos()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                should_exit = True
+            elif game.game_over:
+                if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_RETURN):
+                    should_exit = True
+            elif event.type == pygame.KEYDOWN and event.key == HUD_TOGGLE_KEY:
+                hud_visible = not hud_visible
+            elif not in_settings_menu and not game.game_over:
+                handle_pause_menu_events(event, mouse_pos)
+            elif in_settings_menu:
+                handle_settings_menu_events(event)
+
+    def handle_pause_menu_events(event, mouse_pos):
+        nonlocal paused, pause_menu_selected, in_settings_menu, settings_menu, should_exit
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            paused = not paused
+        if paused:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    pause_menu_selected = (pause_menu_selected - 1) % len(pause_menu_options)
+                elif event.key == pygame.K_DOWN:
+                    pause_menu_selected = (pause_menu_selected + 1) % len(pause_menu_options)
+                elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    option = pause_menu_options[pause_menu_selected]
+                    process_pause_menu_option(option)
+            elif event.type == pygame.MOUSEMOTION:
+                for i, rect in enumerate(pause_menu_rects):
+                    if rect.collidepoint(mouse_pos):
+                        pause_menu_selected = i
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                for i, rect in enumerate(pause_menu_rects):
+                    if rect.collidepoint(mouse_pos):
+                        option = pause_menu_options[i]
+                        process_pause_menu_option(option)
+
+    def process_pause_menu_option(option):
+        nonlocal paused, in_settings_menu, settings_menu, should_exit
+        if option == "Resume":
+            paused = False
+        elif option == "Surrender":
+            should_exit = True
+        elif option == "Settings":
+            in_settings_menu = True
+            if settings_menu is None:
+                settings_menu = Menu(screen)
+                settings_menu.state = 'settings'
+        elif option == "Quit":
+            pygame.quit()
+            exit()
+
+
+    def handle_settings_menu_events(event):
+        nonlocal in_settings_menu, settings_menu
+        if settings_menu is None:
+            settings_menu = Menu(screen)
+            settings_menu.state = 'settings'
+        if settings_menu.handle_event(event):
+            in_settings_menu = False
+            settings_menu = None
+
+    def show_settings_menu_if_active():
+        nonlocal settings_menu
+        if in_settings_menu:
+            if settings_menu is None:
+                settings_menu = Menu(screen)
+                settings_menu.state = 'settings'
+            settings_menu.draw()
+            pygame.display.flip()
+            return True
+        return False
+
+    def get_frame_timing(clock, settings_path, time_accum):
+        """Load FPS from settings, advance clock, and update time accumulator. Returns (dt, time_accum, fps)."""
         try:
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
@@ -40,95 +107,25 @@ def run_game(screen, slot, mode):
             fps = 60
         dt = clock.tick(fps) / 1000.0
         time_accum += dt
+        return dt, time_accum, fps
+
+
+
+
+    ###### MAIN GAME LOOP ######
+    while running:
+        dt, time_accum, fps = get_frame_timing(clock, settings_path, time_accum)
         move_dx, move_dy = 0, 0
-        mouse_pos = pygame.mouse.get_pos()
-        # Event handling
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-                should_exit = True
-            # Game over input
-            if game.game_over:
-                if event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_RETURN):
-                    should_exit = True
-            # HUD toggle
-            if event.type == pygame.KEYDOWN and event.key == HUD_TOGGLE_KEY:
-                hud_visible = not hud_visible
-            # Pause menu logic
-            elif not in_settings_menu and not game.game_over:
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    paused = not paused
-                if paused:
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_UP:
-                            pause_menu_selected = (pause_menu_selected - 1) % len(pause_menu_options)
-                        elif event.key == pygame.K_DOWN:
-                            pause_menu_selected = (pause_menu_selected + 1) % len(pause_menu_options)
-                        elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                            option = pause_menu_options[pause_menu_selected]
-                            if option == "Resume":
-                                paused = False
-                            elif option == "Surrender":
-                                should_exit = True
-                            elif option == "Settings":
-                                in_settings_menu = True
-                                if settings_menu is None:
-                                    settings_menu = Menu(screen)
-                                    settings_menu.state = 'settings'
-                            elif option == "Quit":
-                                pygame.quit()
-                                exit()
-                    elif event.type == pygame.MOUSEMOTION:
-                        for i, rect in enumerate(pause_menu_rects):
-                            if rect.collidepoint(mouse_pos):
-                                pause_menu_selected = i
-                    elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        for i, rect in enumerate(pause_menu_rects):
-                            if rect.collidepoint(mouse_pos):
-                                option = pause_menu_options[i]
-                                if option == "Resume":
-                                    paused = False
-                                elif option == "Surrender":
-                                    should_exit = True
-                                elif option == "Settings":
-                                    in_settings_menu = True
-                                    if settings_menu is None:
-                                        settings_menu = Menu(screen)
-                                        settings_menu.state = 'settings'
-                                elif option == "Quit":
-                                    pygame.quit()
-                                    exit()
-            # Settings menu logic (modal, but non-blocking)
-            elif in_settings_menu:
-                if settings_menu is None:
-                    settings_menu = Menu(screen)
-                    settings_menu.state = 'settings'
-                if settings_menu.handle_event(event):
-                    in_settings_menu = False
-                    settings_menu = None
+
+        handle_events()
+
         # Draw settings menu if active
-        if in_settings_menu:
-            if settings_menu is None:
-                settings_menu = Menu(screen)
-                settings_menu.state = 'settings'
-            settings_menu.draw()
-            pygame.display.flip()
+        if show_settings_menu_if_active():
             continue
 
         # Game logic and movement
         if not game.game_over and not paused:
-            keys = pygame.key.get_pressed()
-            if keys[pygame.K_w]:
-                move_dy -= 1
-            if keys[pygame.K_s]:
-                move_dy += 1
-            if keys[pygame.K_a]:
-                move_dx -= 1
-            if keys[pygame.K_d]:
-                move_dx += 1
-            if move_dx != 0 and move_dy != 0:
-                move_dx *= 0.7071
-                move_dy *= 0.7071
+            move_dx, move_dy = get_movement_vector()
             last_move = (move_dx, move_dy)
             handle_player_movement(game.player, dt)
         if not paused:
@@ -140,71 +137,3 @@ def run_game(screen, slot, mode):
         if should_exit:
             break
 
-
-def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None, hud_visible=True):
-    screen.fill(GAME_BG_COLOR)
-    player = game.player
-    if hud_visible:
-        draw_hud(screen, player)
-    # Handle hurt animation (non-interruptible)
-    if player.anim_state in ('hurt_hp', 'hurt_barrier'):
-        # Determine number of frames for current hurt animation
-        if player.anim_state == 'hurt_hp':
-            img = pygame.image.load('resources/images/player/Hurt/Slime1_Hurt_full_hp.png').convert_alpha()
-        else:
-            img = pygame.image.load('resources/images/player/Hurt/Slime1_Hurt_full_barrier.png').convert_alpha()
-        num_frames = img.get_width() // PLAYER_SPRITE_FRAME_WIDTH
-        duration = num_frames / PLAYER_HURT_ANIMATION_FPS
-        draw_player_hurt(screen, player, player.anim_timer, barrier_damage=(player.anim_state=='hurt_barrier'))
-        # Unlock animation if finished
-        if player.anim_timer >= duration:
-            player.anim_lock = False
-            player.anim_state = 'idle'
-            player.anim_timer = 0.0
-    else:
-        if last_move != (0, 0):
-            if getattr(player, 'movement_speed', 0) >= 5:
-                draw_player_run(screen, player, time_accum)
-            else:
-                draw_player_walk(screen, player, time_accum)
-        else:
-            draw_player_idle(screen, player, time_accum)
-    # TODO: Draw monsters, loot, UI, etc.
-
-    # Draw GAME OVER overlay if needed
-    if getattr(game, 'game_over', False):
-        overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        overlay.fill(GAME_OVERLAY_COLOR)
-        screen.blit(overlay, (0, 0))
-        font = pygame.font.SysFont(None, GAME_OVER_FONT_SIZE)
-        text = font.render("GAME OVER", True, (255, 0, 0))
-        text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
-        screen.blit(text, text_rect)
-        font2 = pygame.font.SysFont(None, MENU_FONT_SIZE)
-        tip = font2.render("Press ESC or Enter to return to menu", True, (255, 255, 255))
-        tip_rect = tip.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 + 100))
-        screen.blit(tip, tip_rect)
-
-    # Draw pause menu overlay if paused
-    if paused and not getattr(game, 'game_over', False):
-        overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        overlay.fill(PAUSE_OVERLAY_COLOR)
-        screen.blit(overlay, (0, 0))
-        font = pygame.font.SysFont(None, PAUSE_FONT_SIZE)
-        text = font.render("Paused", True, PAUSE_MENU_TEXT_COLOR)
-        text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 120))
-        screen.blit(text, text_rect)
-        font2 = pygame.font.SysFont(None, MENU_FONT_SIZE)
-        rects = []
-        for i, option in enumerate(pause_menu_options or []):
-            color = PAUSE_MENU_HIGHLIGHT_COLOR if i == pause_menu_selected else PAUSE_MENU_TEXT_COLOR
-            opt_text = font2.render(option, True, color)
-            opt_rect = opt_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 30 + i * 60))
-            screen.blit(opt_text, opt_rect)
-            # Add a slightly larger rect for mouse hitbox
-            rects.append(opt_rect.inflate(40, 20))
-        if pause_menu_rects is not None:
-            pause_menu_rects.clear()
-            pause_menu_rects.extend(rects)
-
-    pygame.display.flip()
