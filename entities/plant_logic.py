@@ -16,12 +16,12 @@ class PlantEnemyLogic:
         'attack': 'Plant_Attack_full.png',
     }
     FRAME_COUNTS = {
-        'idle': 6,
+        'idle': 8,  # 256px / 8 = 32px per frame
         'walk': 8,
         'run': 8,
         'hurt': 4,
         'death': 8,
-        'attack': 6,
+    'attack': 7,  # 448px / 7 = 64px per frame
     }
     # Class-level sprite cache
     _sprite_cache = None
@@ -34,7 +34,8 @@ class PlantEnemyLogic:
         if PlantEnemyLogic._sprite_cache is None:
             PlantEnemyLogic._sprite_cache = self._load_sprites()
         self.sprites = PlantEnemyLogic._sprite_cache
-        self.attack_cooldown = 1.0
+        # Use attack_cooldown from type if available, else default
+        self.attack_cooldown = getattr(self.enemy.type, 'attack_cooldown', 1.0)
         self.last_attack = -float('inf')
 
     def _load_sprites(self):
@@ -45,13 +46,22 @@ class PlantEnemyLogic:
             if os.path.exists(path):
                 img = pygame.image.load(path).convert_alpha()
                 frame_count = self.FRAME_COUNTS[state]
-                w = img.get_width() // frame_count
-                h = img.get_height() // directions
+                img_w, img_h = img.get_width(), img.get_height()
+                assert img_w % frame_count == 0, f"Sprite width {img_w} not divisible by frame count {frame_count} for {fname}"
+                assert img_h % directions == 0, f"Sprite height {img_h} not divisible by directions {directions} for {fname}"
+                w = img_w // frame_count
+                h = img_h // directions
                 # 2D list: sprites[state][direction][frame]
-                sprites[state] = [
-                    [img.subsurface((i*w, d*h, w, h)) for i in range(frame_count)]
-                    for d in range(directions)
-                ]
+                sprites[state] = []
+                for d in range(directions):
+                    row = []
+                    for i in range(frame_count):
+                        left = i * w
+                        top = d * h
+                        # Clamp to image bounds
+                        if left + w <= img_w and top + h <= img_h:
+                            row.append(img.subsurface((left, top, w, h)))
+                    sprites[state].append(row)
             else:
                 sprites[state] = [[] for _ in range(directions)]
         return sprites
@@ -74,24 +84,54 @@ class PlantEnemyLogic:
             else:
                 direction = 1  # up
         self.direction = direction
-        if dist > 1:
-            move_x = dx / dist
-            move_y = dy / dist
-            self.enemy.position = (
-                self.enemy.position[0] + move_x * speed * dt,
-                self.enemy.position[1] + move_y * speed * dt
-            )
-            self.enemy.rect.center = (int(self.enemy.position[0]), int(self.enemy.position[1]))
-            self.state = 'run' if speed > 4 else 'walk'
-        else:
-            self.state = 'idle'
-        # Attack if close
-        if dist < 48:
-            now = pygame.time.get_ticks() / 1000
-            if now - self.last_attack > self.attack_cooldown:
-                self.state = 'attack'
-                player.take_damage(5, source=self.enemy)
+        now = pygame.time.get_ticks() / 1000
+        attack_trigger_range = 40
+        attack_damage_range = 25
+        attack_frames = self.FRAME_COUNTS['attack']
+        impact_frame = attack_frames // 2
+
+        # Only allow movement if not attacking
+        prev_state = self.state
+        if self.state != 'death':
+            # Always move toward player unless dead
+            min_dist = attack_damage_range
+            if dist > min_dist:
+                move_x = dx / dist
+                move_y = dy / dist
+                self.enemy.position = (
+                    self.enemy.position[0] + move_x * speed * dt,
+                    self.enemy.position[1] + move_y * speed * dt
+                )
+                self.enemy.rect.center = (int(self.enemy.position[0]), int(self.enemy.position[1]))
+            # Always set state to 'run' (or 'walk') unless attacking or dead
+            if self.state not in ('attack', 'death'):
+                if self.state != ('run' if speed > 4 else 'walk'):
+                    self.state = 'run' if speed > 4 else 'walk'
+        # Only reset animation if state actually changed
+        if self.state != prev_state:
+            self.anim_frame = 0
+            self.anim_timer = 0.0
+
+        # Attack logic
+        if self.state == 'attack':
+            # On impact frame, deal damage if player is in range and not already hit
+            # For 7 frames, impact frame should be 3 (0-based, 4th frame)
+            impact_frame = 3
+            if self.anim_frame == impact_frame and not getattr(self, '_damage_dealt', False):
+                if dist < attack_damage_range:
+                    player.take_damage(5, source=self.enemy)
+                self._damage_dealt = True
+            # After animation, return to idle and set cooldown
+            if self.anim_frame == attack_frames - 1:
+                self.state = 'idle'
+                self._damage_dealt = False
                 self.last_attack = now
+        elif self.state != 'attack' and dist < attack_trigger_range and (now - self.last_attack > self.attack_cooldown):
+            # Start attack animation
+            self.state = 'attack'
+            self.anim_frame = 0
+            self.anim_timer = 0.0
+            self._damage_dealt = False
         # Animation update
         self.anim_timer += dt
         frames = self.FRAME_COUNTS[self.state]
@@ -108,6 +148,7 @@ class PlantEnemyLogic:
         direction = getattr(self, 'direction', 0)
         frame_list = state_sprites[direction] if direction < len(state_sprites) else []
         if frame_list:
-            frame = frame_list[self.anim_frame % len(frame_list)]
+            frame_idx = min(self.anim_frame, len(frame_list) - 1)
+            frame = frame_list[frame_idx]
             rect = frame.get_rect(center=self.enemy.rect.center)
             surface.blit(frame, rect)
