@@ -1,3 +1,8 @@
+# Health and Barrier Bar Colors
+COLOR_HEALTH_BAR_BG = (135, 45, 40)
+COLOR_HEALTH_BAR_FILL = (175, 60, 55)
+COLOR_BARRIER_BAR_BG = (130, 110, 50)
+COLOR_BARRIER_BAR_FILL = (180, 150, 35)
 # HUD toggle key
 import pygame
 HUD_TOGGLE_KEY = pygame.K_TAB

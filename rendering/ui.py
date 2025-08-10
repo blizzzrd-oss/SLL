@@ -5,7 +5,8 @@ import pygame
 import os
 from config import (
     HUD_TOP_HEIGHT, HUD_BOTTOM_HEIGHT, HUD_LEFT_WIDTH, HUD_RIGHT_WIDTH,
-    HUD_ALPHA, HUD_COLOR, HUD_LABEL_COLOR, HUD_LABEL_FONT_SIZE
+    HUD_ALPHA, HUD_COLOR, HUD_LABEL_COLOR, HUD_LABEL_FONT_SIZE,
+    COLOR_HEALTH_BAR_BG, COLOR_HEALTH_BAR_FILL, COLOR_BARRIER_BAR_BG, COLOR_BARRIER_BAR_FILL
 )
 
 # Cache for HUD surfaces and font
@@ -121,8 +122,8 @@ def draw_hud(screen, player, fps=None):
     max_health = 100
     health_val = max(0, int(round(player.health)))
     health_frac = min(health_val / max_health, 1.0)
-    pygame.draw.rect(screen, (135, 45, 40), (BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT), border_radius=8)
-    pygame.draw.rect(screen, (175, 60, 55), (BAR_X, BAR_Y, int(BAR_WIDTH * health_frac), BAR_HEIGHT), border_radius=8)
+    pygame.draw.rect(screen, COLOR_HEALTH_BAR_BG, (BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT), border_radius=8)
+    pygame.draw.rect(screen, COLOR_HEALTH_BAR_FILL, (BAR_X, BAR_Y, int(BAR_WIDTH * health_frac), BAR_HEIGHT), border_radius=8)
     health_text = f"{health_val}/{max_health}"
     health_label = font.render(health_text, True, (255,255,255))
     health_label_rect = health_label.get_rect(center=(BAR_X + BAR_WIDTH // 2, BAR_Y + BAR_HEIGHT // 2))
@@ -132,8 +133,8 @@ def draw_hud(screen, player, fps=None):
     shield_val = max(0, int(round(player.barrier)))
     shield_frac = min(shield_val / max_shield, 1.0)
     shield_y = BAR_Y + BAR_HEIGHT + BAR_GAP
-    pygame.draw.rect(screen, (130, 110, 50), (BAR_X, shield_y, BAR_WIDTH, BAR_HEIGHT), border_radius=8)
-    pygame.draw.rect(screen, (180, 150, 35), (BAR_X, shield_y, int(BAR_WIDTH * shield_frac), BAR_HEIGHT), border_radius=8)
+    pygame.draw.rect(screen, COLOR_BARRIER_BAR_BG, (BAR_X, shield_y, BAR_WIDTH, BAR_HEIGHT), border_radius=8)
+    pygame.draw.rect(screen, COLOR_BARRIER_BAR_FILL, (BAR_X, shield_y, int(BAR_WIDTH * shield_frac), BAR_HEIGHT), border_radius=8)
     shield_text = f"{shield_val}/{max_shield}"
     shield_label = font.render(shield_text, True, (255,255,255))
     shield_label_rect = shield_label.get_rect(center=(BAR_X + BAR_WIDTH // 2, shield_y + BAR_HEIGHT // 2))

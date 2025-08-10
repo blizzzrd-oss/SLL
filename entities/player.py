@@ -19,10 +19,16 @@ from skills.registry import get_skill
 class Player:
 
     def update(self, dt):
-        # Barrier decay (int only)
+        # Barrier decay (float, smooth)
+        if not hasattr(self, '_barrier_decay_accum'):
+            self._barrier_decay_accum = 0.0
         if self.barrier > 0:
-            decay = int(self.barrier * (self.barrier_decay_percent_per_sec / 100) * dt)
-            self.barrier = max(0, self.barrier - decay)
+            decay = self.barrier * (self.barrier_decay_percent_per_sec / 100) * dt
+            self._barrier_decay_accum += decay
+            if self._barrier_decay_accum >= 1.0:
+                to_sub = int(self._barrier_decay_accum)
+                self.barrier = max(0, self.barrier - to_sub)
+                self._barrier_decay_accum -= to_sub
         # TODO: barrier regen, buffs, debuffs, etc.
     # Animation states
     ANIM_IDLE = 'idle'
@@ -98,15 +104,22 @@ class Player:
 
 
     def take_damage(self, amount, source=None, barrier_damage=False):
-        # If anim_lock is True, ignore new hurt animation triggers
-        if not self.anim_lock:
-            if barrier_damage:
+        # Barrier absorbs damage first unless barrier_damage is True
+        damage_to_health = amount
+        if not barrier_damage and self.barrier > 0:
+            absorbed = min(self.barrier, amount)
+            self.barrier -= absorbed
+            damage_to_health -= absorbed
+            if absorbed > 0 and not self.anim_lock:
                 self.anim_state = self.ANIM_HURT_BARRIER
-            else:
+                self.anim_timer = 0.0
+                self.anim_lock = True
+        if damage_to_health > 0:
+            if not self.anim_lock:
                 self.anim_state = self.ANIM_HURT_HP
-            self.anim_timer = 0.0
-            self.anim_lock = True
-        self.health -= amount
+                self.anim_timer = 0.0
+                self.anim_lock = True
+            self.health -= damage_to_health
         self.damage_log.append((amount, source))
         self.recent_damage.append((amount, source))
         # ...handle death, clear recent_damage, etc...
