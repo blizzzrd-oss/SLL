@@ -109,24 +109,25 @@ class SlashSkill(Skill):
         pygame.draw.rect(surface, (255, 255, 0), rect, 2)
 
     def _in_slash_arc(self, entity):
-        # Use the current slash sprite's rect as the hitbox
+        # Use the current slash sprite's rect as the hitbox, placed by mouse direction
         frame_idx = min(int(self.animation_frame), self.total_frames - 1)
         frame = self.frames[frame_idx]
-        move_x, move_y = (1, 0)
-        if hasattr(self.user, 'last_move'):
-            move_x, move_y = self.user.last_move
-        elif hasattr(self.user, 'facing_angle'):
-            # Approximate direction from facing_angle
-            angle_rad = math.radians(self.user.facing_angle)
-            move_x, move_y = math.cos(angle_rad), math.sin(angle_rad)
-        offset_dist = PLAYER_SIZE // 2 + 4
+        mouse_x, mouse_y = pygame.mouse.get_pos()
         if hasattr(self.user, 'x') and hasattr(self.user, 'y'):
             px, py = int(self.user.x), int(self.user.y)
         else:
             px, py = self.user.rect.center
-        offset_x = px + (offset_dist if move_x >= 0 else -offset_dist)
-        offset_y = py
-        rect = frame.get_rect(center=(offset_x, offset_y))
+        dx, dy = mouse_x - px, mouse_y - py
+        offset_dist = PLAYER_SIZE // 2 + 4
+        norm = math.hypot(dx, dy)
+        if norm == 0:
+            norm = 1
+        dir_x, dir_y = dx / norm, dy / norm
+        offset_x = int(px + dir_x * offset_dist)
+        offset_y = int(py + dir_y * offset_dist)
+        angle = math.degrees(math.atan2(dy, dx)) % 360
+        draw_frame = pygame.transform.rotate(frame, -angle)
+        rect = draw_frame.get_rect(center=(offset_x, offset_y))
         hit = rect.colliderect(entity.rect)
         print(f"[SLASH DEBUG] Enemy id={id(entity)} enemy_rect={entity.rect} slash_rect={rect} hit={hit}")
         return hit
