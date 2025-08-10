@@ -142,6 +142,21 @@ def run_game(screen, slot, mode):
 
 
     ###### MAIN GAME LOOP ######
+    def get_closest_enemy(player, enemies):
+        if not enemies:
+            return None
+        if hasattr(player, 'x') and hasattr(player, 'y'):
+            px, py = int(player.x), int(player.y)
+            print(f"[AUTO AIM DEBUG] Player pos: ({player.x}, {player.y}) (rect.center: {player.rect.center})")
+        else:
+            px, py = player.rect.center
+            print(f"[AUTO AIM DEBUG] Player rect.center: {player.rect.center}")
+        for e in enemies:
+            print(f"[AUTO AIM DEBUG] Enemy id={id(e)} rect.center={e.rect.center} health={getattr(e, 'health', None)} dead={getattr(e, 'dead', None)}")
+        closest = min(enemies, key=lambda e: (e.rect.centerx - px) ** 2 + (e.rect.centery - py) ** 2)
+        print(f"[AUTO AIM DEBUG] Closest enemy selected: id={id(closest)} rect.center={closest.rect.center}")
+        return closest
+
     while running:
         # profiling if needed
         #frame_start = time.perf_counter()
@@ -169,7 +184,6 @@ def run_game(screen, slot, mode):
             # --- Enemy spawning ---
             new_enemy = spawner.spawn_if_ready()
             if new_enemy:
-                # ...removed debug print...
                 enemies.append(new_enemy)
                 game.enemies = enemies  # Keep reference updated
             # --- Enemy update ---
@@ -178,30 +192,46 @@ def run_game(screen, slot, mode):
                 if hasattr(enemy, 'dead') and enemy.dead:
                     enemies.remove(enemy)
             game.enemies = enemies  # Keep reference updated
-            # --- Player skill logic (unchanged) ---
+            # --- Player skill logic with auto aim ---
             auto_attack = False
+            auto_aim = False
             if hasattr(game, 'player') and hasattr(game.player, 'checkbox_options'):
                 for opt in getattr(game.player, 'checkbox_options', []):
                     if opt.get('label') == 'Auto Attack':
                         auto_attack = opt.get('checked', False)
-                        break
+                    if opt.get('label') == 'Auto Aim':
+                        auto_aim = opt.get('checked', False)
+            def get_skill_target(skill):
+                if getattr(skill, 'is_movement_skill', False):
+                    return pygame.mouse.get_pos()
+                if auto_aim:
+                    closest = get_closest_enemy(game.player, enemies)
+                    if closest:
+                        return closest.rect.center
+                    else:
+                        # If no enemies, do nothing (or could return None)
+                        return None
+                return pygame.mouse.get_pos()
             if skill_pressed['slash'] and 'slash' in game.player.skills:
                 skill = game.player.skills['slash']
                 if skill.can_use(now):
-                    mouse_pos = pygame.mouse.get_pos()
-                    skill.use(target_pos=mouse_pos)
+                    target = get_skill_target(skill)
+                    if target is not None:
+                        skill.use(target_pos=target)
             if skill_pressed['dash'] and 'dash' in game.player.skills:
                 skill = game.player.skills['dash']
                 if skill.can_use(now):
-                    mouse_pos = pygame.mouse.get_pos()
-                    skill.use(target_pos=mouse_pos)
+                    target = get_skill_target(skill)
+                    if target is not None:
+                        skill.use(target_pos=target)
             if auto_attack:
                 for name, skill in game.player.skills.items():
                     if getattr(skill, 'is_movement_skill', False):
                         continue
                     if skill.can_use(now):
-                        mouse_pos = pygame.mouse.get_pos()
-                        skill.use(target_pos=mouse_pos)
+                        target = get_skill_target(skill)
+                        if target is not None:
+                            skill.use(target_pos=target)
             print('--- ENEMY DEBUG (game loop) ---')
             for e in enemies:
                 print(f"Enemy id={id(e)} pos={getattr(e, 'position', None)} rect={getattr(e, 'rect', None)} health={getattr(e, 'health', None)}")
