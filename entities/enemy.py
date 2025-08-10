@@ -24,13 +24,32 @@ class EnemyType:
 # Enemy: instance of an enemy in the game, based on EnemyType
 class Enemy:
     def take_damage(self, amount, source=None):
+        # If already dead or in death animation, ignore further damage
+        if self.dead or (self.logic and hasattr(self.logic, 'state') and self.logic.state == 'death'):
+            return
+            
         self.health -= amount
+        
+        # Only trigger hurt animation if not already dead/dying
         if self.logic and hasattr(self.logic, 'state'):
-            self.logic.state = 'hurt'
-            self.logic.anim_frame = 0
-            self.logic.anim_timer = 0.0
-        if self.health <= 0:
-            self.dead = True
+            if self.health <= 0:
+                # Death overrides everything
+                self.logic.state = 'death'
+                self.logic.anim_frame = 0
+                self.logic.anim_timer = 0.0
+                # Fix position for death animation to prevent jitter
+                if hasattr(self.logic, 'fixed_draw_pos'):
+                    self.logic.fixed_draw_pos = (int(self.position[0]), int(self.position[1]))
+            elif self.logic.state != 'death':
+                # Only trigger hurt if not already dying
+                self.logic.state = 'hurt'
+                self.logic.anim_frame = 0
+                self.logic.anim_timer = 0.0
+                # Fix position for hurt animation to prevent jitter
+                if hasattr(self.logic, 'fixed_draw_pos'):
+                    self.logic.fixed_draw_pos = (int(self.position[0]), int(self.position[1]))
+        
+        # Don't set dead = True here, let the death animation complete first
     def __init__(self, enemy_type, position=(0, 0)):
         self.type = enemy_type
         self.health = enemy_type.max_health
@@ -48,8 +67,8 @@ class Enemy:
     def update(self, dt, player):
         if self.logic:
             self.logic.update(dt, player)
-        if self.health <= 0 and not self.dead:
-            self.dead = True
+        # Don't automatically set dead = True here, let the logic handle it
+        # after death animation completes
 
     def draw(self, surface):
         # Use sprite logic if available, else fallback to debug circle
@@ -58,15 +77,6 @@ class Enemy:
         else:
             x, y = int(self.position[0]), int(self.position[1])
             pygame.draw.circle(surface, (220, 40, 40), (x, y), self.size // 2)
-        # Draw health bar above
-        x, y = int(self.position[0]), int(self.position[1])
-        bar_w = self.size
-        bar_h = 6
-        bar_x = x - bar_w // 2
-        bar_y = y - self.size // 2 - 12
-        health_frac = max(0, self.health / self.type.max_health)
-        pygame.draw.rect(surface, (60, 0, 0), (bar_x, bar_y, bar_w, bar_h))
-        pygame.draw.rect(surface, (175, 60, 55), (bar_x, bar_y, int(bar_w * health_frac), bar_h))
 
 # Register the Plant enemy type using config
 plant_cfg = ENEMY_TYPE_CONFIG['Plant']

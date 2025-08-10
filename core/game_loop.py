@@ -148,14 +148,9 @@ def run_game(screen, slot, mode):
             return None
         if hasattr(player, 'x') and hasattr(player, 'y'):
             px, py = int(player.x), int(player.y)
-            print(f"[AUTO AIM DEBUG] Player pos: ({player.x}, {player.y}) (rect.center: {player.rect.center})")
         else:
             px, py = player.rect.center
-            print(f"[AUTO AIM DEBUG] Player rect.center: {player.rect.center}")
-        for e in enemies:
-            print(f"[AUTO AIM DEBUG] Enemy id={id(e)} rect.center={e.rect.center} health={getattr(e, 'health', None)} dead={getattr(e, 'dead', None)}")
         closest = min(enemies, key=lambda e: (e.rect.centerx - px) ** 2 + (e.rect.centery - py) ** 2)
-        print(f"[AUTO AIM DEBUG] Closest enemy selected: id={id(closest)} rect.center={closest.rect.center}")
         return closest
 
     while running:
@@ -233,9 +228,6 @@ def run_game(screen, slot, mode):
                         target = get_skill_target(skill)
                         if target is not None:
                             skill.use(target_pos=target)
-            print('--- ENEMY DEBUG (game loop) ---')
-            for e in enemies:
-                print(f"Enemy id={id(e)} pos={getattr(e, 'position', None)} rect={getattr(e, 'rect', None)} health={getattr(e, 'health', None)}")
             for skill in game.player.skills.values():
                 skill.update(dt, enemies)
         if game.player.anim_lock:

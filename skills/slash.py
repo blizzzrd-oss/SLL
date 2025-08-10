@@ -56,7 +56,6 @@ class SlashSkill(Skill):
         angle = math.degrees(math.atan2(dy, dx)) % 360
         self.start_angle = (angle - self.arc_deg / 2) % 360
         self.end_angle = (angle + self.arc_deg / 2) % 360
-        print(f"[SLASH DEBUG] Player pos={self.center} facing_angle={angle:.2f} arc=({self.start_angle:.2f} to {self.end_angle:.2f}) arc_deg={self.arc_deg} max_dist=100")
         return True
 
     def update(self, dt, entities):
@@ -67,13 +66,10 @@ class SlashSkill(Skill):
             self.active = False
             return
         # Hit detection
-        print('--- ENEMY DEBUG (slash skill) ---')
         for entity in entities:
-            print(f"Slash check id={id(entity)} pos={getattr(entity, 'position', None)} rect={getattr(entity, 'rect', None)} health={getattr(entity, 'health', None)}")
             if entity is self.user or entity in self.hit_entities:
                 continue
             if self._in_slash_arc(entity):
-                print(f"[DEBUG] Slash HIT entity id={id(entity)}")
                 entity.take_damage(self.damage)
                 self.hit_entities.add(entity)
 
@@ -129,5 +125,4 @@ class SlashSkill(Skill):
         draw_frame = pygame.transform.rotate(frame, -angle)
         rect = draw_frame.get_rect(center=(offset_x, offset_y))
         hit = rect.colliderect(entity.rect)
-        print(f"[SLASH DEBUG] Enemy id={id(entity)} enemy_rect={entity.rect} slash_rect={rect} hit={hit}")
         return hit
