@@ -22,6 +22,9 @@ def run_game(screen, slot, mode):
         pause_menu_options, pause_menu_rects, in_settings_menu, settings_menu, hud_visible, settings_path
     ) = initialize_game_state(screen, slot, mode)
 
+    # Track skill button states for auto-repeat
+    skill_pressed = {'slash': False, 'dash': False}
+
     def handle_events():
         nonlocal running, should_exit, paused, pause_menu_selected, in_settings_menu, settings_menu, hud_visible
         mouse_pos = pygame.mouse.get_pos()
@@ -35,13 +38,20 @@ def run_game(screen, slot, mode):
             elif event.type == pygame.KEYDOWN and event.key == HUD_TOGGLE_KEY:
                 hud_visible = not hud_visible
             elif not in_settings_menu and not game.game_over:
-                # Player skill input (slash on LMB)
+                # Track skill button presses/releases
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    # Use slash skill toward mouse position
+                    skill_pressed['slash'] = True
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    skill_pressed['slash'] = False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    skill_pressed['dash'] = True
+                if event.type == pygame.KEYUP and event.key == pygame.K_SPACE:
+                    skill_pressed['dash'] = False
+                # Manual skill use (for instant response)
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if 'slash' in game.player.skills:
                         mouse_pos = pygame.mouse.get_pos()
                         game.player.skills['slash'].use(target_pos=mouse_pos)
-                # Player skill input (dash on SPACE)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     if 'dash' in game.player.skills:
                         mouse_pos = pygame.mouse.get_pos()
@@ -145,8 +155,23 @@ def run_game(screen, slot, mode):
                 game.player.last_move = (move_dx, move_dy)
             last_move = (move_dx, move_dy)
             handle_player_movement(game.player, dt)
+
         if not paused:
             game.update(dt)
+            # Skill auto-repeat logic
+            now = pygame.time.get_ticks() / 1000
+            # Slash (LMB)
+            if skill_pressed['slash'] and 'slash' in game.player.skills:
+                skill = game.player.skills['slash']
+                if skill.can_use(now):
+                    mouse_pos = pygame.mouse.get_pos()
+                    skill.use(target_pos=mouse_pos)
+            # Dash (SPACE)
+            if skill_pressed['dash'] and 'dash' in game.player.skills:
+                skill = game.player.skills['dash']
+                if skill.can_use(now):
+                    mouse_pos = pygame.mouse.get_pos()
+                    skill.use(target_pos=mouse_pos)
             # Update all player skills
             for skill in game.player.skills.values():
                 skill.update(dt, [])  # TODO: pass list of entities for hit detection

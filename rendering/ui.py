@@ -46,11 +46,29 @@ def draw_hud(screen, player, fps=None):
             draw_hud._dash_img = pygame.transform.smoothscale(img, (SKILL_BOX_SIZE, SKILL_BOX_SIZE))
         else:
             draw_hud._dash_img = None
-    # Draw skill boxes
+    # Draw skill boxes and cooldown bars
+    skill_names = ["slash", None, "dash", None, None, None, None]
     for i in range(SKILL_BOX_COUNT):
         box_x = SKILL_BAR_X + i * (SKILL_BOX_SIZE + SKILL_BOX_GAP)
         box_y = SKILL_BAR_Y
         box_rect = pygame.Rect(box_x, box_y, SKILL_BOX_SIZE, SKILL_BOX_SIZE)
+        # Draw cooldown bar above box if skill exists
+        skill_name = skill_names[i]
+        if skill_name and skill_name in player.skills:
+            skill = player.skills[skill_name]
+            now = pygame.time.get_ticks() / 1000
+            cd = max(0, skill.cooldown - (now - skill.last_used)) if not getattr(skill, 'active', False) else skill.cooldown
+            cd_frac = min(cd / skill.cooldown, 1.0) if skill.cooldown > 0 else 0
+            bar_w = SKILL_BOX_SIZE
+            bar_h = 8
+            bar_x = box_x
+            bar_y = box_y - bar_h - 4
+            # Draw background
+            pygame.draw.rect(screen, (60, 60, 60), (bar_x, bar_y, bar_w, bar_h), border_radius=4)
+            # Draw filled portion if on cooldown
+            if cd_frac > 0:
+                fill_w = int(bar_w * cd_frac)
+                pygame.draw.rect(screen, (120, 180, 255), (bar_x, bar_y, fill_w, bar_h), border_radius=4)
         # Draw semi-transparent box
         box_surface = pygame.Surface((SKILL_BOX_SIZE, SKILL_BOX_SIZE), pygame.SRCALPHA)
         box_surface.fill((80, 80, 80, SKILL_BOX_ALPHA))
