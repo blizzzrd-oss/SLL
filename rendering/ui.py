@@ -182,38 +182,42 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
         notification_y = height // 2 - 100
         
         for notification in event_notifications:
-            # Calculate fade alpha based on time since notification
-            age = notification.get('age', 0)
-            max_age = 3.0  # 3 seconds total display time
-            fade_time = 0.5  # Fade in/out duration
-            
-            if age < fade_time:
-                alpha = int(255 * (age / fade_time))
-            elif age > max_age - fade_time:
-                alpha = int(255 * ((max_age - age) / fade_time))
+            # Handle both string and dict notification formats
+            if isinstance(notification, str):
+                # Simple string notification - show for 2 seconds
+                notification_text = notification
+                alpha = 255  # Full opacity for string notifications
             else:
-                alpha = 255
-            
-            alpha = max(0, min(255, alpha))
+                # Dictionary notification with age tracking
+                age = notification.get('age', 0)
+                max_age = 3.0  # 3 seconds total display time
+                fade_time = 0.5  # Fade in/out duration
+                
+                if age < fade_time:
+                    alpha = int(255 * (age / fade_time))
+                elif age > max_age - fade_time:
+                    alpha = int(255 * ((max_age - age) / fade_time))
+                else:
+                    alpha = 255
+                
+                alpha = max(0, min(255, alpha))
+                notification_text = notification.get('text', str(notification))
             
             if alpha > 0:
-                # Event type color
-                event_color = {
-                    'healing_shrine': (100, 255, 150),
-                    'loot_blessing': (255, 215, 0),
-                    'enemy_weakness': (255, 100, 255)
-                }.get(notification['type'], (255, 255, 255))
+                # Use default color for string notifications
+                event_color = (255, 255, 100)  # Yellow default
                 
-                # Create notification text
-                event_name = {
-                    'healing_shrine': 'HEALING SHRINE ACTIVATED!',
-                    'loot_blessing': 'LOOT BLESSING ACTIVE!',
-                    'enemy_weakness': 'ENEMIES WEAKENED!'
-                }.get(notification['type'], notification['type'].upper())
+                # If we can determine event type, use specific colors
+                if 'HEALING' in notification_text.upper():
+                    event_color = (100, 255, 150)
+                elif 'LOOT' in notification_text.upper():
+                    event_color = (255, 215, 0)
+                elif 'ENEMIES' in notification_text.upper() or 'WEAKNESS' in notification_text.upper():
+                    event_color = (255, 100, 255)
                 
                 # Render with alpha
                 notification_font = pygame.font.SysFont(None, 36)
-                text_surface = notification_font.render(event_name, True, event_color)
+                text_surface = notification_font.render(notification_text, True, event_color)
                 text_surface.set_alpha(alpha)
                 
                 # Draw background with alpha
