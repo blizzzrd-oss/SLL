@@ -55,6 +55,11 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
                 draw_player_walk(screen, player, time_accum)
         else:
             draw_player_idle(screen, player, time_accum)
+
+    # Draw all player skills (e.g., slash animation), pass last_move for direction
+    for skill in player.skills.values():
+        if hasattr(skill, 'draw'):
+            skill.draw(screen, last_move=last_move)
     # TODO: Draw monsters, loot, UI, etc.
 
     # Draw GAME OVER overlay if needed
