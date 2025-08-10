@@ -91,11 +91,12 @@ def run_game(screen, slot, mode):
                         process_pause_menu_option(option)
 
     def process_pause_menu_option(option):
-        nonlocal paused, in_settings_menu, settings_menu, should_exit
+        nonlocal paused, in_settings_menu, settings_menu, should_exit, running
         if option == "Resume":
             paused = False
         elif option == "Surrender":
-            should_exit = True
+            # Return to main menu instead of exiting the game
+            running = False
         elif option == "Settings":
             in_settings_menu = True
             if settings_menu is None:
