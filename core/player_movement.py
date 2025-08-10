@@ -23,6 +23,9 @@ def get_movement_vector():
 def handle_player_movement(player, dt):
     """Handle WASD movement input for the player. dt is delta time in seconds."""
     dx, dy = get_movement_vector()
+    # Update last_move if there is movement
+    if (dx, dy) != (0, 0):
+        player.last_move = (dx, dy)
     player.x += dx * player.movement_speed * dt * 60
     player.y += dy * player.movement_speed * dt * 60
     player.position = (player.x, player.y)

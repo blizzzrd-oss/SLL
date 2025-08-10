@@ -30,8 +30,8 @@ def draw_hud(screen, player, fps=None):
     SKILL_BAR_WIDTH = SKILL_BOX_COUNT * SKILL_BOX_SIZE + (SKILL_BOX_COUNT - 1) * SKILL_BOX_GAP
     SKILL_BAR_X = (width - SKILL_BAR_WIDTH) // 2
     # Key labels for each skill slot (first is SPACE, rest empty)
-    SKILL_KEYS = ["SPACE"] + ["" for _ in range(SKILL_BOX_COUNT - 1)]
-    # Load slash skill image (cache it)
+    SKILL_KEYS = ["LMB", "RMB", "SPACE", "1", "2", "3", "4"]
+    # Load slash and dash skill images (cache them)
     if not hasattr(draw_hud, '_slash_img'):
         slash_img_path = r'C:\Repos\SLL\resources\images\UI\hud\skill_bar\skill_slash.jpg'
         if os.path.exists(slash_img_path):
@@ -39,6 +39,13 @@ def draw_hud(screen, player, fps=None):
             draw_hud._slash_img = pygame.transform.smoothscale(img, (SKILL_BOX_SIZE, SKILL_BOX_SIZE))
         else:
             draw_hud._slash_img = None
+    if not hasattr(draw_hud, '_dash_img'):
+        dash_img_path = r'C:\Repos\SLL\resources\images\UI\hud\skill_bar\skill_dash.jpg'
+        if os.path.exists(dash_img_path):
+            img = pygame.image.load(dash_img_path).convert_alpha()
+            draw_hud._dash_img = pygame.transform.smoothscale(img, (SKILL_BOX_SIZE, SKILL_BOX_SIZE))
+        else:
+            draw_hud._dash_img = None
     # Draw skill boxes
     for i in range(SKILL_BOX_COUNT):
         box_x = SKILL_BAR_X + i * (SKILL_BOX_SIZE + SKILL_BOX_GAP)
@@ -48,9 +55,11 @@ def draw_hud(screen, player, fps=None):
         box_surface = pygame.Surface((SKILL_BOX_SIZE, SKILL_BOX_SIZE), pygame.SRCALPHA)
         box_surface.fill((80, 80, 80, SKILL_BOX_ALPHA))
         screen.blit(box_surface, (box_x, box_y))
-        # Draw slash skill image in first box
+        # Draw slash skill image in first box, dash skill image in third box
         if i == 0 and draw_hud._slash_img:
             screen.blit(draw_hud._slash_img, (box_x, box_y))
+        if i == 2 and draw_hud._dash_img:
+            screen.blit(draw_hud._dash_img, (box_x, box_y))
         # Draw border
         pygame.draw.rect(screen, (200, 200, 200), box_rect, 2)
         # Draw key label below box (no visual box, move text up)

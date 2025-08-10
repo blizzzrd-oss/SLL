@@ -70,6 +70,8 @@ class Player:
         self.position = (self.x, self.y)
         self.damage_log = []
         self.recent_damage = []
+        # Track last nonzero movement vector for dash direction
+        self.last_move = (1, 0)
 
         # Animation state
         self.anim_state = self.ANIM_IDLE

@@ -35,12 +35,17 @@ def run_game(screen, slot, mode):
             elif event.type == pygame.KEYDOWN and event.key == HUD_TOGGLE_KEY:
                 hud_visible = not hud_visible
             elif not in_settings_menu and not game.game_over:
-                # Player skill input (slash on SPACE)
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                # Player skill input (slash on LMB)
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     # Use slash skill toward mouse position
                     if 'slash' in game.player.skills:
                         mouse_pos = pygame.mouse.get_pos()
                         game.player.skills['slash'].use(target_pos=mouse_pos)
+                # Player skill input (dash on SPACE)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    if 'dash' in game.player.skills:
+                        mouse_pos = pygame.mouse.get_pos()
+                        game.player.skills['dash'].use(target_pos=mouse_pos)
                 handle_pause_menu_events(event, mouse_pos)
             elif in_settings_menu:
                 handle_settings_menu_events(event)
@@ -135,6 +140,9 @@ def run_game(screen, slot, mode):
         # Game logic and movement
         if not game.game_over and not paused:
             move_dx, move_dy = get_movement_vector()
+            # If there is movement, update last_move on the player
+            if (move_dx, move_dy) != (0, 0):
+                game.player.last_move = (move_dx, move_dy)
             last_move = (move_dx, move_dy)
             handle_player_movement(game.player, dt)
         if not paused:
