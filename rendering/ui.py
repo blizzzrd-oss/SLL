@@ -19,7 +19,7 @@ _hud_cache = {
     'font': None
 }
 
-def draw_hud(screen, player, fps=None):
+def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event_notifications=None):
     width, height = screen.get_size()
     # --- Skill Bar ---
     # Skill bar config
@@ -90,26 +90,14 @@ def draw_hud(screen, player, fps=None):
             screen.blit(label_surf, label_rect)
     width, height = screen.get_size()
     global _hud_cache
-    # Recreate surfaces only if size changed
+    # Remove HUD backgrounds for a cleaner look
     if _hud_cache['size'] != (width, height):
-        _hud_cache['top'] = pygame.Surface((width, HUD_TOP_HEIGHT), pygame.SRCALPHA)
-        _hud_cache['top'].fill(HUD_COLOR)
-        _hud_cache['bottom'] = pygame.Surface((width, HUD_BOTTOM_HEIGHT), pygame.SRCALPHA)
-        _hud_cache['bottom'].fill(HUD_COLOR)
-        _hud_cache['left'] = pygame.Surface((HUD_LEFT_WIDTH, height - HUD_TOP_HEIGHT - HUD_BOTTOM_HEIGHT), pygame.SRCALPHA)
-        _hud_cache['left'].fill(HUD_COLOR)
-        _hud_cache['right'] = pygame.Surface((HUD_RIGHT_WIDTH, height - HUD_TOP_HEIGHT - HUD_BOTTOM_HEIGHT), pygame.SRCALPHA)
-        _hud_cache['right'].fill(HUD_COLOR)
         _hud_cache['size'] = (width, height)
     if _hud_cache['font'] is None:
         _hud_cache['font'] = pygame.font.SysFont(None, HUD_LABEL_FONT_SIZE)
     font = _hud_cache['font']
 
-    # Blit cached surfaces
-    screen.blit(_hud_cache['top'], (0, 0))
-    # Removed bottom HUD background for a cleaner look
-    screen.blit(_hud_cache['left'], (0, HUD_TOP_HEIGHT))
-    screen.blit(_hud_cache['right'], (width - HUD_RIGHT_WIDTH, HUD_TOP_HEIGHT))
+    # No HUD background surfaces blitted for cleaner appearance
 
 
     # --- Health and Shield Bars (Left HUD, Top) ---
@@ -140,17 +128,104 @@ def draw_hud(screen, player, fps=None):
     shield_label_rect = shield_label.get_rect(center=(BAR_X + BAR_WIDTH // 2, shield_y + BAR_HEIGHT // 2))
     screen.blit(shield_label, shield_label_rect)
 
-    # Optionally, add labels for clarity
-    screen.blit(font.render("TOP HUD", True, HUD_LABEL_COLOR), (width//2 - 60, 20))
-    # Removed 'BOTTOM HUD' label for a cleaner look
-    screen.blit(font.render("LEFT HUD", True, HUD_LABEL_COLOR), (10, height//2 - 20))
-    screen.blit(font.render("RIGHT HUD", True, HUD_LABEL_COLOR), (width - HUD_RIGHT_WIDTH + 10, height//2 - 20))
+    # Remove debug labels for cleaner look
+    # screen.blit(font.render("TOP HUD", True, HUD_LABEL_COLOR), (width//2 - 60, 20))
+    # screen.blit(font.render("LEFT HUD", True, HUD_LABEL_COLOR), (10, height//2 - 20))
+    # screen.blit(font.render("RIGHT HUD", True, HUD_LABEL_COLOR), (width - HUD_RIGHT_WIDTH + 10, height//2 - 20))
 
+    # --- Right HUD Display (FPS and Game Mode) ---
     # Show FPS in the top right corner
     if fps is not None:
         fps_text = font.render(f"FPS: {int(fps)}", True, HUD_LABEL_COLOR)
         text_rect = fps_text.get_rect(topright=(width - 20, 10))
         screen.blit(fps_text, text_rect)
+
+    # Show Game Mode under FPS in right HUD
+    if game_mode:
+        mode_color = {
+            'Easy': (100, 255, 100),    # Green
+            'Normal': (255, 255, 100),  # Yellow
+            'Hard': (255, 100, 100)     # Red
+        }.get(game_mode, (255, 255, 255))
+        
+        mode_text = font.render(f"Mode: {game_mode}", True, mode_color)
+        mode_rect = mode_text.get_rect(topright=(width - 20, 35))
+        screen.blit(mode_text, mode_rect)
+
+    # --- Active Events Display (Top HUD, Left) ---
+    if active_events:
+        event_y = 50
+        for event in active_events:
+            event_color = {
+                'healing_shrine': (100, 255, 150),    # Light green
+                'loot_blessing': (255, 215, 0),       # Gold
+                'enemy_weakness': (255, 100, 255)     # Magenta
+            }.get(event['type'], (255, 255, 255))
+            
+            # Format remaining time
+            remaining_time = max(0, event['remaining'])
+            time_str = f"{remaining_time:.1f}s"
+            
+            event_name = {
+                'healing_shrine': 'Healing Shrine',
+                'loot_blessing': 'Loot Blessing',
+                'enemy_weakness': 'Enemy Weakness'
+            }.get(event['type'], event['type'].title())
+            
+            event_text = font.render(f"{event_name} ({time_str})", True, event_color)
+            screen.blit(event_text, (20, event_y))
+            event_y += 25
+
+    # --- Event Notifications (Center-right, fade in/out) ---
+    if event_notifications:
+        notification_x = width - 300
+        notification_y = height // 2 - 100
+        
+        for notification in event_notifications:
+            # Calculate fade alpha based on time since notification
+            age = notification.get('age', 0)
+            max_age = 3.0  # 3 seconds total display time
+            fade_time = 0.5  # Fade in/out duration
+            
+            if age < fade_time:
+                alpha = int(255 * (age / fade_time))
+            elif age > max_age - fade_time:
+                alpha = int(255 * ((max_age - age) / fade_time))
+            else:
+                alpha = 255
+            
+            alpha = max(0, min(255, alpha))
+            
+            if alpha > 0:
+                # Event type color
+                event_color = {
+                    'healing_shrine': (100, 255, 150),
+                    'loot_blessing': (255, 215, 0),
+                    'enemy_weakness': (255, 100, 255)
+                }.get(notification['type'], (255, 255, 255))
+                
+                # Create notification text
+                event_name = {
+                    'healing_shrine': 'HEALING SHRINE ACTIVATED!',
+                    'loot_blessing': 'LOOT BLESSING ACTIVE!',
+                    'enemy_weakness': 'ENEMIES WEAKENED!'
+                }.get(notification['type'], notification['type'].upper())
+                
+                # Render with alpha
+                notification_font = pygame.font.SysFont(None, 36)
+                text_surface = notification_font.render(event_name, True, event_color)
+                text_surface.set_alpha(alpha)
+                
+                # Draw background with alpha
+                bg_rect = text_surface.get_rect(center=(notification_x, notification_y))
+                bg_rect.inflate_ip(20, 10)
+                bg_surface = pygame.Surface((bg_rect.width, bg_rect.height), pygame.SRCALPHA)
+                bg_surface.fill((0, 0, 0, alpha // 3))
+                screen.blit(bg_surface, bg_rect.topleft)
+                
+                # Draw text
+                screen.blit(text_surface, text_surface.get_rect(center=(notification_x, notification_y)))
+                notification_y += 50
 
 def draw_menu(screen):
     # Draw game menu

@@ -100,7 +100,12 @@ class PlantEnemyLogic:
         dx = player.position[0] - self.enemy.position[0]
         dy = player.position[1] - self.enemy.position[1]
         dist = (dx**2 + dy**2) ** 0.5
+        # Calculate speed based on distance to player
         speed = self.enemy.type.speed
+        
+        # Apply game mode speed multiplier
+        if hasattr(self.enemy, 'mode_speed_multiplier'):
+            speed *= self.enemy.mode_speed_multiplier
         # Map movement to sprite row: 0=down, 1=up, 2=left, 3=right
         if abs(dx) > abs(dy):
             if dx > 0:
@@ -172,7 +177,11 @@ class PlantEnemyLogic:
             impact_frame = 3
             if self.anim_frame == impact_frame and not getattr(self, '_damage_dealt', False):
                 if dist < attack_damage_range:
-                    player.take_damage(5, source=self.enemy)
+                    # Calculate damage with mode multiplier
+                    base_damage = 5
+                    mode_multiplier = getattr(self.enemy, 'mode_damage_multiplier', 1.0)
+                    final_damage = int(base_damage * mode_multiplier)
+                    player.take_damage(final_damage, source=self.enemy)
                 self._damage_dealt = True
             # After animation, return to movement and set cooldown
             if self.anim_frame >= attack_frames - 1:

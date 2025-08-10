@@ -57,6 +57,7 @@ class Player:
                 self.skills[skill_name] = skill_cls(self)
 
         self.health = PLAYER_START_HEALTH
+        self.max_health = PLAYER_START_HEALTH  # Add max_health attribute
         self.barrier = PLAYER_START_BARRIER
         self.barrier_decay_percent_per_sec = PLAYER_BARRIER_DECAY_PERCENT_PER_SEC
         self.barrier_regen = PLAYER_BARRIER_REGEN

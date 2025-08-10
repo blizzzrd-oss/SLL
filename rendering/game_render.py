@@ -31,7 +31,10 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
         _game_render_cache['pause_font'] = pygame.font.SysFont(None, PAUSE_FONT_SIZE)
 
     if hud_visible:
-        draw_hud(screen, player, fps=fps)
+        game_mode = game.mode
+        active_events = game.get_active_events_for_display()
+        event_notifications = game.get_event_notifications()
+        draw_hud(screen, player, fps=fps, game_mode=game_mode, active_events=active_events, event_notifications=event_notifications)
     # Handle hurt animation (non-interruptible)
     if player.anim_state in ('hurt_hp', 'hurt_barrier'):
         # Determine number of frames for current hurt animation

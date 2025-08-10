@@ -30,7 +30,7 @@ def run_game(screen, slot, mode):
     from entities.enemy import PlantType
     enemies = []
     game.enemies = enemies
-    spawner = EnemySpawner([PlantType], get_game_time_fn=lambda: time_accum, screen=screen)
+    spawner = EnemySpawner([PlantType], get_game_time_fn=lambda: time_accum, screen=screen, game=game)
 
     def handle_events():
         nonlocal running, should_exit, paused, pause_menu_selected, in_settings_menu, settings_menu, hud_visible
