@@ -1,7 +1,7 @@
 # Enemy Type Config
 ENEMY_TYPE_CONFIG = {
 	'Plant': {
-		'max_health': 15,
+		'max_health': 25,
 		'size': 48,
 		'speed': 75,
 		'color': (80, 200, 80),

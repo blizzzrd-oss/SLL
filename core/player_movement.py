@@ -28,5 +28,4 @@ def handle_player_movement(player, dt):
         player.last_move = (dx, dy)
     player.x += dx * player.movement_speed * dt * 60
     player.y += dy * player.movement_speed * dt * 60
-    player.position[0] = player.x
-    player.position[1] = player.y
+    player.position = [player.x, player.y]
