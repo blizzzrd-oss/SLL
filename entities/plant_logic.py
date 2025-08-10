@@ -53,6 +53,7 @@ class PlantEnemyLogic:
         
         for state, fname in self.ANIMATIONS.items():
             path = os.path.join(self.SPRITE_PATH, fname)
+            
             if os.path.exists(path):
                 img = pygame.image.load(path).convert_alpha()
                 frame_count = self.FRAME_COUNTS[state]
@@ -64,6 +65,7 @@ class PlantEnemyLogic:
                     
                     # 2D list: sprites[state][direction][frame]
                     sprites[state] = []
+                    
                     for d in range(directions):
                         row = []
                         for i in range(frame_count):
@@ -205,6 +207,7 @@ class PlantEnemyLogic:
         state_sprites = self.sprites.get(self.state, [[] for _ in range(4)])
         direction = getattr(self, 'direction', 0)
         frame_list = state_sprites[direction] if direction < len(state_sprites) else []
+        
         if frame_list:
             frame_idx = min(self.anim_frame, len(frame_list) - 1)
             frame = frame_list[frame_idx]
