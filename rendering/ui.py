@@ -110,6 +110,35 @@ def draw_hud(screen, player, fps=None):
     screen.blit(_hud_cache['left'], (0, HUD_TOP_HEIGHT))
     screen.blit(_hud_cache['right'], (width - HUD_RIGHT_WIDTH, HUD_TOP_HEIGHT))
 
+
+    # --- Health and Shield Bars (Left HUD, Top) ---
+    BAR_X = 24
+    BAR_Y = 24
+    BAR_WIDTH = HUD_LEFT_WIDTH - 48
+    BAR_HEIGHT = 32
+    BAR_GAP = 12
+    # Health bar (red)
+    max_health = 100
+    health_val = max(0, int(round(player.health)))
+    health_frac = min(health_val / max_health, 1.0)
+    pygame.draw.rect(screen, (135, 45, 40), (BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT), border_radius=8)
+    pygame.draw.rect(screen, (175, 60, 55), (BAR_X, BAR_Y, int(BAR_WIDTH * health_frac), BAR_HEIGHT), border_radius=8)
+    health_text = f"{health_val}/{max_health}"
+    health_label = font.render(health_text, True, (255,255,255))
+    health_label_rect = health_label.get_rect(center=(BAR_X + BAR_WIDTH // 2, BAR_Y + BAR_HEIGHT // 2))
+    screen.blit(health_label, health_label_rect)
+    # Shield bar (blue), below health
+    max_shield = 100  # For bar scaling; actual max is 100 for full bar
+    shield_val = max(0, int(round(player.barrier)))
+    shield_frac = min(shield_val / max_shield, 1.0)
+    shield_y = BAR_Y + BAR_HEIGHT + BAR_GAP
+    pygame.draw.rect(screen, (130, 110, 50), (BAR_X, shield_y, BAR_WIDTH, BAR_HEIGHT), border_radius=8)
+    pygame.draw.rect(screen, (180, 150, 35), (BAR_X, shield_y, int(BAR_WIDTH * shield_frac), BAR_HEIGHT), border_radius=8)
+    shield_text = f"{shield_val}/{max_shield}"
+    shield_label = font.render(shield_text, True, (255,255,255))
+    shield_label_rect = shield_label.get_rect(center=(BAR_X + BAR_WIDTH // 2, shield_y + BAR_HEIGHT // 2))
+    screen.blit(shield_label, shield_label_rect)
+
     # Optionally, add labels for clarity
     screen.blit(font.render("TOP HUD", True, HUD_LABEL_COLOR), (width//2 - 60, 20))
     # Removed 'BOTTOM HUD' label for a cleaner look
