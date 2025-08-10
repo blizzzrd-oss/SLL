@@ -3,7 +3,7 @@ import pygame
 from core.init import init_pygame
 from rendering.menu import Menu
 from core.game import Game
-from core.game_loop import run_game
+from core.game_loop_clean import run_game
 
 def main():
     screen = init_pygame()
