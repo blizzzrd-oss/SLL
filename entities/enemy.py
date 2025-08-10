@@ -30,7 +30,7 @@ class Enemy:
             
         self.health -= amount
         
-        # Only trigger hurt animation if not already dead/dying
+        # Handle death or hurt visual feedback
         if self.logic and hasattr(self.logic, 'state'):
             if self.health <= 0:
                 # Death overrides everything
@@ -40,14 +40,10 @@ class Enemy:
                 # Fix position for death animation to prevent jitter
                 if hasattr(self.logic, 'fixed_draw_pos'):
                     self.logic.fixed_draw_pos = (int(self.position[0]), int(self.position[1]))
-            elif self.logic.state != 'death':
-                # Only trigger hurt if not already dying
-                self.logic.state = 'hurt'
-                self.logic.anim_frame = 0
-                self.logic.anim_timer = 0.0
-                # Fix position for hurt animation to prevent jitter
-                if hasattr(self.logic, 'fixed_draw_pos'):
-                    self.logic.fixed_draw_pos = (int(self.position[0]), int(self.position[1]))
+            else:
+                # Trigger hurt overlay without changing state
+                if hasattr(self.logic, 'hurt_overlay_timer') and hasattr(self.logic, 'hurt_overlay_duration'):
+                    self.logic.hurt_overlay_timer = self.logic.hurt_overlay_duration
         
         # Don't set dead = True here, let the death animation complete first
     def __init__(self, enemy_type, position=(0, 0)):

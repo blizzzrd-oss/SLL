@@ -11,7 +11,6 @@ class PlantEnemyLogic:
         'idle': 'Plant_Idle_full.png',
         'walk': 'Plant_Walk_full.png',
         'run': 'Plant_Run_full.png',
-        'hurt': 'Plant_Hurt_full.png',
         'death': 'Plant_Death_full.png',
         'attack': 'Plant_Attack_full.png',
     }
@@ -19,7 +18,6 @@ class PlantEnemyLogic:
         'idle': 8,  # 256px / 8 = 32px per frame
         'walk': 6,  # Updated: 6 frames per direction
         'run': 8,
-        'hurt': 5,  # Updated: 5 frames per direction
         'death': 10,  # Updated: 10 frames per direction
         'attack': 7,  # 448px / 7 = 64px per frame
     }
@@ -40,6 +38,10 @@ class PlantEnemyLogic:
         
         # Store fixed position during hurt/death animations to prevent jitter
         self.fixed_draw_pos = None
+        
+        # Hurt overlay system (instead of hurt state)
+        self.hurt_overlay_timer = 0.0
+        self.hurt_overlay_duration = 0.5  # 500ms red tint
 
     def _load_sprites(self):
         sprites = {}
@@ -134,20 +136,9 @@ class PlantEnemyLogic:
                     self.enemy.dead = True
             return  # Don't process any other logic during death
 
-        # Handle hurt animation - can only be interrupted by death
-        if self.state == 'hurt':
-            self.anim_timer += dt
-            if self.anim_timer > 0.1:
-                self.anim_frame += 1
-                self.anim_timer = 0.0
-                if self.anim_frame >= self.FRAME_COUNTS['hurt']:
-                    # Hurt animation complete, return to movement
-                    self.state = 'run' if speed > 4 else 'walk'
-                    self.anim_frame = 0
-                    self.anim_timer = 0.0
-                    # Clear fixed position to allow normal movement
-                    self.fixed_draw_pos = None
-            return  # Don't process any other logic during hurt
+        # Update hurt overlay timer
+        if self.hurt_overlay_timer > 0:
+            self.hurt_overlay_timer -= dt
 
         # Normal movement and attack logic - only when not hurt or dead
         prev_state = self.state
@@ -218,7 +209,7 @@ class PlantEnemyLogic:
             frame_idx = min(self.anim_frame, len(frame_list) - 1)
             frame = frame_list[frame_idx]
             
-            # Use fixed position during hurt/death animations to prevent jitter
+            # Use fixed position during death animations to prevent jitter
             if self.fixed_draw_pos is not None:
                 enemy_center_x, enemy_center_y = self.fixed_draw_pos
             else:
@@ -230,4 +221,14 @@ class PlantEnemyLogic:
             rect.centerx = enemy_center_x
             rect.bottom = enemy_center_y + (self.enemy.size // 2)
             
-            surface.blit(frame, rect)
+            # Apply hurt overlay if active
+            if self.hurt_overlay_timer > 0:
+                # Create a red-tinted version of the frame
+                hurt_frame = frame.copy()
+                # Create red overlay surface
+                red_overlay = pygame.Surface(frame.get_size(), pygame.SRCALPHA)
+                red_overlay.fill((255, 100, 100, 128))  # Red with transparency
+                hurt_frame.blit(red_overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+                surface.blit(hurt_frame, rect)
+            else:
+                surface.blit(frame, rect)
