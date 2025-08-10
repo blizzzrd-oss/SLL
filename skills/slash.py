@@ -100,8 +100,7 @@ class SlashSkill(Skill):
         offset_y = int(py + dir_y * offset_dist)
         rect = draw_frame.get_rect(center=(offset_x, offset_y))
         surface.blit(draw_frame, rect)
-        # Draw the hitbox rectangle in yellow for debugging
-        pygame.draw.rect(surface, (255, 255, 0), rect, 2)
+        # Removed yellow hitbox debug visualization
 
     def _in_slash_arc(self, entity):
         # Use the current slash sprite's rect as the hitbox, placed by target_pos
