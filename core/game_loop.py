@@ -202,8 +202,11 @@ def run_game(screen, slot, mode):
                     if skill.can_use(now):
                         mouse_pos = pygame.mouse.get_pos()
                         skill.use(target_pos=mouse_pos)
+            print('--- ENEMY DEBUG (game loop) ---')
+            for e in enemies:
+                print(f"Enemy id={id(e)} pos={getattr(e, 'position', None)} rect={getattr(e, 'rect', None)} health={getattr(e, 'health', None)}")
             for skill in game.player.skills.values():
-                skill.update(dt, [])
+                skill.update(dt, enemies)
         if game.player.anim_lock:
             game.player.anim_timer += dt
 

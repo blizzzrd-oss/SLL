@@ -23,6 +23,14 @@ class EnemyType:
 
 # Enemy: instance of an enemy in the game, based on EnemyType
 class Enemy:
+    def take_damage(self, amount, source=None):
+        self.health -= amount
+        if self.logic and hasattr(self.logic, 'state'):
+            self.logic.state = 'hurt'
+            self.logic.anim_frame = 0
+            self.logic.anim_timer = 0.0
+        if self.health <= 0:
+            self.dead = True
     def __init__(self, enemy_type, position=(0, 0)):
         self.type = enemy_type
         self.health = enemy_type.max_health

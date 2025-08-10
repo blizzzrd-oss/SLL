@@ -53,11 +53,12 @@ class SlashSkill(Skill):
         self.center = self.user.rect.center
         if target_pos:
             dx, dy = target_pos[0] - self.center[0], target_pos[1] - self.center[1]
-            angle = math.degrees(math.atan2(-dy, dx)) % 360
+            angle = math.degrees(math.atan2(dy, dx)) % 360
         else:
             angle = self.user.facing_angle if hasattr(self.user, 'facing_angle') else 0
         self.start_angle = (angle - self.arc_deg / 2) % 360
         self.end_angle = (angle + self.arc_deg / 2) % 360
+        print(f"[SLASH DEBUG] Player pos={self.center} facing_angle={angle:.2f} arc=({self.start_angle:.2f} to {self.end_angle:.2f}) arc_deg={self.arc_deg} max_dist=100")
         return True
 
     def update(self, dt, entities):
@@ -68,10 +69,13 @@ class SlashSkill(Skill):
             self.active = False
             return
         # Hit detection
+        print('--- ENEMY DEBUG (slash skill) ---')
         for entity in entities:
+            print(f"Slash check id={id(entity)} pos={getattr(entity, 'position', None)} rect={getattr(entity, 'rect', None)} health={getattr(entity, 'health', None)}")
             if entity is self.user or entity in self.hit_entities:
                 continue
             if self._in_slash_arc(entity):
+                print(f"[DEBUG] Slash HIT entity id={id(entity)}")
                 entity.take_damage(self.damage)
                 self.hit_entities.add(entity)
 
@@ -97,15 +101,24 @@ class SlashSkill(Skill):
         surface.blit(draw_frame, rect)
 
     def _in_slash_arc(self, entity):
-        # Simple circular + angle check
-        ex, ey = entity.rect.center
-        cx, cy = self.center
-        dx, dy = ex - cx, cy - ey
-        dist = math.hypot(dx, dy)
-        if dist > 100:  # Slash reach (adjust as needed)
-            return False
-        angle = math.degrees(math.atan2(dy, dx)) % 360
-        if self.start_angle < self.end_angle:
-            return self.start_angle <= angle <= self.end_angle
+        # Use the current slash sprite's rect as the hitbox
+        frame_idx = min(int(self.animation_frame), self.total_frames - 1)
+        frame = self.frames[frame_idx]
+        move_x, move_y = (1, 0)
+        if hasattr(self.user, 'last_move'):
+            move_x, move_y = self.user.last_move
+        elif hasattr(self.user, 'facing_angle'):
+            # Approximate direction from facing_angle
+            angle_rad = math.radians(self.user.facing_angle)
+            move_x, move_y = math.cos(angle_rad), math.sin(angle_rad)
+        offset_dist = PLAYER_SIZE // 2 + 4
+        if hasattr(self.user, 'x') and hasattr(self.user, 'y'):
+            px, py = int(self.user.x), int(self.user.y)
         else:
-            return angle >= self.start_angle or angle <= self.end_angle
+            px, py = self.user.rect.center
+        offset_x = px + (offset_dist if move_x >= 0 else -offset_dist)
+        offset_y = py
+        rect = frame.get_rect(center=(offset_x, offset_y))
+        hit = rect.colliderect(entity.rect)
+        print(f"[SLASH DEBUG] Enemy id={id(entity)} enemy_rect={entity.rect} slash_rect={rect} hit={hit}")
+        return hit
