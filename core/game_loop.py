@@ -25,6 +25,13 @@ def run_game(screen, slot, mode):
     # Track skill button states for auto-repeat
     skill_pressed = {'slash': False, 'dash': False}
 
+    # --- Enemy management ---
+    from entities.spawner import EnemySpawner
+    from entities.enemy import PlantType
+    enemies = []
+    game.enemies = enemies
+    spawner = EnemySpawner([PlantType], get_game_time_fn=lambda: time_accum, screen=screen)
+
     def handle_events():
         nonlocal running, should_exit, paused, pause_menu_selected, in_settings_menu, settings_menu, hud_visible
         mouse_pos = pygame.mouse.get_pos()
@@ -159,44 +166,51 @@ def run_game(screen, slot, mode):
         if not paused:
             game.update(dt)
             now = pygame.time.get_ticks() / 1000
-            # Auto attack logic
+            # --- Enemy spawning ---
+            new_enemy = spawner.spawn_if_ready()
+            if new_enemy:
+                # ...removed debug print...
+                enemies.append(new_enemy)
+                game.enemies = enemies  # Keep reference updated
+            # --- Enemy update ---
+            for enemy in enemies[:]:
+                enemy.update(dt, game.player)
+                if hasattr(enemy, 'dead') and enemy.dead:
+                    enemies.remove(enemy)
+            game.enemies = enemies  # Keep reference updated
+            # --- Player skill logic (unchanged) ---
             auto_attack = False
             if hasattr(game, 'player') and hasattr(game.player, 'checkbox_options'):
-                # Find the auto attack checkbox (assume label order)
                 for opt in getattr(game.player, 'checkbox_options', []):
                     if opt.get('label') == 'Auto Attack':
                         auto_attack = opt.get('checked', False)
                         break
-            # Skill auto-repeat logic
-            # Slash (LMB)
             if skill_pressed['slash'] and 'slash' in game.player.skills:
                 skill = game.player.skills['slash']
                 if skill.can_use(now):
                     mouse_pos = pygame.mouse.get_pos()
                     skill.use(target_pos=mouse_pos)
-            # Dash (SPACE)
             if skill_pressed['dash'] and 'dash' in game.player.skills:
                 skill = game.player.skills['dash']
                 if skill.can_use(now):
                     mouse_pos = pygame.mouse.get_pos()
                     skill.use(target_pos=mouse_pos)
-            # Auto attack: trigger all non-movement skills if off cooldown
             if auto_attack:
                 for name, skill in game.player.skills.items():
                     if getattr(skill, 'is_movement_skill', False):
                         continue
                     if skill.can_use(now):
-                        # Use mouse position for targeting if needed
                         mouse_pos = pygame.mouse.get_pos()
                         skill.use(target_pos=mouse_pos)
-            # Update all player skills
             for skill in game.player.skills.values():
-                skill.update(dt, [])  # TODO: pass list of entities for hit detection
+                skill.update(dt, [])
         if game.player.anim_lock:
             game.player.anim_timer += dt
 
         # Draw game and all player skills (skills now drawn inside draw_game)
+        # Draw enemies
         draw_game(screen, game, last_move, time_accum, paused, pause_menu_selected, pause_menu_options, pause_menu_rects, hud_visible, clock.get_fps())
+    # Enemy drawing and debug overlays are now handled in draw_game
         if should_exit:
             break
         # Simple profiling: print frame time in ms

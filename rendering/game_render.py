@@ -60,7 +60,14 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
     for skill in player.skills.values():
         if hasattr(skill, 'draw'):
             skill.draw(screen, last_move=last_move)
-    # TODO: Draw monsters, loot, UI, etc.
+    # Draw enemies and debug overlays
+    if hasattr(game, 'enemies'):
+        enemies = game.enemies
+    else:
+        enemies = []
+    for enemy in getattr(game, 'enemies', []):
+        enemy.draw(screen)
+    # ...removed enemy count and player position debug overlays...
 
     # Draw GAME OVER overlay if needed
     if getattr(game, 'game_over', False):

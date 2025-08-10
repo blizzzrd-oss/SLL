@@ -74,7 +74,7 @@ class Player:
         self.crit_damage = PLAYER_CRIT_DAMAGE
 
         # For compatibility with old code
-        self.position = (self.x, self.y)
+        self.position = [self.x, self.y]  # Make this a mutable list
         self.damage_log = []
         self.recent_damage = []
         # Track last nonzero movement vector for dash direction

@@ -1,3 +1,26 @@
+# Enemy Type Config
+ENEMY_TYPE_CONFIG = {
+	'Plant': {
+		'max_health': 40,
+		'size': 48,
+		'speed': 75,
+		'color': (80, 200, 80),
+		'attack_range': 32,  # Only attack if player is within 32px
+		'attack_damage': 5,
+	},
+	# Add more enemy types here
+}
+# Enemy Spawner Config
+SPAWNER_DEFAULT_INTERVAL = 1.0  # seconds between spawns
+SPAWNER_ENEMY_WEIGHTS = {
+	'Plant': 1.0,
+	# Add more enemy types and their base weights here
+}
+SPAWNER_TIME_WEIGHT_EVENTS = [
+	# (enemy_name, time_threshold, weight_multiplier)
+	('Plant', 60, 2.0),  # After 60s, double plant spawn chance
+	# Add more events as needed
+]
 # Health and Barrier Bar Colors
 COLOR_HEALTH_BAR_BG = (135, 45, 40)
 COLOR_HEALTH_BAR_FILL = (175, 60, 55)

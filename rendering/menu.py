@@ -49,6 +49,70 @@ class Menu:
             Button((btn_x, btn_y_start + 1*(btn_h+btn_gap), btn_w, btn_h), 'Settings', self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img),
             Button((btn_x, btn_y_start + 2*(btn_h+btn_gap), btn_w, btn_h), 'Quit', self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img),
         ]
+        # Gamemode menu
+        gm_btn_w, gm_btn_h = 292, 145
+        gm_btn_gap = 30
+        total_width = 3 * gm_btn_w + 2 * gm_btn_gap
+        group_height = gm_btn_h + gm_btn_gap + 80 + 2 * gm_btn_gap
+        gm_btn_y = (WINDOW_HEIGHT - group_height) // 2
+        gm_btn_x_start = (WINDOW_WIDTH - total_width) // 2
+        self.gamemode_buttons = [
+            Button((gm_btn_x_start + i * (gm_btn_w + gm_btn_gap), gm_btn_y, gm_btn_w, gm_btn_h), label, self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img)
+            for i, label in enumerate(['Easy', 'Normal', 'Hard'])
+        ]
+        back_w, back_h = 180, 80
+        back_x = (WINDOW_WIDTH - back_w) // 2
+        back_y = gm_btn_y + gm_btn_h + 2 * gm_btn_gap
+        back_img = None
+        if self._main_menu_button_img:
+            back_img = pygame.transform.smoothscale(self._main_menu_button_img, (back_w, back_h))
+        back_font = pygame.font.SysFont(None, int(FONT_SIZE_LARGE * 0.9))
+        self.gamemode_back_button = Button((back_x, back_y, back_w, back_h), 'Back', back_font, COLOR_BG, COLOR_HIGHLIGHT, back_img)
+        self.selected_slot = None
+        self.settings_back_button = Button((back_x, back_y, back_w, back_h), 'Back', back_font, COLOR_BG, COLOR_HIGHLIGHT, back_img)
+        self.dragging_music = False
+        self.dragging_sfx = False
+        self.slider_label_x = 100
+        self.music_label_y = 110
+        self.sfx_label_y = 170
+        self.slider_x = 380
+        self.slider_width = 200
+        self.slider_height = 20
+        self.checkbox_x = self.slider_x
+        self.checkbox_y_start = self.sfx_label_y + 50
+        self.checkbox_spacing = 40
+        self.checkbox_size = 28
+        from config import GAME_FPS_OPTIONS, GAME_DEFAULT_FPS
+        self._settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings.json')
+        self.fps_options = GAME_FPS_OPTIONS
+        self.fps = GAME_DEFAULT_FPS
+        self.load_settings()
+        # Ensure music volume matches loaded setting
+        try:
+            pygame.mixer.music.set_volume(self.music_volume / 100)
+        except Exception:
+            pass
+        # Menu exit/callback logic (must be last)
+        self._should_exit = False
+        self._real_start_game_callback = start_game_callback
+        self.start_game_callback = self._wrap_start_game_callback()
+    def _wrap_start_game_callback(self):
+        def wrapped(slot, mode):
+            self._should_exit = True
+            if self._real_start_game_callback:
+                self._real_start_game_callback(slot, mode)
+        return wrapped
+        btn_w, btn_h = 292, 145
+        btn_x = (WINDOW_WIDTH - btn_w) // 2
+        btn_y_start = 100
+        btn_gap = 30
+        # Use a larger font for main menu buttons
+        self.main_menu_font = pygame.font.SysFont(None, int(FONT_SIZE_LARGE * 1.5))
+        self.main_menu_buttons = [
+            Button((btn_x, btn_y_start + 0*(btn_h+btn_gap), btn_w, btn_h), 'New Game', self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img),
+            Button((btn_x, btn_y_start + 1*(btn_h+btn_gap), btn_w, btn_h), 'Settings', self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img),
+            Button((btn_x, btn_y_start + 2*(btn_h+btn_gap), btn_w, btn_h), 'Quit', self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img),
+        ]
     # Removed savegame/slot selection UI
         # Gamemode menu
         # Use the same button image and sizing for gamemode buttons and back button
@@ -142,10 +206,10 @@ class Menu:
             pass
 
     def run(self):
-        """Main menu loop. Handles events and drawing until quit."""
+        """Main menu loop. Handles events and drawing until quit or game start."""
         clock = pygame.time.Clock()
         running = True
-        while running:
+        while running and not self._should_exit:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -153,7 +217,9 @@ class Menu:
                     self.handle_event(event)
             self.draw()
             clock.tick(60)
-        pygame.quit()
+        # Only quit pygame if the whole app is closing, not if starting the game
+        if not self._should_exit:
+            pygame.quit()
 
     def draw(self):
         """Draws the current menu state to the screen."""
