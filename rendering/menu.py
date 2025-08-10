@@ -32,23 +32,51 @@ class Menu:
         self.selected = 0
         self.font = pygame.font.SysFont(None, FONT_SIZE_LARGE)
         self.small_font = pygame.font.SysFont(None, FONT_SIZE_SMALL)
+        # Cache the button image for all main menu buttons
+        self._main_menu_button_img = None
+        img_path = r'C:\Repos\SLL\resources\images\UI\menu\buttons\slime_button_292x145.png'
+        if os.path.exists(img_path):
+            self._main_menu_button_img = pygame.image.load(img_path).convert_alpha()
+        # Use the original image size for button rects
+        btn_w, btn_h = 292, 145
+        btn_x = (WINDOW_WIDTH - btn_w) // 2
+        btn_y_start = 100
+        btn_gap = 30
+        # Use a larger font for main menu buttons
+        self.main_menu_font = pygame.font.SysFont(None, int(FONT_SIZE_LARGE * 1.5))
         self.main_menu_buttons = [
-            Button((100, 100, 400, 60), 'New Game / Continue', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
-            Button((100, 180, 400, 60), 'Settings', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
-            Button((100, 260, 400, 60), 'Quit', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
+            Button((btn_x, btn_y_start + 0*(btn_h+btn_gap), btn_w, btn_h), 'New Game', self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img),
+            Button((btn_x, btn_y_start + 1*(btn_h+btn_gap), btn_w, btn_h), 'Settings', self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img),
+            Button((btn_x, btn_y_start + 2*(btn_h+btn_gap), btn_w, btn_h), 'Quit', self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img),
         ]
-        self.savegame_back_button = Button((100, 330, 200, 40), 'Back', self.small_font, COLOR_BACK, COLOR_HIGHLIGHT)
-        # Save slots: list of 3 slots, None or string for each slot
-        self.save_slots = [None, None, None]
+    # Removed savegame/slot selection UI
         # Gamemode menu
+        # Use the same button image and sizing for gamemode buttons and back button
+        gm_btn_w, gm_btn_h = 292, 145
+        gm_btn_gap = 30
+        total_width = 3 * gm_btn_w + 2 * gm_btn_gap
+        # Center the button group vertically
+        group_height = gm_btn_h + gm_btn_gap + 80 + 2 * gm_btn_gap  # 3 buttons + gap + back button + gap
+        gm_btn_y = (WINDOW_HEIGHT - group_height) // 2
+        gm_btn_x_start = (WINDOW_WIDTH - total_width) // 2
         self.gamemode_buttons = [
-            Button((100, 100, 400, 60), 'Easy', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
-            Button((100, 180, 400, 60), 'Normal', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
-            Button((100, 260, 400, 60), 'Hard', self.font, COLOR_TEXT, COLOR_HIGHLIGHT),
+            Button((gm_btn_x_start + i * (gm_btn_w + gm_btn_gap), gm_btn_y, gm_btn_w, gm_btn_h), label, self.main_menu_font, COLOR_BG, COLOR_HIGHLIGHT, self._main_menu_button_img)
+            for i, label in enumerate(['Easy', 'Normal', 'Hard'])
         ]
-        self.gamemode_back_button = Button((100, 340, 200, 40), 'Back', self.small_font, COLOR_BACK, COLOR_HIGHLIGHT)
+        # Smaller back button
+        back_w, back_h = 180, 80
+        back_x = (WINDOW_WIDTH - back_w) // 2
+        back_y = gm_btn_y + gm_btn_h + 2 * gm_btn_gap
+        # Scale the button image for back button if available
+        back_img = None
+        if self._main_menu_button_img:
+            back_img = pygame.transform.smoothscale(self._main_menu_button_img, (back_w, back_h))
+        # Use a smaller font for the back button
+        back_font = pygame.font.SysFont(None, int(FONT_SIZE_LARGE * 0.9))
+        self.gamemode_back_button = Button((back_x, back_y, back_w, back_h), 'Back', back_font, COLOR_BG, COLOR_HIGHLIGHT, back_img)
         self.selected_slot = None  # Track which slot was selected
-        self.settings_back_button = Button((100, 240, 200, 40), 'Back', self.small_font, COLOR_BACK, COLOR_HIGHLIGHT)
+        # Use the same back button as the gamemode menu for settings
+        self.settings_back_button = Button((back_x, back_y, back_w, back_h), 'Back', back_font, COLOR_BG, COLOR_HIGHLIGHT, back_img)
         self.dragging_music = False
         self.dragging_sfx = False
         # Slider positions and sizes
@@ -135,8 +163,6 @@ class Menu:
         self.screen.fill(COLOR_BG)
         if self.state == 'main':
             self.draw_main_menu()
-        elif self.state == 'savegame':
-            self.draw_savegame_menu()
         elif self.state == 'settings':
             self.draw_settings_menu()
         elif self.state == 'gamemode':
@@ -145,7 +171,17 @@ class Menu:
 
     def draw_gamemode_menu(self):
         title = self.font.render('Select Game Mode', True, COLOR_TEXT)
-        self.screen.blit(title, (100, 40))
+        # Centered graphic for 'Select Game Mode'
+        img_path = r'C:\Repos\SLL\resources\images\UI\menu\buttons\slect_game_mode.png'
+        if not hasattr(self, '_select_gamemode_img'):
+            if os.path.exists(img_path):
+                self._select_gamemode_img = pygame.image.load(img_path).convert_alpha()
+            else:
+                self._select_gamemode_img = None
+        if self._select_gamemode_img:
+            img = self._select_gamemode_img
+            img_rect = img.get_rect(center=(WINDOW_WIDTH//2, 200))
+            self.screen.blit(img, img_rect)
         mouse_pos = pygame.mouse.get_pos()
         for button in self.gamemode_buttons:
             button.check_hover(mouse_pos)
@@ -159,42 +195,20 @@ class Menu:
             button.check_hover(mouse_pos)
             button.draw(self.screen)
 
-    def draw_savegame_menu(self):
-        mouse_pos = pygame.mouse.get_pos()
-        self.slot_rects = []
-        for i in range(3):
-            slot = self.save_slots[i] or 'Empty Slot'
-            y = 100 + i * 70
-            rect = pygame.Rect(100, y, 400, 60)
-            self.slot_rects.append(rect)
-            is_hovered = rect.collidepoint(mouse_pos)
-            # Button style: fill, border, highlight on hover/selection
-            fill_color = COLOR_HIGHLIGHT if is_hovered or i == self.selected else COLOR_BACK
-            border_color = COLOR_TEXT if not is_hovered else COLOR_HIGHLIGHT
-            pygame.draw.rect(self.screen, fill_color, rect, border_radius=8)
-            pygame.draw.rect(self.screen, border_color, rect, 3, border_radius=8)
-            # Draw label centered
-            label_color = COLOR_BLACK if is_hovered or i == self.selected else COLOR_TEXT
-            label = self.font.render(f'Slot {i+1}: {slot}', True, label_color)
-            label_rect = label.get_rect(center=rect.center)
-            self.screen.blit(label, label_rect)
-        # Always place back button well below the last slot
-        self.savegame_back_button.rect.y = 100 + 3 * 70 + 40
-        self.savegame_back_button.check_hover(mouse_pos)
-        self.savegame_back_button.draw(self.screen)
+    # draw_savegame_menu removed
 
     def draw_settings_menu(self):
         # Layout constants
         top_y = 60
         spacing_y = 60
         slider_offset = 40
-        # FPS label and buttons
+        # FPS label stays on the left, buttons align above sliders
         fps_label = self.small_font.render(f'FPS:', True, COLOR_TEXT)
         fps_label_x = self.slider_label_x
         fps_label_y = top_y
         self.screen.blit(fps_label, (fps_label_x, fps_label_y))
-        # Draw FPS options as buttons right next to label
-        fps_btn_x = fps_label_x + 60
+        # FPS buttons above sliders
+        fps_btn_x = self.slider_x
         fps_btn_y = fps_label_y - 6
         btn_w, btn_h = 70, 36
         self.fps_rects = []
@@ -242,7 +256,7 @@ class Menu:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = event.pos
                 if self.main_menu_buttons[0].is_clicked(mouse_pos):
-                    self.state = 'savegame'
+                    self.state = 'gamemode'
                     self.selected = 0
                 elif self.main_menu_buttons[1].is_clicked(mouse_pos):
                     self.state = 'settings'
@@ -256,7 +270,7 @@ class Menu:
                     self.selected = (self.selected - 1) % 3
                 elif event.key == pygame.K_RETURN:
                     if self.selected == 0:
-                        self.state = 'savegame'
+                        self.state = 'gamemode'
                         self.selected = 0
                     elif self.selected == 1:
                         self.state = 'settings'
@@ -308,8 +322,8 @@ class Menu:
                         self.state = 'main'  # Optionally reset menu state
                         return
                 if self.gamemode_back_button.is_clicked(mouse_pos):
-                    self.state = 'savegame'
-                    self.selected = self.selected_slot if self.selected_slot is not None else 0
+                    self.state = 'main'
+                    self.selected = 0
         elif self.state == 'settings':
             # Always update slider/fps rects before handling events
             self.draw_settings_menu()
@@ -395,19 +409,26 @@ class Menu:
             return False
 
 class Button:
-    def __init__(self, rect, text, font, color, highlight_color):
+    def __init__(self, rect, text, font, color, highlight_color, bg_image=None):
         self.rect = pygame.Rect(rect)
         self.text = text
         self.font = font
         self.color = color
         self.highlight_color = highlight_color
         self.is_hovered = False
+        self.bg_image = bg_image
 
     def draw(self, screen):
-        color = self.highlight_color if self.is_hovered else self.color
-        pygame.draw.rect(screen, color, self.rect, border_radius=8)
-        label = self.font.render(self.text, True, COLOR_BLACK)
-        label_rect = label.get_rect(center=self.rect.center)
+        if self.bg_image:
+            # Draw the image at its original size, centered in the button rect
+            img_rect = self.bg_image.get_rect(center=self.rect.center)
+            screen.blit(self.bg_image, img_rect)
+        else:
+            color = self.highlight_color if self.is_hovered else self.color
+            pygame.draw.rect(screen, color, self.rect, border_radius=8)
+        # Center the text horizontally, but move it just a little up from previous position
+        label = self.font.render(self.text, True, self.color)
+        label_rect = label.get_rect(center=(self.rect.centerx, self.rect.centery - 10))
         screen.blit(label, label_rect)
 
     def check_hover(self, mouse_pos):
