@@ -117,7 +117,6 @@ class Menu:
             self.checkbox_options = [
                 {"label": "Auto Aim", "checked": bool(data.get('auto_aim', True))},
                 {"label": "Auto Attack", "checked": bool(data.get('auto_attack', True))},
-                {"label": "Auto Skills", "checked": bool(data.get('auto_skills', True))},
             ]
         except Exception:
             self.music_volume = int(MUSIC_VOLUME * 100)
@@ -126,7 +125,6 @@ class Menu:
             self.checkbox_options = [
                 {"label": "Auto Aim", "checked": True},
                 {"label": "Auto Attack", "checked": True},
-                {"label": "Auto Skills", "checked": True},
             ]
 
     def save_settings(self):
@@ -135,8 +133,7 @@ class Menu:
             'sfx_volume': int(self.sfx_volume),
             'fps': int(self.fps),
             'auto_aim': self.checkbox_options[0]["checked"],
-            'auto_attack': self.checkbox_options[1]["checked"],
-            'auto_skills': self.checkbox_options[2]["checked"]
+            'auto_attack': self.checkbox_options[1]["checked"]
         }
         try:
             with open(self._settings_path, 'w') as f:
