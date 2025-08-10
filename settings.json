@@ -3,6 +3,5 @@
     "sfx_volume": 10,
     "fps": 240,
     "auto_aim": true,
-    "auto_attack": true,
-    "auto_skills": true
+    "auto_attack": true
 }

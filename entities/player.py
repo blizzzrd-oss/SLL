@@ -15,6 +15,7 @@ from config import (
 
 from skills.registry import get_skill
 
+
 class Player:
 
     def update(self, dt):
@@ -73,10 +74,27 @@ class Player:
         # Track last nonzero movement vector for dash direction
         self.last_move = (1, 0)
 
+
         # Animation state
         self.anim_state = self.ANIM_IDLE
         self.anim_timer = 0.0  # Time since animation started
         self.anim_lock = False  # If True, animation cannot be interrupted
+
+        # Settings checkboxes (auto aim, auto attack) - sync with menu if possible
+        try:
+            import os, json
+            settings_path = os.path.join(os.path.dirname(__file__), '..', 'settings.json')
+            with open(settings_path, 'r') as f:
+                data = json.load(f)
+            self.checkbox_options = [
+                {"label": "Auto Aim", "checked": bool(data.get('auto_aim', True))},
+                {"label": "Auto Attack", "checked": bool(data.get('auto_attack', True))},
+            ]
+        except Exception:
+            self.checkbox_options = [
+                {"label": "Auto Aim", "checked": True},
+                {"label": "Auto Attack", "checked": True},
+            ]
 
 
     def take_damage(self, amount, source=None, barrier_damage=False):

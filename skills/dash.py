@@ -8,6 +8,7 @@ DASH_COOLDOWN = 2.0
 DASH_DURATION = 0.15  # seconds
 
 class DashSkill(Skill):
+    is_movement_skill = True
     def __init__(self, user, cooldown=DASH_COOLDOWN, dash_range=DASH_RANGE, duration=DASH_DURATION):
         super().__init__(user, cooldown)
         self.dash_range = dash_range

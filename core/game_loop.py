@@ -158,8 +158,16 @@ def run_game(screen, slot, mode):
 
         if not paused:
             game.update(dt)
-            # Skill auto-repeat logic
             now = pygame.time.get_ticks() / 1000
+            # Auto attack logic
+            auto_attack = False
+            if hasattr(game, 'player') and hasattr(game.player, 'checkbox_options'):
+                # Find the auto attack checkbox (assume label order)
+                for opt in getattr(game.player, 'checkbox_options', []):
+                    if opt.get('label') == 'Auto Attack':
+                        auto_attack = opt.get('checked', False)
+                        break
+            # Skill auto-repeat logic
             # Slash (LMB)
             if skill_pressed['slash'] and 'slash' in game.player.skills:
                 skill = game.player.skills['slash']
@@ -172,6 +180,15 @@ def run_game(screen, slot, mode):
                 if skill.can_use(now):
                     mouse_pos = pygame.mouse.get_pos()
                     skill.use(target_pos=mouse_pos)
+            # Auto attack: trigger all non-movement skills if off cooldown
+            if auto_attack:
+                for name, skill in game.player.skills.items():
+                    if getattr(skill, 'is_movement_skill', False):
+                        continue
+                    if skill.can_use(now):
+                        # Use mouse position for targeting if needed
+                        mouse_pos = pygame.mouse.get_pos()
+                        skill.use(target_pos=mouse_pos)
             # Update all player skills
             for skill in game.player.skills.values():
                 skill.update(dt, [])  # TODO: pass list of entities for hit detection
