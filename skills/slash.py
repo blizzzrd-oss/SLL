@@ -85,20 +85,28 @@ class SlashSkill(Skill):
         # Calculate current frame index
         frame_idx = min(int(self.animation_frame), self.total_frames - 1)
         frame = self.frames[frame_idx]
-        # Determine direction from last_move
-        move_x, move_y = last_move if last_move != (0,0) else (1,0)
-        mirror = move_x < 0
-        draw_frame = pygame.transform.flip(frame, True, False) if mirror else frame
-        # Offset: place slash just next to player in movement direction
-        offset_dist = PLAYER_SIZE // 2 + 4
+        # Always face the mouse direction and rotate the sprite
+        mouse_x, mouse_y = pygame.mouse.get_pos()
         if hasattr(self.user, 'x') and hasattr(self.user, 'y'):
             px, py = int(self.user.x), int(self.user.y)
         else:
             px, py = self.user.rect.center
-        offset_x = px + (offset_dist if move_x >= 0 else -offset_dist)
-        offset_y = py
+        dx, dy = mouse_x - px, mouse_y - py
+        angle = math.degrees(math.atan2(dy, dx)) % 360
+        # Sprite faces right (0°) by default, so rotate by -angle
+        draw_frame = pygame.transform.rotate(frame, -angle)
+        # Offset: place slash just next to player in mouse direction
+        offset_dist = PLAYER_SIZE // 2 + 4
+        norm = math.hypot(dx, dy)
+        if norm == 0:
+            norm = 1
+        dir_x, dir_y = dx / norm, dy / norm
+        offset_x = int(px + dir_x * offset_dist)
+        offset_y = int(py + dir_y * offset_dist)
         rect = draw_frame.get_rect(center=(offset_x, offset_y))
         surface.blit(draw_frame, rect)
+        # Draw the hitbox rectangle in yellow for debugging
+        pygame.draw.rect(surface, (255, 255, 0), rect, 2)
 
     def _in_slash_arc(self, entity):
         # Use the current slash sprite's rect as the hitbox
