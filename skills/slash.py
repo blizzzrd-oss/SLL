@@ -8,12 +8,18 @@ SLASH_SHEET_PATH = os.path.join('resources', 'images', 'player_melee', 'slash', 
 SLASH_FRAME_COUNT = 5
 
 class SlashSkill(Skill):
+    # Class-level cache for frames
+    _cached_frames = None
+
     def __init__(self, user, cooldown=0.5, damage=10, arc_deg=190, duration=0.25):
         super().__init__(user, cooldown)
         self.damage = damage
         self.arc_deg = arc_deg
         self.duration = duration
-        self.frames = self._load_frames()
+        # Use class-level cache for frames
+        if SlashSkill._cached_frames is None:
+            SlashSkill._cached_frames = self._load_frames()
+        self.frames = SlashSkill._cached_frames
         self.total_frames = len(self.frames)
         self.frame_time = duration / max(1, self.total_frames)
         self.active = False
