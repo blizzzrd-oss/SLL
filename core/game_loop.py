@@ -127,20 +127,17 @@ def run_game(screen, slot, mode):
             return True
         return False
 
-    def get_frame_timing(clock, settings_path, time_accum):
-        """Load FPS from settings, advance clock, and update time accumulator. Returns (dt, time_accum, fps)."""
-        try:
-            with open(settings_path, 'r') as f:
-                settings = json.load(f)
-            fps = int(settings.get('fps', 60))
-        except Exception:
-            fps = 60
+    # Read all settings once at startup
+    try:
+        with open(settings_path, 'r') as f:
+            settings = json.load(f)
+        fps = int(settings.get('fps', 60))
+    except Exception:
+        fps = 60
+    def get_frame_timing(clock, time_accum):
         dt = clock.tick(fps) / 1000.0
         time_accum += dt
         return dt, time_accum, fps
-
-
-
 
     ###### MAIN GAME LOOP ######
     def get_closest_enemy(player, enemies):
@@ -156,7 +153,17 @@ def run_game(screen, slot, mode):
     while running:
         # profiling if needed
         #frame_start = time.perf_counter()
-        dt, time_accum, fps = get_frame_timing(clock, settings_path, time_accum)
+        # If settings menu is open, check for FPS change
+        if in_settings_menu and settings_menu and hasattr(settings_menu, 'fps'):
+            try:
+                with open(settings_path, 'r') as f:
+                    settings = json.load(f)
+                new_fps = int(settings.get('fps', 60))
+                if new_fps != fps:
+                    fps = new_fps
+            except Exception:
+                pass
+        dt, time_accum, fps = get_frame_timing(clock, time_accum)
         move_dx, move_dy = 0, 0
 
         handle_events()
