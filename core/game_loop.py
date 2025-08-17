@@ -231,13 +231,12 @@ def run_game(screen, slot, mode):
                     if target is not None:
                         skill.use(target_pos=target)
             if auto_attack:
-                for name, skill in game.player.skills.items():
-                    if getattr(skill, 'is_movement_skill', False):
-                        continue
-                    if skill.can_use(now):
-                        target = get_skill_target(skill)
-                        if target is not None:
-                            skill.use(target_pos=target)
+                ready_skills = [skill for name, skill in game.player.skills.items()
+                                if not getattr(skill, 'is_movement_skill', False) and skill.can_use(now)]
+                for skill in ready_skills:
+                    target = get_skill_target(skill)
+                    if target is not None:
+                        skill.use(target_pos=target)
             for skill in game.player.skills.values():
                 skill.update(dt, enemies)
         if game.player.anim_lock:
