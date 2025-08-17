@@ -190,10 +190,13 @@ def run_game(screen, slot, mode):
                 enemies.append(new_enemy)
                 game.enemies = enemies  # Keep reference updated
             # --- Enemy update ---
-            for enemy in enemies[:]:
+            dead_enemies = []
+            for enemy in enemies:
                 enemy.update(dt, game.player)
                 if hasattr(enemy, 'dead') and enemy.dead:
-                    enemies.remove(enemy)
+                    dead_enemies.append(enemy)
+            for enemy in dead_enemies:
+                enemies.remove(enemy)
             game.enemies = enemies  # Keep reference updated
             # --- Player skill logic with auto aim ---
             auto_attack = False
