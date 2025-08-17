@@ -190,6 +190,18 @@ def run_game(screen, slot, mode):
                 enemies.append(new_enemy)
                 game.enemies = enemies  # Keep reference updated
             # --- Enemy update ---
+            # --- Spatial grid partitioning for enemies ---
+            GRID_SIZE = 200  # pixels per cell (tune as needed)
+            grid = {}
+            def get_cell(pos):
+                return (pos[0] // GRID_SIZE, pos[1] // GRID_SIZE)
+            # Assign enemies to grid cells
+            for enemy in enemies:
+                cell = get_cell(enemy.rect.center)
+                if cell not in grid:
+                    grid[cell] = []
+                grid[cell].append(enemy)
+            # Update only relevant enemies (all for now, but grid is ready for targeting)
             dead_enemies = []
             for enemy in enemies:
                 enemy.update(dt, game.player)
@@ -211,11 +223,19 @@ def run_game(screen, slot, mode):
                 if getattr(skill, 'is_movement_skill', False):
                     return pygame.mouse.get_pos()
                 if auto_aim:
-                    closest = get_closest_enemy(game.player, enemies)
-                    if closest:
+                    # Use grid to find nearby enemies
+                    px, py = game.player.rect.center
+                    player_cell = get_cell((px, py))
+                    nearby_enemies = []
+                    # Check player's cell and adjacent cells
+                    for dx in [-1, 0, 1]:
+                        for dy in [-1, 0, 1]:
+                            cell = (player_cell[0] + dx, player_cell[1] + dy)
+                            nearby_enemies.extend(grid.get(cell, []))
+                    if nearby_enemies:
+                        closest = min(nearby_enemies, key=lambda e: (e.rect.centerx - px) ** 2 + (e.rect.centery - py) ** 2)
                         return closest.rect.center
                     else:
-                        # If no enemies, do nothing (or could return None)
                         return None
                 return pygame.mouse.get_pos()
             if skill_pressed['slash'] and 'slash' in game.player.skills:
