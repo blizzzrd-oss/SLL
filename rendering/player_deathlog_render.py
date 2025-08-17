@@ -6,8 +6,20 @@ def render_player_deathlog(screen, player, font):
         return
     recent = received_log.get_recent()
     center_x = screen.get_width() // 2
-    y2 = screen.get_height() // 2 + 220
-    header2 = font.render(f"Deathlog (last 10 changes):", True, (255, 180, 180))
+    y2 = screen.get_height() // 2 + 100
+    # Try to create a smaller font based on the original font's properties
+    try:
+        font_path = font.name if hasattr(font, 'name') else None
+        font_size = font.get_height()
+        small_size = max(12, font_size - 4)
+        if font_path:
+            small_font = pygame.font.Font(font_path, small_size)
+        else:
+            # Fallback to SysFont with same family if possible
+            small_font = pygame.font.SysFont(None, small_size)
+    except Exception:
+        small_font = pygame.font.SysFont(None, max(12, font.get_height() - 4))
+    header2 = small_font.render(f"Deathlog:", True, (255, 180, 180))
     header2_rect = header2.get_rect(center=(center_x, y2))
     screen.blit(header2, header2_rect)
     y2 += 30
@@ -40,11 +52,11 @@ def render_player_deathlog(screen, player, font):
             src_str = src_str.split('object at')[0].replace('<', '').replace('>', '').strip()
         time_str = entry.get('timestamp', '')
         line_txt = f"[{time_str}] {change_type} {'barrier' if 'barrier' in src_str.lower() else 'health'} by {src_str} - hp:{hp_str} barrier:{barrier_str}"
-        line = font.render(line_txt, True, color)
+        line = small_font.render(line_txt, True, color)
         line_rect = line.get_rect(center=(center_x, y2))
         screen.blit(line, line_rect)
-        y2 += 25
+        y2 += 32
     if player.health <= 0:
-        death_line = font.render("DEATH", True, (255, 0, 0))
+        death_line = small_font.render("DEATH", True, (255, 0, 0))
         death_rect = death_line.get_rect(center=(center_x, y2))
         screen.blit(death_line, death_rect)

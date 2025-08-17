@@ -79,11 +79,11 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
         screen.blit(overlay, (0, 0))
         font = _game_render_cache['game_over_font']
         text = font.render("GAME OVER", True, (255, 0, 0))
-        text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+        text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 200))
         screen.blit(text, text_rect)
         font2 = _game_render_cache['menu_font']
         tip = font2.render("Press ESC or Enter to return to menu", True, (255, 255, 255))
-        tip_rect = tip.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 + 100))
+        tip_rect = tip.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 100))
         screen.blit(tip, tip_rect)
 
     # --- Modular renderers for player damage stats and deathlog ---
