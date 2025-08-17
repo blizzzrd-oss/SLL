@@ -238,6 +238,8 @@ def run_game(screen, slot, mode):
                     if target is not None:
                         skill.use(target_pos=target)
             for skill in game.player.skills.values():
+                if hasattr(skill, 'active') and not skill.active:
+                    continue
                 skill.update(dt, enemies)
         if game.player.anim_lock:
             game.player.anim_timer += dt
