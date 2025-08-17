@@ -26,7 +26,7 @@ class Menu:
     """
     Handles the main menu, savegame, and settings UI and logic.
     """
-    def __init__(self, screen, start_game_callback=None):
+    def __init__(self, screen, start_game_callback=None, game=None):
         self.screen = screen
         self.state = 'main'  # 'main', 'savegame', 'settings'
         self.selected = 0
@@ -92,10 +92,12 @@ class Menu:
             pygame.mixer.music.set_volume(self.music_volume / 100)
         except Exception:
             pass
-        # Menu exit/callback logic (must be last)
+    # Menu exit/callback logic (must be last)
         self._should_exit = False
         self._real_start_game_callback = start_game_callback
         self.start_game_callback = self._wrap_start_game_callback()
+        self.game = game
+
     def _wrap_start_game_callback(self):
         def wrapped(slot, mode):
             self._should_exit = True
@@ -191,7 +193,7 @@ class Menu:
                 {"label": "Auto Attack", "checked": True},
             ]
 
-    def save_settings(self):
+    def save_settings(self, player=None):
         data = {
             'music_volume': int(self.music_volume),
             'sfx_volume': int(self.sfx_volume),
@@ -204,6 +206,10 @@ class Menu:
                 json.dump(data, f, indent=4)
         except Exception as e:
             pass
+        # Update current player instance if provided
+        if player is not None and hasattr(player, 'checkbox_options'):
+            player.checkbox_options[0]["checked"] = self.checkbox_options[0]["checked"]
+            player.checkbox_options[1]["checked"] = self.checkbox_options[1]["checked"]
 
     def run(self):
         """Main menu loop. Handles events and drawing until quit or game start."""
@@ -451,12 +457,24 @@ class Menu:
                             break
                 # Checkboxes
                 else:
+                    # Try to update the current player instance if available
+                    from rendering.game_render import _game_render_cache
+                    game = getattr(self, 'game', None)
+                    player = None
+                    if game and hasattr(game, 'player'):
+                        player = game.player
+                    elif '_current_game' in _game_render_cache and hasattr(_game_render_cache['_current_game'], 'player'):
+                        player = _game_render_cache['_current_game'].player
                     for i, opt in enumerate(self.checkbox_options):
                         box_y = self.checkbox_y_start + i * self.checkbox_spacing
                         if (self.checkbox_x <= mouse_pos[0] <= self.checkbox_x + self.checkbox_size and
                             box_y <= mouse_pos[1] <= box_y + self.checkbox_size):
                             opt["checked"] = not opt["checked"]
-                            self.save_settings()
+                            self.save_settings(player=player)
+                            # Live sync: update game.player.checkbox_options immediately
+                            if player is not None and hasattr(player, 'checkbox_options'):
+                                player.checkbox_options[i]["checked"] = opt["checked"]
+                                print(f"[Settings Sync] Updated player id {id(player)}: {player.checkbox_options}")
                             break
                 if self.settings_back_button.is_clicked(mouse_pos):
                     self.state = 'main'

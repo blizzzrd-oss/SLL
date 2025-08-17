@@ -12,7 +12,9 @@ def main():
         run_game(screen, slot, mode)
 
     while True:
-        menu = Menu(screen, start_game_callback=start_game)
+        # Create a dummy game instance to pass to Menu for settings sync
+        dummy_game = Game(screen, slot=None, mode=None)
+        menu = Menu(screen, start_game_callback=start_game, game=dummy_game)
         menu.run()  # Handles menu loop and transitions
         # If the user closed the window or chose Quit, pygame.get_init() will be False
         if not pygame.get_init():

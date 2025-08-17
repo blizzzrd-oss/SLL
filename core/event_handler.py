@@ -124,7 +124,7 @@ class GameEventHandler:
         elif option == "Settings":
             self.in_settings_menu = True
             if self.settings_menu is None:
-                self.settings_menu = Menu(self.screen)
+                self.settings_menu = Menu(self.screen, game=self.game)
                 self.settings_menu.state = 'settings'
         elif option == "Quit":
             pygame.quit()
@@ -135,7 +135,7 @@ class GameEventHandler:
         from rendering.menu import Menu
         
         if self.settings_menu is None:
-            self.settings_menu = Menu(self.screen)
+            self.settings_menu = Menu(self.screen, game=self.game)
             self.settings_menu.state = 'settings'
             
         if self.settings_menu.handle_event(event):
@@ -150,7 +150,7 @@ class GameEventHandler:
         from rendering.menu import Menu
         
         if self.settings_menu is None:
-            self.settings_menu = Menu(self.screen)
+            self.settings_menu = Menu(self.screen, game=self.game)
             self.settings_menu.state = 'settings'
             
         self.settings_menu.draw()

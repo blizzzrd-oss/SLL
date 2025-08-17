@@ -100,7 +100,7 @@ def run_game(screen, slot, mode):
         elif option == "Settings":
             in_settings_menu = True
             if settings_menu is None:
-                settings_menu = Menu(screen)
+                settings_menu = Menu(screen, game=game)
                 settings_menu.state = 'settings'
         elif option == "Quit":
             pygame.quit()
@@ -110,7 +110,7 @@ def run_game(screen, slot, mode):
     def handle_settings_menu_events(event):
         nonlocal in_settings_menu, settings_menu
         if settings_menu is None:
-            settings_menu = Menu(screen)
+            settings_menu = Menu(screen, game=game)
             settings_menu.state = 'settings'
         if settings_menu.handle_event(event):
             in_settings_menu = False
@@ -120,7 +120,7 @@ def run_game(screen, slot, mode):
         nonlocal settings_menu
         if in_settings_menu:
             if settings_menu is None:
-                settings_menu = Menu(screen)
+                settings_menu = Menu(screen, game=game)
                 settings_menu.state = 'settings'
             settings_menu.draw()
             pygame.display.flip()
