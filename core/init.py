@@ -31,9 +31,12 @@ def init_pygame():
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), flags)
     pygame.display.set_caption("SLL")
     # Load and play background music
-    pygame.mixer.init()
-    music_path = resource_path(BG_MUSIC_PATH)
-    pygame.mixer.music.load(music_path)
-    pygame.mixer.music.set_volume(MUSIC_VOLUME)
-    pygame.mixer.music.play(-1)  # Loop forever
+    try:
+        pygame.mixer.init()
+        music_path = resource_path(BG_MUSIC_PATH)
+        pygame.mixer.music.load(music_path)
+        pygame.mixer.music.set_volume(MUSIC_VOLUME)
+        pygame.mixer.music.play(-1)  # Loop forever
+    except Exception as e:
+        print(f"[WARNING] Audio initialization failed: {e}\nContinuing without sound.")
     return screen

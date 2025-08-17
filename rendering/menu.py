@@ -399,7 +399,10 @@ class Menu:
                 if event.key == pygame.K_LEFT:
                     if self.selected == 0:
                         self.music_volume = max(0, self.music_volume - 5)
-                        pygame.mixer.music.set_volume(self.music_volume / 100)
+                        try:
+                            pygame.mixer.music.set_volume(self.music_volume / 100)
+                        except Exception:
+                            pass
                         self.save_settings()
                     elif self.selected == 1:
                         self.sfx_volume = max(0, self.sfx_volume - 5)
@@ -407,7 +410,10 @@ class Menu:
                 elif event.key == pygame.K_RIGHT:
                     if self.selected == 0:
                         self.music_volume = min(100, self.music_volume + 5)
-                        pygame.mixer.music.set_volume(self.music_volume / 100)
+                        try:
+                            pygame.mixer.music.set_volume(self.music_volume / 100)
+                        except Exception:
+                            pass
                         self.save_settings()
                     elif self.selected == 1:
                         self.sfx_volume = min(100, self.sfx_volume + 5)
@@ -424,7 +430,10 @@ class Menu:
                     percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
                     self.music_volume = min(100, max(0, percent))
                     self.dragging_music = True
-                    pygame.mixer.music.set_volume(self.music_volume / 100)
+                    try:
+                        pygame.mixer.music.set_volume(self.music_volume / 100)
+                    except Exception:
+                        pass
                     self.save_settings()
                 # Check if user clicked on the sfx volume slider
                 elif self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width and self.sfx_label_y <= mouse_pos[1] <= self.sfx_label_y + self.slider_height:
@@ -462,7 +471,10 @@ class Menu:
                     rel_x = mouse_pos[0] - self.slider_x
                     percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
                     self.music_volume = min(100, max(0, percent))
-                    pygame.mixer.music.set_volume(self.music_volume / 100)
+                    try:
+                        pygame.mixer.music.set_volume(self.music_volume / 100)
+                    except Exception:
+                        pass
                     self.save_settings()
                 if self.dragging_sfx:
                     rel_x = mouse_pos[0] - self.slider_x
