@@ -11,7 +11,7 @@ class SlashSkill(Skill):
     # Class-level cache for frames
     _cached_frames = None
 
-    def __init__(self, user, cooldown=0.5, damage=10, arc_deg=190, duration=0.25):
+    def __init__(self, user, cooldown=1.0, damage=10, arc_deg=190, duration=0.25):
         super().__init__(user, cooldown)
         self.damage = damage
         self.arc_deg = arc_deg

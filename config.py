@@ -1,3 +1,5 @@
+import pygame
+
 # Enemy Type Config
 ENEMY_TYPE_CONFIG = {
 	'Plant': {
@@ -27,7 +29,6 @@ COLOR_HEALTH_BAR_FILL = (175, 60, 55)
 COLOR_BARRIER_BAR_BG = (130, 110, 50)
 COLOR_BARRIER_BAR_FILL = (180, 150, 35)
 # HUD toggle key
-import pygame
 HUD_TOGGLE_KEY = pygame.K_TAB
 # HUD section config
 HUD_TOP_HEIGHT = 80
@@ -100,7 +101,7 @@ PLAYER_START_EXP = 0
 PLAYER_EXP_TO_NEXT_LEVEL_MULT = 1.02
 PLAYER_START_LEVEL = 1
 PLAYER_SIZE = 48
-PLAYER_MOVEMENT_SPEED = 5
+PLAYER_MOVEMENT_SPEED = 3
 PLAYER_DAMAGE_REDUCTION = 0.0
 PLAYER_COOLDOWN = 1.0
 PLAYER_ATTACK_SPEED = 1.0
@@ -122,6 +123,7 @@ PLAYER_ACTIVE_SKILLS = {
 SAVEGAME_PATH = "savegame.sav"
 
 # Audio settings
-MUSIC_VOLUME = 0.1  # 10%
+MUSIC_VOLUME = 0.05  # 5%
 SFX_VOLUME = 0.1    # 10%
 BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"
+SKILL_COOLDOWN = 0.5  # Default cooldown for skills (seconds)
