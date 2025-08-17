@@ -23,13 +23,17 @@ class EnemyType:
 
 # Enemy: instance of an enemy in the game, based on EnemyType
 class Enemy:
-    def take_damage(self, amount, source=None):
+    def take_damage(self, amount, source=None, attacker=None):
         # If already dead or in death animation, ignore further damage
         if self.dead or (self.logic and hasattr(self.logic, 'state') and self.logic.state == 'death'):
             return
-            
+
         self.health -= amount
-        
+
+        # Log outgoing damage for player stats if attacker is a Player
+        if attacker and hasattr(attacker, 'damage_log'):
+            attacker.damage_log.add_entry(amount, source, self.__class__.__name__)
+
         # Handle death or hurt visual feedback
         if self.logic and hasattr(self.logic, 'state'):
             if self.health <= 0:
@@ -44,7 +48,6 @@ class Enemy:
                 # Trigger hurt overlay without changing state
                 if hasattr(self.logic, 'hurt_overlay_timer') and hasattr(self.logic, 'hurt_overlay_duration'):
                     self.logic.hurt_overlay_timer = self.logic.hurt_overlay_duration
-        
         # Don't set dead = True here, let the death animation complete first
     def __init__(self, enemy_type, position=(0, 0)):
         self.type = enemy_type

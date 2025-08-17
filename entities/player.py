@@ -3,6 +3,7 @@ Player entity and logic.
 """
 
 import pygame
+from skills.base import Skill
 from config import (
     WINDOW_WIDTH, WINDOW_HEIGHT,
     PLAYER_START_HEALTH, PLAYER_START_BARRIER, PLAYER_BARRIER_DECAY_PERCENT_PER_SEC, PLAYER_BARRIER_REGEN,
@@ -10,6 +11,8 @@ from config import (
     PLAYER_DAMAGE_REDUCTION, PLAYER_COOLDOWN, PLAYER_ATTACK_SPEED, PLAYER_CRIT_CHANCE, PLAYER_CRIT_DAMAGE,
     PLAYER_START_SKILL_POINTS, PLAYER_PASSIVE_SKILLS, PLAYER_ACTIVE_SKILLS
 )
+
+from utils.player_damage_log import PlayerDamageLog
 
 
 
@@ -76,9 +79,10 @@ class Player:
 
         # For compatibility with old code
         self.position = [self.x, self.y]  # Make this a mutable list
-        self.damage_log = []
-        self.recent_damage = []
-        # Track last nonzero movement vector for dash direction
+        from utils.player_damage_log import PlayerDamageLog
+        from utils.player_received_log import PlayerReceivedLog
+        self.damage_log = PlayerDamageLog()
+        self.received_log = PlayerReceivedLog()
         self.last_move = (1, 0)
 
 
@@ -107,6 +111,14 @@ class Player:
     def take_damage(self, amount, source=None, barrier_damage=False):
         # Barrier absorbs damage first unless barrier_damage is True
         damage_to_health = amount
+        # Use actual skill name for damage logging
+        if source and hasattr(source, 'name') and isinstance(source.name, str):
+            skill_name = source.name
+        elif isinstance(source, str):
+            skill_name = source
+        else:
+            skill_name = 'Unknown'
+        # Track barrier damage
         if not barrier_damage and self.barrier > 0:
             absorbed = min(self.barrier, amount)
             self.barrier -= absorbed
@@ -115,12 +127,26 @@ class Player:
                 self.anim_state = self.ANIM_HURT_BARRIER
                 self.anim_timer = 0.0
                 self.anim_lock = True
+            # Log barrier reduction
+            self.received_log.add_entry(-absorbed, skill_name, 'damage', health=self.health, barrier=self.barrier)
         if damage_to_health > 0:
             if not self.anim_lock:
                 self.anim_state = self.ANIM_HURT_HP
                 self.anim_timer = 0.0
                 self.anim_lock = True
             self.health -= damage_to_health
-        self.damage_log.append((amount, source))
-        self.recent_damage.append((amount, source))
+            # Log health reduction
+            self.received_log.add_entry(-damage_to_health, skill_name, 'damage', health=self.health, barrier=self.barrier)
+        # Log outgoing damage (only if source is a Skill instance)
+        if isinstance(source, Skill):
+            self.damage_log.add_entry(amount, skill_name, 'Enemy')
         # ...handle death, clear recent_damage, etc...
+    def heal(self, amount, source=None):
+        if source and hasattr(source, 'name') and isinstance(source.name, str):
+            skill_name = source.name
+        elif isinstance(source, str):
+            skill_name = source
+        else:
+            skill_name = 'Unknown'
+        self.health = min(self.max_health, self.health + amount)
+        self.received_log.add_entry(amount, skill_name, 'heal', health=self.health, barrier=self.barrier)

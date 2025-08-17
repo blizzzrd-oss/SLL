@@ -86,6 +86,12 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
         tip_rect = tip.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 + 100))
         screen.blit(tip, tip_rect)
 
+    # --- Modular renderers for player damage stats and deathlog ---
+    if getattr(game, 'game_over', False):
+        from rendering.player_damage_stats_render import render_player_damage_stats
+        from rendering.player_deathlog_render import render_player_deathlog
+        render_player_damage_stats(screen, game.player, font2)
+        render_player_deathlog(screen, game.player, font2)
     # Draw pause menu overlay if paused
     if paused and not getattr(game, 'game_over', False):
         overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)

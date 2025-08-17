@@ -5,12 +5,13 @@ from abc import ABC, abstractmethod
 from config import SKILL_COOLDOWN
 
 class Skill(ABC):
-    def __init__(self, user, cooldown=None):
+    def __init__(self, user, cooldown=None, name=None):
         self.user = user
         self.cooldown = SKILL_COOLDOWN if cooldown is None else cooldown
         self.last_used = -float('inf')
         self.active = False
         self.animation_frame = 0
+        self.name = name if name is not None else self.__class__.__name__
 
     @abstractmethod
     def use(self, target_pos=None):

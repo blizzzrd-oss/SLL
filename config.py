@@ -93,8 +93,8 @@ Game configuration constants and settings.
 """
 
 # Player attribute defaults
-PLAYER_START_HEALTH = 100
-PLAYER_START_BARRIER = 50
+PLAYER_START_HEALTH = 50
+PLAYER_START_BARRIER = 0
 PLAYER_BARRIER_DECAY_PERCENT_PER_SEC = 10  # percent per second
 PLAYER_BARRIER_REGEN = 0
 PLAYER_START_EXP = 0

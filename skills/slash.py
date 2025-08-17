@@ -12,7 +12,7 @@ class SlashSkill(Skill):
     _cached_frames = None
 
     def __init__(self, user, cooldown=1.0, damage=10, arc_deg=190, duration=0.25):
-        super().__init__(user, cooldown)
+        super().__init__(user, cooldown, name="Slash")
         self.damage = damage
         self.arc_deg = arc_deg
         self.duration = duration
@@ -70,7 +70,7 @@ class SlashSkill(Skill):
             if entity is self.user or entity in self.hit_entities:
                 continue
             if self._in_slash_arc(entity):
-                entity.take_damage(self.damage)
+                entity.take_damage(self.damage, source=self, attacker=self.user)
                 self.hit_entities.add(entity)
 
     def draw(self, surface, last_move=(1,0)):

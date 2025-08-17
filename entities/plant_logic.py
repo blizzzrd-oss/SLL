@@ -181,7 +181,7 @@ class PlantEnemyLogic:
                     base_damage = 5
                     mode_multiplier = getattr(self.enemy, 'mode_damage_multiplier', 1.0)
                     final_damage = int(base_damage * mode_multiplier)
-                    player.take_damage(final_damage, source=self.enemy)
+                    player.take_damage(final_damage, source="Plant Attack")
                 self._damage_dealt = True
             # After animation, return to movement and set cooldown
             if self.anim_frame >= attack_frames - 1:

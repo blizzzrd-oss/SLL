@@ -9,10 +9,11 @@ DASH_DURATION = 0.15  # seconds
 
 class DashSkill(Skill):
     is_movement_skill = True
-    def __init__(self, user, cooldown=DASH_COOLDOWN, dash_range=DASH_RANGE, duration=DASH_DURATION):
-        super().__init__(user, cooldown)
+    def __init__(self, user, cooldown=DASH_COOLDOWN, dash_range=DASH_RANGE, duration=DASH_DURATION, dash_damage=10):
+        super().__init__(user, cooldown, name="Dash")
         self.dash_range = dash_range
         self.duration = duration
+        self.dash_damage = dash_damage
         self.active = False
         self.dash_vector = (0, 0)
         self.dash_start = None
@@ -51,8 +52,20 @@ class DashSkill(Skill):
         self.user.y = new_y
         self.user.position = (new_x, new_y)
         self.user.rect.center = (int(new_x), int(new_y))
+        # Modular damage logic: deal damage to entities collided with during dash
+        self.deal_damage(entities)
         if t >= 1.0:
             self.active = False
+
+    def deal_damage(self, entities):
+        # Deal damage to entities collided with during dash
+        for entity in entities:
+            if entity is self.user:
+                continue
+            # Simple collision: check rect overlap
+            if hasattr(entity, 'rect') and self.user.rect.colliderect(entity.rect):
+                if hasattr(entity, 'take_damage'):
+                    entity.take_damage(self.dash_damage, source=self, attacker=self.user)
 
     def draw(self, surface, last_move=(1,0)):
         # Optionally, draw a dash effect (e.g., a trail or afterimage)
