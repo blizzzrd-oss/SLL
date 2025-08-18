@@ -7,6 +7,7 @@ import os
 import random
 import time
 from config import TILE_SIZE, BIOME_TILES, BIOME_FALLBACK_COLORS
+from utils.resource_path import resource_path
 
 # Background tile patterns
 _background_patterns = []
@@ -289,9 +290,10 @@ def load_background_patterns():
         if isinstance(biome_config, list):
             # Multiple tiles with weights
             for tile_path, weight in biome_config:
-                if os.path.exists(tile_path):
+                full_tile_path = resource_path(tile_path)
+                if os.path.exists(full_tile_path):
                     try:
-                        tile_img = pygame.image.load(tile_path).convert()
+                        tile_img = pygame.image.load(full_tile_path).convert()
                         # Scale to tile size if needed
                         if tile_img.get_size() != (tile_size, tile_size):
                             tile_img = pygame.transform.scale(tile_img, (tile_size, tile_size))
@@ -303,9 +305,10 @@ def load_background_patterns():
                     print(f"Tile image not found: {tile_path}")
         elif isinstance(biome_config, str):
             # Single tile
-            if os.path.exists(biome_config):
+            full_tile_path = resource_path(biome_config)
+            if os.path.exists(full_tile_path):
                 try:
-                    tile_img = pygame.image.load(biome_config).convert()
+                    tile_img = pygame.image.load(full_tile_path).convert()
                     if tile_img.get_size() != (tile_size, tile_size):
                         tile_img = pygame.transform.scale(tile_img, (tile_size, tile_size))
                     biome_tiles.append((tile_img, 100))

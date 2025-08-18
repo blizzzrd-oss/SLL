@@ -7,6 +7,7 @@ from rendering.ui import draw_hud
 from rendering.player_damage_stats_render import render_player_damage_stats
 from rendering.player_deathlog_render import render_player_deathlog
 from rendering.background_render import draw_tiled_background
+from utils.resource_path import resource_path
 
 
 # --- Resource cache ---
@@ -38,9 +39,9 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
     
     # Load cached resources if needed
     if _game_render_cache['hurt_hp_img'] is None:
-        _game_render_cache['hurt_hp_img'] = pygame.image.load('resources/images/player/Hurt/Slime1_Hurt_full_hp.png').convert_alpha()
+        _game_render_cache['hurt_hp_img'] = pygame.image.load(resource_path('resources/images/player/Hurt/Slime1_Hurt_full_hp.png')).convert_alpha()
     if _game_render_cache['hurt_barrier_img'] is None:
-        _game_render_cache['hurt_barrier_img'] = pygame.image.load('resources/images/player/Hurt/Slime1_Hurt_full_barrier.png').convert_alpha()
+        _game_render_cache['hurt_barrier_img'] = pygame.image.load(resource_path('resources/images/player/Hurt/Slime1_Hurt_full_barrier.png')).convert_alpha()
     if _game_render_cache['game_over_font'] is None:
         _game_render_cache['game_over_font'] = pygame.font.SysFont(None, GAME_OVER_FONT_SIZE)
     if _game_render_cache['menu_font'] is None:

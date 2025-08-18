@@ -234,7 +234,7 @@ COLOR_BARRIER_BAR_FILL = (180, 150, 35)
 # PERFORMANCE AND SYSTEM CONFIGURATION
 # =============================================================================
 GAME_FPS_OPTIONS = [60, 120, 240]
-GAME_DEFAULT_FPS = 60
+GAME_DEFAULT_FPS = 120
 
 # =============================================================================
 # LOGGING AND DEBUGGING CONFIGURATION

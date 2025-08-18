@@ -1,5 +1,6 @@
 import pygame
 import os
+from utils.resource_path import resource_path
 
 
 class PlantEnemyLogic:
@@ -52,7 +53,7 @@ class PlantEnemyLogic:
         STANDARD_FRAME_HEIGHT = 64
         
         for state, fname in self.ANIMATIONS.items():
-            path = os.path.join(self.SPRITE_PATH, fname)
+            path = resource_path(os.path.join(self.SPRITE_PATH, fname))
             
             if os.path.exists(path):
                 img = pygame.image.load(path).convert_alpha()

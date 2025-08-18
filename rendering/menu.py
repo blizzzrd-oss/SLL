@@ -29,7 +29,7 @@ class Menu:
         self.small_font = pygame.font.SysFont(None, FONT_SIZE_SMALL)
         # Cache the button image for all main menu buttons
         self._main_menu_button_img = None
-        img_path = r'C:\Repos\SLL\resources\images\UI\menu\buttons\slime_button_292x145.png'
+        img_path = resource_path('resources/images/UI/menu/buttons/slime_button_292x145.png')
         if os.path.exists(img_path):
             self._main_menu_button_img = pygame.image.load(img_path).convert_alpha()
         # Use the original image size for button rects
@@ -234,7 +234,7 @@ class Menu:
     def draw_gamemode_menu(self):
         title = self.font.render('Select Game Mode', True, COLOR_TEXT)
         # Centered graphic for 'Select Game Mode'
-        img_path = r'C:\Repos\SLL\resources\images\UI\menu\buttons\slect_game_mode.png'
+        img_path = resource_path('resources/images/UI/menu/buttons/slect_game_mode.png')
         if not hasattr(self, '_select_gamemode_img'):
             if os.path.exists(img_path):
                 self._select_gamemode_img = pygame.image.load(img_path).convert_alpha()

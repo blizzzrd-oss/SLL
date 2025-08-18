@@ -3,6 +3,7 @@ import pygame
 import math
 import os
 from skills.base import Skill
+from utils.resource_path import resource_path
 
 class SlashSkill(Skill):
     # Class-level cache for frames
@@ -28,9 +29,10 @@ class SlashSkill(Skill):
 
     def _load_frames(self):
         frames = []
-        if not os.path.exists(SLASH_SHEET_PATH):
+        slash_path = resource_path(SLASH_SHEET_PATH)
+        if not os.path.exists(slash_path):
             return frames
-        sheet = pygame.image.load(SLASH_SHEET_PATH).convert_alpha()
+        sheet = pygame.image.load(slash_path).convert_alpha()
         sheet_width, sheet_height = sheet.get_width(), sheet.get_height()
         frame_width = sheet_width // SLASH_FRAME_COUNT
         for i in range(SLASH_FRAME_COUNT):

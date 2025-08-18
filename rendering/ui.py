@@ -8,6 +8,7 @@ from config import (
     HUD_ALPHA, HUD_COLOR, HUD_LABEL_COLOR, HUD_LABEL_FONT_SIZE,
     COLOR_HEALTH_BAR_BG, COLOR_HEALTH_BAR_FILL, COLOR_BARRIER_BAR_BG, COLOR_BARRIER_BAR_FILL
 )
+from utils.resource_path import resource_path
 
 # Cache for HUD surfaces and font
 _hud_cache = {
@@ -34,14 +35,14 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
     SKILL_KEYS = ["LMB", "RMB", "SPACE", "1", "2", "3", "4"]
     # Load slash and dash skill images (cache them)
     if not hasattr(draw_hud, '_slash_img'):
-        slash_img_path = r'C:\Repos\SLL\resources\images\UI\hud\skill_bar\skill_slash.jpg'
+        slash_img_path = resource_path('resources/images/UI/hud/skill_bar/skill_slash.jpg')
         if os.path.exists(slash_img_path):
             img = pygame.image.load(slash_img_path).convert_alpha()
             draw_hud._slash_img = pygame.transform.smoothscale(img, (SKILL_BOX_SIZE, SKILL_BOX_SIZE))
         else:
             draw_hud._slash_img = None
     if not hasattr(draw_hud, '_dash_img'):
-        dash_img_path = r'C:\Repos\SLL\resources\images\UI\hud\skill_bar\skill_dash.jpg'
+        dash_img_path = resource_path('resources/images/UI/hud/skill_bar/skill_dash.jpg')
         if os.path.exists(dash_img_path):
             img = pygame.image.load(dash_img_path).convert_alpha()
             draw_hud._dash_img = pygame.transform.smoothscale(img, (SKILL_BOX_SIZE, SKILL_BOX_SIZE))
