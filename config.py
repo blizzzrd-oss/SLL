@@ -68,7 +68,7 @@ ENEMY_TYPE_CONFIG = {
 }
 
 # Enemy Spawner Configuration
-SPAWNER_DEFAULT_INTERVAL = 1.0  # seconds between spawns
+SPAWNER_DEFAULT_INTERVAL = 0.5  # seconds between spawns
 SPAWNER_SPAWN_BUFFER = 100  # Distance outside camera view to spawn enemies
 SPAWNER_ENEMY_WEIGHTS = {
 	'Plant': 1.0,
@@ -76,6 +76,12 @@ SPAWNER_ENEMY_WEIGHTS = {
 SPAWNER_TIME_WEIGHT_EVENTS = [
 	('Plant', 60, 2.0),  # After 60s, double plant spawn chance
 ]
+
+# Spawn Rate Scaling Over Time
+SPAWNER_RATE_INCREASE_ENABLED = True  # Enable spawn rate increases over time
+SPAWNER_RATE_INCREASE_INTERVAL = 30.0  # Every 30 seconds, increase spawn rate
+SPAWNER_RATE_INCREASE_FACTOR = 0.9  # Multiply interval by 0.9 (10% faster spawning)
+SPAWNER_MIN_INTERVAL = 0.1  # Minimum spawn interval (maximum spawn rate)
 
 # =============================================================================
 # ENEMY LOGIC CONFIGURATION
@@ -110,7 +116,7 @@ DASH_DEFAULT_DAMAGE = 10
 # =============================================================================
 # PLAYER CONFIGURATION
 # =============================================================================
-PLAYER_START_HEALTH = 50
+PLAYER_START_HEALTH = 100
 PLAYER_START_BARRIER = 0
 PLAYER_BARRIER_DECAY_PERCENT_PER_SEC = 10
 PLAYER_BARRIER_REGEN = 0

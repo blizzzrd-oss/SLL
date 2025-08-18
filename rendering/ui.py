@@ -19,7 +19,7 @@ _hud_cache = {
     'font': None
 }
 
-def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event_notifications=None):
+def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event_notifications=None, game_time=None):
     width, height = screen.get_size()
     # --- Skill Bar ---
     # Skill bar config
@@ -151,6 +151,17 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
         mode_text = font.render(f"Mode: {game_mode}", True, mode_color)
         mode_rect = mode_text.get_rect(topright=(width - 20, 35))
         screen.blit(mode_text, mode_rect)
+
+    # --- Game Time Display (Top HUD, Right) ---
+    if game_time is not None:
+        # Format time as MM:SS
+        minutes = int(game_time // 60)
+        seconds = int(game_time % 60)
+        time_str = f"Time: {minutes:02d}:{seconds:02d}"
+        
+        time_text = font.render(time_str, True, (255, 255, 255))
+        time_rect = time_text.get_rect(topright=(width - 20, 65))  # Below mode display
+        screen.blit(time_text, time_rect)
 
     # --- Active Events Display (Top HUD, Left) ---
     if active_events:

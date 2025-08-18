@@ -2,7 +2,11 @@
 
 import random
 import time
-from config import SPAWNER_DEFAULT_INTERVAL, SPAWNER_ENEMY_WEIGHTS, SPAWNER_TIME_WEIGHT_EVENTS, WINDOW_WIDTH, WINDOW_HEIGHT
+from config import (
+    SPAWNER_DEFAULT_INTERVAL, SPAWNER_ENEMY_WEIGHTS, SPAWNER_TIME_WEIGHT_EVENTS, 
+    WINDOW_WIDTH, WINDOW_HEIGHT, SPAWNER_RATE_INCREASE_ENABLED, 
+    SPAWNER_RATE_INCREASE_INTERVAL, SPAWNER_RATE_INCREASE_FACTOR, SPAWNER_MIN_INTERVAL
+)
 from entities.enemy import PlantType, EnemyType, Enemy
 
 
@@ -40,9 +44,28 @@ class EnemySpawner:
             upto += w
         return self.enemy_types[0]  # fallback
 
+    def get_current_spawn_interval(self):
+        """Calculate the current spawn interval based on game time."""
+        if not SPAWNER_RATE_INCREASE_ENABLED:
+            return self.spawn_interval
+            
+        game_time = self.get_game_time()
+        
+        # Calculate how many rate increases should have occurred
+        rate_increases = int(game_time // SPAWNER_RATE_INCREASE_INTERVAL)
+        
+        # Apply the rate increase factor for each interval
+        current_interval = self.spawn_interval
+        for _ in range(rate_increases):
+            current_interval *= SPAWNER_RATE_INCREASE_FACTOR
+            
+        # Ensure we don't go below minimum interval
+        return max(current_interval, SPAWNER_MIN_INTERVAL)
+
     def can_spawn(self):
         now = time.time()
-        return (now - self.last_spawn_time) >= self.spawn_interval
+        current_interval = self.get_current_spawn_interval()
+        return (now - self.last_spawn_time) >= current_interval
 
 
     def random_edge_position(self):

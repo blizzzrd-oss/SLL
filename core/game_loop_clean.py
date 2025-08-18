@@ -115,7 +115,8 @@ def run_game(screen, slot, mode):
             pause_menu_options=event_handler.pause_menu_options,
             pause_menu_rects=event_handler.pause_menu_rects,
             hud_visible=event_handler.hud_visible,
-            fps=fps
+            fps=fps,
+            game_time=game_logic.game_time
         )
         
         # Check for exit condition

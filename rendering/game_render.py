@@ -33,7 +33,7 @@ def clear_pause_cache():
     _pause_screen_cache = None
     _pause_cache_valid = False
 
-def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None, hud_visible=True, fps=None):
+def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None, hud_visible=True, fps=None, game_time=None):
     global _game_render_cache, _pause_screen_cache, _pause_cache_valid
     
     # Load cached resources if needed
@@ -55,7 +55,7 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
             screen.blit(_pause_screen_cache, (0, 0))
         else:
             # Cache is invalid - render full game and cache it
-            render_full_game_to_cache(screen, game, last_move, time_accum, hud_visible, fps)
+            render_full_game_to_cache(screen, game, last_move, time_accum, hud_visible, fps, game_time)
         
         # Draw pause overlay on top of cached screen
         draw_pause_overlay(screen, pause_menu_selected, pause_menu_options, pause_menu_rects)
@@ -64,22 +64,22 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
         # NORMAL GAME RENDERING: Full render and invalidate pause cache
         _pause_cache_valid = False  # Invalidate cache since game state is changing
         
-        render_full_game(screen, game, last_move, time_accum, hud_visible, fps)
+        render_full_game(screen, game, last_move, time_accum, hud_visible, fps, game_time)
     
     pygame.display.flip()
 
-def render_full_game_to_cache(screen, game, last_move, time_accum, hud_visible, fps):
+def render_full_game_to_cache(screen, game, last_move, time_accum, hud_visible, fps, game_time=None):
     """Render the full game and cache the result for pause optimization."""
     global _pause_screen_cache, _pause_cache_valid
     
     # Render everything normally
-    render_full_game(screen, game, last_move, time_accum, hud_visible, fps)
+    render_full_game(screen, game, last_move, time_accum, hud_visible, fps, game_time)
     
     # Cache the current screen state
     _pause_screen_cache = screen.copy()
     _pause_cache_valid = True
 
-def render_full_game(screen, game, last_move, time_accum, hud_visible, fps):
+def render_full_game(screen, game, last_move, time_accum, hud_visible, fps, game_time=None):
     """Render the complete game state (background, player, enemies, UI, etc.)"""
     global _game_render_cache
     
@@ -92,7 +92,7 @@ def render_full_game(screen, game, last_move, time_accum, hud_visible, fps):
         game_mode = game.mode
         active_events = game.get_active_events_for_display()
         event_notifications = game.get_event_notifications()
-        draw_hud(screen, player, fps=fps, game_mode=game_mode, active_events=active_events, event_notifications=event_notifications)
+        draw_hud(screen, player, fps=fps, game_mode=game_mode, active_events=active_events, event_notifications=event_notifications, game_time=game_time)
     
     # Handle hurt animation (non-interruptible)
     if player.anim_state in ('hurt_hp', 'hurt_barrier'):
