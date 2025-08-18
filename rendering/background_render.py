@@ -26,47 +26,85 @@ def get_biome_type(x, y):
     
     combined = noise_val + detail_noise
     
-    # Define biome thresholds
-    if combined < -0.5:
+    # Define biome thresholds for 4 biomes
+    if combined < -0.6:
         return 0  # Grass areas
-    elif combined < 0.3:
-        return 1  # Dirt/transition areas  
+    elif combined < -0.1:
+        return 1  # Grass with yellow plants
+    elif combined < 0.4:
+        return 2  # Grass with red plants  
     else:
-        return 2  # Stone/rocky areas
+        return 3  # Stone/rocky areas
 
 def load_background_patterns():
-    """Load biome tile patterns from image files specified in config."""
+    """Load biome tile patterns from image files specified in config with weighted selection."""
     global _background_patterns, _patterns_loaded
     if _patterns_loaded:
         return
     
     tile_size = TILE_SIZE
-    biome_order = ['grass', 'dirt', 'stone']  # Order matches biome indices
+    biome_order = ['grass', 'grass_plant_yellow', 'grass_plant_red', 'stone']  # Order matches biome indices
     
     for biome_name in biome_order:
-        tile_path = BIOME_TILES.get(biome_name)
+        biome_config = BIOME_TILES.get(biome_name)
+        biome_tiles = []
         
-        if tile_path and os.path.exists(tile_path):
-            # Load image tile
-            try:
-                tile_img = pygame.image.load(tile_path).convert()
-                # Scale to tile size if needed
-                if tile_img.get_size() != (tile_size, tile_size):
-                    tile_img = pygame.transform.scale(tile_img, (tile_size, tile_size))
-                _background_patterns.append(tile_img)
-                print(f"Loaded {biome_name} tile from {tile_path}")
-            except pygame.error as e:
-                print(f"Failed to load {biome_name} tile from {tile_path}: {e}")
-                # Create fallback tile
-                fallback_tile = create_fallback_tile(biome_name, tile_size)
-                _background_patterns.append(fallback_tile)
-        else:
-            print(f"Tile image not found for {biome_name}, using fallback")
-            # Create fallback tile
+        if isinstance(biome_config, list):
+            # Multiple tiles with weights
+            for tile_path, weight in biome_config:
+                if os.path.exists(tile_path):
+                    try:
+                        tile_img = pygame.image.load(tile_path).convert()
+                        # Scale to tile size if needed
+                        if tile_img.get_size() != (tile_size, tile_size):
+                            tile_img = pygame.transform.scale(tile_img, (tile_size, tile_size))
+                        biome_tiles.append((tile_img, weight))
+                        print(f"Loaded {biome_name} tile from {tile_path} (weight: {weight}%)")
+                    except pygame.error as e:
+                        print(f"Failed to load {biome_name} tile from {tile_path}: {e}")
+                else:
+                    print(f"Tile image not found: {tile_path}")
+        elif isinstance(biome_config, str):
+            # Single tile
+            if os.path.exists(biome_config):
+                try:
+                    tile_img = pygame.image.load(biome_config).convert()
+                    if tile_img.get_size() != (tile_size, tile_size):
+                        tile_img = pygame.transform.scale(tile_img, (tile_size, tile_size))
+                    biome_tiles.append((tile_img, 100))
+                    print(f"Loaded {biome_name} tile from {biome_config}")
+                except pygame.error as e:
+                    print(f"Failed to load {biome_name} tile from {biome_config}: {e}")
+            else:
+                print(f"Tile image not found: {biome_config}")
+        
+        # If no tiles loaded successfully, create fallback
+        if not biome_tiles:
+            print(f"Using fallback tile for {biome_name}")
             fallback_tile = create_fallback_tile(biome_name, tile_size)
-            _background_patterns.append(fallback_tile)
+            biome_tiles.append((fallback_tile, 100))
+        
+        _background_patterns.append(biome_tiles)
     
     _patterns_loaded = True
+
+def select_tile_from_biome(biome_tiles, tile_x, tile_y):
+    """Select a tile from biome based on weights and position for consistency."""
+    if len(biome_tiles) == 1:
+        return biome_tiles[0][0]
+    
+    # Use hash of position to get consistent random value
+    hash_val = abs(hash((tile_x, tile_y, 'tile_variant'))) % 100
+    
+    # Select tile based on cumulative weights
+    cumulative = 0
+    for tile_img, weight in biome_tiles:
+        cumulative += weight
+        if hash_val < cumulative:
+            return tile_img
+    
+    # Fallback to first tile
+    return biome_tiles[0][0]
 
 def create_fallback_tile(biome_name, tile_size):
     """Create a procedural fallback tile if image is not available."""
@@ -81,8 +119,8 @@ def create_fallback_tile(biome_name, tile_size):
             y = (i * 17) % tile_size
             darker_color = tuple(max(0, c - 20) for c in fallback_color)
             pygame.draw.circle(tile, darker_color, (x, y), 3)
-    elif biome_name == 'dirt':
-        # Dirt-like pattern
+    elif biome_name == 'grass_plant_yellow':
+        # Yellow plant-like pattern
         tile = pygame.Surface((tile_size, tile_size))
         tile.fill(fallback_color)
         for i in range(12):
@@ -90,6 +128,15 @@ def create_fallback_tile(biome_name, tile_size):
             y = (i * 19) % tile_size
             darker_color = tuple(max(0, c - 16) for c in fallback_color)
             pygame.draw.circle(tile, darker_color, (x, y), 2)
+    elif biome_name == 'grass_plant_red':
+        # Red plant-like pattern
+        tile = pygame.Surface((tile_size, tile_size))
+        tile.fill(fallback_color)
+        for i in range(10):
+            x = (i * 13) % tile_size
+            y = (i * 17) % tile_size
+            darker_color = tuple(max(0, c - 20) for c in fallback_color)
+            pygame.draw.circle(tile, darker_color, (x, y), 3)
     else:  # stone
         # Stone-like pattern
         tile = pygame.Surface((tile_size, tile_size))
@@ -141,16 +188,20 @@ def draw_tiled_background(surface, camera, tile_size=None, buffer_tiles=None):
             local_hash = abs(hash((tile_x, tile_y))) % 100
             if local_hash < 15:  # 15% chance for variation
                 # Occasionally use a different tile type for natural mixing
-                if biome_type == 0:  # Grass areas can have some dirt
+                if biome_type == 0:  # Grass areas can have some plant variations
                     pattern_idx = 1 if local_hash < 8 else 0
-                elif biome_type == 1:  # Dirt areas can have grass or stone
+                elif biome_type == 1:  # Yellow plant areas can have grass or red plants
                     pattern_idx = 0 if local_hash < 5 else (2 if local_hash < 10 else 1)
-                else:  # Stone areas can have some dirt
-                    pattern_idx = 1 if local_hash < 8 else 2
+                elif biome_type == 2:  # Red plant areas can have grass or yellow plants
+                    pattern_idx = 0 if local_hash < 5 else (1 if local_hash < 10 else 2)
+                else:  # Stone areas can have some plant mixing
+                    pattern_idx = 1 if local_hash < 8 else 3
             else:
                 pattern_idx = biome_type
             
-            tile_pattern = _background_patterns[pattern_idx]
+            # Select tile from biome with weighted probability
+            biome_tiles = _background_patterns[pattern_idx]
+            tile_pattern = select_tile_from_biome(biome_tiles, tile_x, tile_y)
             
             # Convert world position to screen position
             screen_x, screen_y = camera.world_to_screen(world_x, world_y)
