@@ -6,6 +6,7 @@ from rendering.player_render import draw_player_idle, draw_player_walk, draw_pla
 from rendering.ui import draw_hud
 from rendering.player_damage_stats_render import render_player_damage_stats
 from rendering.player_deathlog_render import render_player_deathlog
+from rendering.background_render import draw_tiled_background
 
 
 # --- Resource cache ---
@@ -18,7 +19,9 @@ _game_render_cache = {
 }
 
 def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None, hud_visible=True, fps=None):
-    screen.fill(GAME_BG_COLOR)
+    # Draw background tiles first
+    draw_tiled_background(screen, game.camera)
+    
     player = game.player
     global _game_render_cache
     if _game_render_cache['hurt_hp_img'] is None:

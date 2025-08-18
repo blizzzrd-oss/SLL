@@ -2,60 +2,89 @@
 Background rendering for tiled world.
 """
 import pygame
-import os
-import random
+import math
+from config import TILE_SIZE
 
-# Cache for loaded tiles
-_grass_tiles = []
-_tiles_loaded = False
+# Simple visual background patterns
+_background_patterns = []
+_patterns_loaded = False
 
-def load_grass_tiles():
-    """Load grass tiles from resources/images/Tiles/grass/"""
-    global _grass_tiles, _tiles_loaded
-    if _tiles_loaded:
+def load_background_patterns():
+    """Create simple visual patterns for background tiles."""
+    global _background_patterns, _patterns_loaded
+    if _patterns_loaded:
         return
     
-    grass_dir = "resources/images/Tiles/grass"
-    if os.path.exists(grass_dir):
-        for filename in os.listdir(grass_dir):
-            if filename.endswith('.png'):
-                tile_path = os.path.join(grass_dir, filename)
-                tile = pygame.image.load(tile_path).convert_alpha()
-                _grass_tiles.append(tile)
+    # Create different tile patterns
+    tile_size = TILE_SIZE
     
-    if not _grass_tiles:
-        # Fallback: create a simple green tile
-        fallback_tile = pygame.Surface((64, 64))
-        fallback_tile.fill((50, 150, 50))  # Green
-        _grass_tiles.append(fallback_tile)
+    # Pattern 1: Grass-like (light green with darker spots)
+    grass_tile = pygame.Surface((tile_size, tile_size))
+    grass_tile.fill((60, 140, 40))  # Base green
+    for i in range(8):
+        x = (i * 13) % tile_size
+        y = (i * 17) % tile_size
+        pygame.draw.circle(grass_tile, (45, 120, 30), (x, y), 3)
+    _background_patterns.append(grass_tile)
     
-    _tiles_loaded = True
+    # Pattern 2: Dirt-like (brown with texture)
+    dirt_tile = pygame.Surface((tile_size, tile_size))
+    dirt_tile.fill((101, 67, 33))  # Base brown
+    for i in range(12):
+        x = (i * 11) % tile_size
+        y = (i * 19) % tile_size
+        pygame.draw.circle(dirt_tile, (85, 55, 25), (x, y), 2)
+    _background_patterns.append(dirt_tile)
+    
+    # Pattern 3: Stone-like (gray with darker lines)
+    stone_tile = pygame.Surface((tile_size, tile_size))
+    stone_tile.fill((120, 120, 120))  # Base gray
+    for i in range(0, tile_size, 8):
+        pygame.draw.line(stone_tile, (100, 100, 100), (i, 0), (i, tile_size), 1)
+        pygame.draw.line(stone_tile, (100, 100, 100), (0, i), (tile_size, i), 1)
+    _background_patterns.append(stone_tile)
+    
+    _patterns_loaded = True
 
-def draw_tiled_background(surface, camera_x, camera_y, tile_size=64):
-    """Draw a tiled grass background based on camera position."""
-    load_grass_tiles()
+def draw_tiled_background(surface, camera, tile_size=None, buffer_tiles=None):
+    """Draw a simple visual background that clearly shows world movement."""
+    load_background_patterns()
     
-    if not _grass_tiles:
+    if not _background_patterns:
         return
+    
+    if tile_size is None:
+        tile_size = TILE_SIZE
     
     screen_width = surface.get_width()
     screen_height = surface.get_height()
     
-    # Calculate which tiles are visible (with extra buffer to ensure full coverage)
-    start_tile_x = int(camera_x // tile_size) - 2
-    start_tile_y = int(camera_y // tile_size) - 2
-    end_tile_x = start_tile_x + (screen_width // tile_size) + 5
-    end_tile_y = start_tile_y + (screen_height // tile_size) + 5
+    # Calculate which tiles are visible (with buffer for smooth scrolling)
+    buffer = 2
+    tiles_x = math.ceil(screen_width / tile_size) + buffer * 2
+    tiles_y = math.ceil(screen_height / tile_size) + buffer * 2
+    
+    # Calculate starting tile indices based on camera position
+    start_tile_x = int(camera.x // tile_size) - buffer
+    start_tile_y = int(camera.y // tile_size) - buffer
     
     # Draw tiles
-    for tile_y in range(start_tile_y, end_tile_y):
-        for tile_x in range(start_tile_x, end_tile_x):
-            # Use tile coordinates to pick a consistent tile
-            tile_index = abs(tile_x + tile_y * 1000) % len(_grass_tiles)
-            tile = _grass_tiles[tile_index]
+    for row in range(tiles_y):
+        for col in range(tiles_x):
+            # Calculate world tile coordinates
+            tile_x = start_tile_x + col
+            tile_y = start_tile_y + row
             
-            # Calculate screen position
-            screen_x = tile_x * tile_size - camera_x + screen_width // 2
-            screen_y = tile_y * tile_size - camera_y + screen_height // 2
+            # Calculate world position of this tile
+            world_x = tile_x * tile_size
+            world_y = tile_y * tile_size
             
-            surface.blit(tile, (screen_x, screen_y))
+            # Use hash of tile coordinates for consistent pattern selection
+            pattern_idx = abs(hash((tile_x, tile_y))) % len(_background_patterns)
+            tile_pattern = _background_patterns[pattern_idx]
+            
+            # Convert world position to screen position
+            screen_x, screen_y = camera.world_to_screen(world_x, world_y)
+            
+            # Blit the tile pattern
+            surface.blit(tile_pattern, (screen_x, screen_y))
