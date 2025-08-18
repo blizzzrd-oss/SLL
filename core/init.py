@@ -1,7 +1,8 @@
 import pygame
 import os
 from config import BG_MUSIC_PATH, MUSIC_VOLUME, WINDOW_WIDTH, WINDOW_HEIGHT, PAUSE_MENU_OPTIONS
-from rendering.menu import resource_path, Menu
+from utils.resource_path import resource_path
+from rendering.menu import Menu
 from core.game import Game
 
 def initialize_game_state(screen, slot, mode):

@@ -1,10 +1,10 @@
 # Import plant logic
 from entities.plant_logic import PlantEnemyLogic
 from config import ENEMY_TYPE_CONFIG
+import pygame
 """
 Enemy entity and logic.
 """
-import pygame
 
 
 
@@ -69,13 +69,17 @@ class Enemy:
         # Don't automatically set dead = True here, let the logic handle it
         # after death animation completes
 
-    def draw(self, surface):
+    def draw(self, surface, camera=None):
         # Use sprite logic if available, else fallback to debug circle
         if self.logic and hasattr(self.logic, 'draw'):
-            self.logic.draw(surface)
+            self.logic.draw(surface, camera=camera)
         else:
-            x, y = int(self.position[0]), int(self.position[1])
-            pygame.draw.circle(surface, (220, 40, 40), (x, y), self.size // 2)
+            # Apply camera transformation for fallback circle
+            if camera:
+                screen_x, screen_y = camera.world_to_screen(self.position[0], self.position[1])
+            else:
+                screen_x, screen_y = int(self.position[0]), int(self.position[1])
+            pygame.draw.circle(surface, (220, 40, 40), (screen_x, screen_y), self.size // 2)
 
 # Register the Plant enemy type using config
 plant_cfg = ENEMY_TYPE_CONFIG['Plant']

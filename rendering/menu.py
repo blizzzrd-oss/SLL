@@ -5,22 +5,17 @@ import pygame
 import os
 import sys
 import json
+from rendering.game_render import _game_render_cache
+from utils.resource_path import resource_path
 from config import (
     MUSIC_VOLUME, SFX_VOLUME, BG_MUSIC_PATH,
     COLOR_BG, COLOR_TEXT, COLOR_HIGHLIGHT, COLOR_SLIDER_MUSIC, COLOR_SLIDER_SFX, COLOR_BACK,
+    GAME_FPS_OPTIONS, GAME_DEFAULT_FPS,
     COLOR_BLACK, COLOR_GRAY,
     FONT_SIZE_LARGE, FONT_SIZE_SMALL, WINDOW_WIDTH, WINDOW_HEIGHT
 )
 
 # Helper for resource paths
-
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        base_path = sys._MEIPASS
-    except AttributeError:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
 
 class Menu:
     """
@@ -82,7 +77,6 @@ class Menu:
         self.checkbox_y_start = self.sfx_label_y + 50
         self.checkbox_spacing = 40
         self.checkbox_size = 28
-        from config import GAME_FPS_OPTIONS, GAME_DEFAULT_FPS
         self._settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings.json')
         self.fps_options = GAME_FPS_OPTIONS
         self.fps = GAME_DEFAULT_FPS
@@ -156,7 +150,6 @@ class Menu:
         self.checkbox_y_start = self.sfx_label_y + 50
         self.checkbox_spacing = 40
         self.checkbox_size = 28
-        from config import GAME_FPS_OPTIONS, GAME_DEFAULT_FPS
         self._settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings.json')
         self.fps_options = GAME_FPS_OPTIONS
         self.fps = GAME_DEFAULT_FPS
@@ -458,7 +451,6 @@ class Menu:
                 # Checkboxes
                 else:
                     # Try to update the current player instance if available
-                    from rendering.game_render import _game_render_cache
                     game = getattr(self, 'game', None)
                     player = None
                     if game and hasattr(game, 'player'):

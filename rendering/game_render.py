@@ -4,6 +4,8 @@ from config import (
 )
 from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run, draw_player_hurt
 from rendering.ui import draw_hud
+from rendering.player_damage_stats_render import render_player_damage_stats
+from rendering.player_deathlog_render import render_player_deathlog
 
 
 # --- Resource cache ---
@@ -44,7 +46,7 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
             img = _game_render_cache['hurt_barrier_img']
         num_frames = img.get_width() // PLAYER_SPRITE_FRAME_WIDTH
         duration = num_frames / PLAYER_HURT_ANIMATION_FPS
-        draw_player_hurt(screen, player, player.anim_timer, barrier_damage=(player.anim_state=='hurt_barrier'))
+        draw_player_hurt(screen, player, player.anim_timer, barrier_damage=(player.anim_state=='hurt_barrier'), camera=game.camera)
         # Unlock animation if finished
         if player.anim_timer >= duration:
             player.anim_lock = False
@@ -53,23 +55,23 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
     else:
         if last_move != (0, 0):
             if getattr(player, 'movement_speed', 0) >= 5:
-                draw_player_run(screen, player, time_accum)
+                draw_player_run(screen, player, time_accum, camera=game.camera)
             else:
-                draw_player_walk(screen, player, time_accum)
+                draw_player_walk(screen, player, time_accum, camera=game.camera)
         else:
-            draw_player_idle(screen, player, time_accum)
+            draw_player_idle(screen, player, time_accum, camera=game.camera)
 
     # Draw all player skills (e.g., slash animation), pass last_move for direction
     for skill in player.skills.values():
         if hasattr(skill, 'draw'):
-            skill.draw(screen, last_move=last_move)
+            skill.draw(screen, last_move=last_move, camera=game.camera)
     # Draw enemies and debug overlays
     if hasattr(game, 'enemies'):
         enemies = game.enemies
     else:
         enemies = []
     for enemy in getattr(game, 'enemies', []):
-        enemy.draw(screen)
+        enemy.draw(screen, camera=game.camera)
     # ...removed enemy count and player position debug overlays...
 
     # Draw GAME OVER overlay if needed
@@ -88,8 +90,6 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
 
     # --- Modular renderers for player damage stats and deathlog ---
     if getattr(game, 'game_over', False):
-        from rendering.player_damage_stats_render import render_player_damage_stats
-        from rendering.player_deathlog_render import render_player_deathlog
         render_player_damage_stats(screen, game.player, font2)
         render_player_deathlog(screen, game.player, font2)
     # Draw pause menu overlay if paused

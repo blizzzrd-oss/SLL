@@ -1,17 +1,14 @@
-from config import PLAYER_SIZE
+from config import PLAYER_SIZE, SLASH_COOLDOWN, SLASH_DAMAGE, SLASH_ARC_DEGREES, SLASH_DURATION, SLASH_SHEET_PATH, SLASH_FRAME_COUNT
 import pygame
 import math
 import os
 from skills.base import Skill
 
-SLASH_SHEET_PATH = os.path.join('resources', 'images', 'player_melee', 'slash', 'player_melee_slash.png')
-SLASH_FRAME_COUNT = 5
-
 class SlashSkill(Skill):
     # Class-level cache for frames
     _cached_frames = None
 
-    def __init__(self, user, cooldown=1.0, damage=10, arc_deg=190, duration=0.25):
+    def __init__(self, user, cooldown=SLASH_COOLDOWN, damage=SLASH_DAMAGE, arc_deg=SLASH_ARC_DEGREES, duration=SLASH_DURATION):
         super().__init__(user, cooldown, name="Slash")
         self.damage = damage
         self.arc_deg = arc_deg
@@ -73,7 +70,7 @@ class SlashSkill(Skill):
                 entity.take_damage(self.damage, source=self, attacker=self.user)
                 self.hit_entities.add(entity)
 
-    def draw(self, surface, last_move=(1,0)):
+    def draw(self, surface, last_move=(1,0), camera=None):
         if not self.active or not self.frames:
             return
         # Calculate current frame index
@@ -81,12 +78,29 @@ class SlashSkill(Skill):
         frame = self.frames[frame_idx]
         # Always face the target_pos direction and rotate the sprite
         if not hasattr(self, 'target_pos') or self.target_pos is None:
-            self.target_pos = pygame.mouse.get_pos()
+            mouse_screen = pygame.mouse.get_pos()
+            # Convert mouse screen position to world coordinates if camera is available
+            if camera:
+                self.target_pos = camera.screen_to_world(mouse_screen[0], mouse_screen[1])
+            else:
+                self.target_pos = mouse_screen
         if hasattr(self.user, 'x') and hasattr(self.user, 'y'):
-            px, py = int(self.user.x), int(self.user.y)
+            world_px, world_py = self.user.x, self.user.y
         else:
-            px, py = self.user.rect.center
-        dx, dy = self.target_pos[0] - px, self.target_pos[1] - py
+            world_px, world_py = self.user.rect.center
+            
+        # Apply camera transformation to player position
+        if camera:
+            px, py = camera.world_to_screen(world_px, world_py)
+        else:
+            px, py = int(world_px), int(world_py)
+            
+        # For world coordinate calculations, use world positions
+        if camera and hasattr(self, 'target_pos'):
+            target_world_x, target_world_y = self.target_pos
+            dx, dy = target_world_x - world_px, target_world_y - world_py
+        else:
+            dx, dy = self.target_pos[0] - px, self.target_pos[1] - py
         angle = math.degrees(math.atan2(dy, dx)) % 360
         # Sprite faces right (0°) by default, so rotate by -angle
         draw_frame = pygame.transform.rotate(frame, -angle)

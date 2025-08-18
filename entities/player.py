@@ -3,19 +3,17 @@ Player entity and logic.
 """
 
 import pygame
+import os
+import json
 from skills.base import Skill
 from config import (
-    WINDOW_WIDTH, WINDOW_HEIGHT,
-    PLAYER_START_HEALTH, PLAYER_START_BARRIER, PLAYER_BARRIER_DECAY_PERCENT_PER_SEC, PLAYER_BARRIER_REGEN,
+    WORLD_SIZE, PLAYER_START_HEALTH, PLAYER_START_BARRIER, PLAYER_BARRIER_DECAY_PERCENT_PER_SEC, PLAYER_BARRIER_REGEN,
     PLAYER_START_EXP, PLAYER_EXP_TO_NEXT_LEVEL_MULT, PLAYER_START_LEVEL, PLAYER_SIZE, PLAYER_MOVEMENT_SPEED,
     PLAYER_DAMAGE_REDUCTION, PLAYER_COOLDOWN, PLAYER_ATTACK_SPEED, PLAYER_CRIT_CHANCE, PLAYER_CRIT_DAMAGE,
     PLAYER_START_SKILL_POINTS, PLAYER_PASSIVE_SKILLS, PLAYER_ACTIVE_SKILLS
 )
-
 from utils.player_damage_log import PlayerDamageLog
-
-
-
+from utils.player_received_log import PlayerReceivedLog
 from skills.registry import get_skill
 
 
@@ -42,9 +40,9 @@ class Player:
 
 
     def __init__(self):
-        # Start in the middle of the game window
-        self.x = WINDOW_WIDTH // 2
-        self.y = WINDOW_HEIGHT // 2
+        # Start in the middle of a large world
+        self.x = WORLD_SIZE // 2
+        self.y = WORLD_SIZE // 2
         self.size = PLAYER_SIZE
         self.rect = pygame.Rect(self.x - self.size // 2, self.y - self.size // 2, self.size, self.size)
         self.facing_angle = 0  # Degrees, 0 = right
@@ -79,8 +77,6 @@ class Player:
 
         # For compatibility with old code
         self.position = [self.x, self.y]  # Make this a mutable list
-        from utils.player_damage_log import PlayerDamageLog
-        from utils.player_received_log import PlayerReceivedLog
         self.damage_log = PlayerDamageLog()
         self.received_log = PlayerReceivedLog()
         self.last_move = (1, 0)
@@ -93,7 +89,6 @@ class Player:
 
         # Settings checkboxes (auto aim, auto attack) - sync with menu if possible
         try:
-            import os, json
             settings_path = os.path.join(os.path.dirname(__file__), '..', 'settings.json')
             with open(settings_path, 'r') as f:
                 data = json.load(f)

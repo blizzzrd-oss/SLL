@@ -8,6 +8,8 @@ import json
 #import os
 from core.player_movement import handle_player_movement, get_movement_vector
 from core.init import initialize_game_state
+from entities.spawner import EnemySpawner
+from entities.enemy import PlantType
 #from rendering.player_render import draw_player_idle, draw_player_walk, draw_player_run, draw_player_hurt
 from rendering.game_render import draw_game
 from core.game import Game
@@ -26,8 +28,6 @@ def run_game(screen, slot, mode):
     skill_pressed = {'slash': False, 'dash': False}
 
     # --- Enemy management ---
-    from entities.spawner import EnemySpawner
-    from entities.enemy import PlantType
     enemies = []
     game.enemies = enemies
     spawner = EnemySpawner([PlantType], get_game_time_fn=lambda: time_accum, screen=screen, game=game)

@@ -9,7 +9,7 @@ from config import (
     PLAYER_IDLE_ANIMATION_FPS, PLAYER_WALK_ANIMATION_FPS, PLAYER_RUN_ANIMATION_FPS,
     PLAYER_HURT_ANIMATION_FPS
 )
-from rendering.menu import resource_path
+from utils.resource_path import resource_path
 
 # Sprite sheet cache
 _idle_sheet = None
@@ -55,7 +55,7 @@ def _load_hurt_barrier_frames():
     ]
     _hurt_barrier_loaded = True
 
-def draw_player_hurt(surface, player, time, barrier_damage=False):
+def draw_player_hurt(surface, player, time, barrier_damage=False, camera=None):
     """Draw the player hurt animation at the player's position. If barrier_damage is True, use barrier hurt sprite."""
     if barrier_damage:
         _load_hurt_barrier_frames()
@@ -68,7 +68,14 @@ def draw_player_hurt(surface, player, time, barrier_damage=False):
     if frame >= num_frames:
         frame = num_frames - 1  # Clamp to last frame
     img = frames[frame]
-    rect = img.get_rect(center=(int(player.x), int(player.y)))
+    
+    # Apply camera transformation
+    if camera:
+        screen_x, screen_y = camera.world_to_screen(player.x, player.y)
+    else:
+        screen_x, screen_y = int(player.x), int(player.y)
+    
+    rect = img.get_rect(center=(screen_x, screen_y))
     surface.blit(img, rect)
 
 def _load_idle_frames():
@@ -110,29 +117,50 @@ def _load_run_frames():
     ]
     _run_loaded = True
 
-def draw_player_run(surface, player, time):
+def draw_player_run(surface, player, time, camera=None):
     """Draw the player run animation at the player's position."""
     _load_run_frames()
     num_frames = len(_run_frames)
     frame = int((time * PLAYER_RUN_ANIMATION_FPS) % num_frames)
     img = _run_frames[frame]
-    rect = img.get_rect(center=(int(player.x), int(player.y)))
+    
+    # Apply camera transformation
+    if camera:
+        screen_x, screen_y = camera.world_to_screen(player.x, player.y)
+    else:
+        screen_x, screen_y = int(player.x), int(player.y)
+    
+    rect = img.get_rect(center=(screen_x, screen_y))
     surface.blit(img, rect)
 
-def draw_player_idle(surface, player, time):
+def draw_player_idle(surface, player, time, camera=None):
     """Draw the player idle animation at the player's position."""
     _load_idle_frames()
     num_frames = len(_idle_frames)
     frame = int((time * PLAYER_IDLE_ANIMATION_FPS) % num_frames)
     img = _idle_frames[frame]
-    rect = img.get_rect(center=(int(player.x), int(player.y)))
+    
+    # Apply camera transformation
+    if camera:
+        screen_x, screen_y = camera.world_to_screen(player.x, player.y)
+    else:
+        screen_x, screen_y = int(player.x), int(player.y)
+    
+    rect = img.get_rect(center=(screen_x, screen_y))
     surface.blit(img, rect)
 
-def draw_player_walk(surface, player, time):
+def draw_player_walk(surface, player, time, camera=None):
     """Draw the player walk animation at the player's position."""
     _load_walk_frames()
     num_frames = len(_walk_frames)
     frame = int((time * PLAYER_WALK_ANIMATION_FPS) % num_frames)
     img = _walk_frames[frame]
-    rect = img.get_rect(center=(int(player.x), int(player.y)))
+    
+    # Apply camera transformation
+    if camera:
+        screen_x, screen_y = camera.world_to_screen(player.x, player.y)
+    else:
+        screen_x, screen_y = int(player.x), int(player.y)
+    
+    rect = img.get_rect(center=(screen_x, screen_y))
     surface.blit(img, rect)

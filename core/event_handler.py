@@ -5,6 +5,7 @@ Separates input handling from the main game loop.
 
 import pygame
 from config import HUD_TOGGLE_KEY
+from rendering.menu import Menu
 
 
 class GameEventHandler:
@@ -115,7 +116,6 @@ class GameEventHandler:
 
     def _process_pause_menu_option(self, option):
         """Execute the selected pause menu option."""
-        from rendering.menu import Menu
         
         if option == "Resume":
             self.paused = False
@@ -132,7 +132,6 @@ class GameEventHandler:
 
     def _handle_settings_menu_events(self, event):
         """Handle events in the settings menu."""
-        from rendering.menu import Menu
         
         if self.settings_menu is None:
             self.settings_menu = Menu(self.screen, game=self.game)
@@ -147,8 +146,6 @@ class GameEventHandler:
         if not self.in_settings_menu:
             return False
             
-        from rendering.menu import Menu
-        
         if self.settings_menu is None:
             self.settings_menu = Menu(self.screen, game=self.game)
             self.settings_menu.state = 'settings'

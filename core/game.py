@@ -9,12 +9,16 @@ from rendering.player_render import draw_player_idle, draw_player_walk
 from core.player_movement import handle_player_movement
 from core.game_modes import get_game_mode_config
 from core.game_events import GameEventManager
+from core.camera import Camera
 
 class Game:
     def __init__(self, screen, slot, mode):
         self.screen = screen
         self.slot = slot  # Save slot index
         self.mode = mode  # 'Easy', 'Normal', 'Hard'
+        
+        # Initialize camera
+        self.camera = Camera()
         
         # Load game mode configuration
         self.mode_config = get_game_mode_config(mode)
@@ -62,6 +66,9 @@ class Game:
 
     def update(self, dt):
         if not self.game_over:
+            # Update camera to follow player
+            self.camera.update(self.player, dt)
+            
             # Update event manager
             self.event_manager.update(dt)
             

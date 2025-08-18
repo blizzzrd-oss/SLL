@@ -46,20 +46,44 @@ class EnemySpawner:
 
 
     def random_edge_position(self):
-        # Use actual window size if screen is available
-        if self.screen:
-            width, height = self.screen.get_width(), self.screen.get_height()
+        # Spawn enemies around the player's world position, not screen edges
+        if self.game and hasattr(self.game, 'player'):
+            player_x = self.game.player.x
+            player_y = self.game.player.y
+            
+            # Use screen dimensions to determine spawn distance from player
+            if self.screen:
+                width, height = self.screen.get_width(), self.screen.get_height()
+            else:
+                width, height = WINDOW_WIDTH, WINDOW_HEIGHT
+            
+            # Spawn slightly outside the visible area around the player
+            spawn_distance = max(width, height) // 2 + 100  # A bit beyond screen edge
+            
+            edge = random.choice(['top', 'bottom', 'left', 'right'])
+            if edge == 'top':
+                return (player_x + random.randint(-width//2, width//2), player_y - spawn_distance)
+            elif edge == 'bottom':
+                return (player_x + random.randint(-width//2, width//2), player_y + spawn_distance)
+            elif edge == 'left':
+                return (player_x - spawn_distance, player_y + random.randint(-height//2, height//2))
+            else:  # right
+                return (player_x + spawn_distance, player_y + random.randint(-height//2, height//2))
         else:
-            width, height = WINDOW_WIDTH, WINDOW_HEIGHT
-        edge = random.choice(['top', 'bottom', 'left', 'right'])
-        if edge == 'top':
-            return (random.randint(0, width), 0)
-        elif edge == 'bottom':
-            return (random.randint(0, width), height)
-        elif edge == 'left':
-            return (0, random.randint(0, height))
-        else:
-            return (width, random.randint(0, height))
+            # Fallback to old method if no game/player reference
+            if self.screen:
+                width, height = self.screen.get_width(), self.screen.get_height()
+            else:
+                width, height = WINDOW_WIDTH, WINDOW_HEIGHT
+            edge = random.choice(['top', 'bottom', 'left', 'right'])
+            if edge == 'top':
+                return (random.randint(0, width), 0)
+            elif edge == 'bottom':
+                return (random.randint(0, width), height)
+            elif edge == 'left':
+                return (0, random.randint(0, height))
+            else:
+                return (width, random.randint(0, height))
 
     def spawn_if_ready(self):
         if not self.can_spawn():

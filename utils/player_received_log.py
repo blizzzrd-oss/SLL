@@ -1,14 +1,15 @@
 """
-Player received log: tracks last 10 damage/heal events received by the player.
+Player received log: tracks damage/heal events received by the player.
 """
 from collections import deque
+from datetime import datetime
+from config import PLAYER_RECEIVED_LOG_MAX_ENTRIES
 
 class PlayerReceivedLog:
     def __init__(self):
-        self.entries = deque(maxlen=50)
+        self.entries = deque(maxlen=PLAYER_RECEIVED_LOG_MAX_ENTRIES)
 
     def add_entry(self, amount, source, type_, health=None, barrier=None):
-        from datetime import datetime
         time_str = datetime.now().strftime('%H:%M:%S')
         self.entries.append({
             'amount': amount,

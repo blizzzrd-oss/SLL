@@ -211,7 +211,7 @@ class PlantEnemyLogic:
                     self.anim_frame = (self.anim_frame + 1) % frames
                 self.anim_timer = 0.0
 
-    def draw(self, surface):
+    def draw(self, surface, camera=None):
         # Use direction-aware sprites
         state_sprites = self.sprites.get(self.state, [[] for _ in range(4)])
         direction = getattr(self, 'direction', 0)
@@ -223,15 +223,21 @@ class PlantEnemyLogic:
             
             # Use fixed position during death animations to prevent jitter
             if self.fixed_draw_pos is not None:
-                enemy_center_x, enemy_center_y = self.fixed_draw_pos
+                world_center_x, world_center_y = self.fixed_draw_pos
             else:
-                enemy_center_x = int(self.enemy.position[0])
-                enemy_center_y = int(self.enemy.position[1])
+                world_center_x = self.enemy.position[0]
+                world_center_y = self.enemy.position[1]
+            
+            # Apply camera transformation
+            if camera:
+                screen_x, screen_y = camera.world_to_screen(world_center_x, world_center_y)
+            else:
+                screen_x, screen_y = int(world_center_x), int(world_center_y)
             
             # Since all frames are now 64x64 and bottom-aligned, positioning is consistent
             rect = frame.get_rect()
-            rect.centerx = enemy_center_x
-            rect.bottom = enemy_center_y + (self.enemy.size // 2)
+            rect.centerx = screen_x
+            rect.bottom = screen_y + (self.enemy.size // 2)
             
             # Apply hurt overlay if active
             if self.hurt_overlay_timer > 0:

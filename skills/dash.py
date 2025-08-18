@@ -2,14 +2,11 @@ import pygame
 import math
 import os
 from skills.base import Skill
-
-DASH_RANGE = 100
-DASH_COOLDOWN = 2.0
-DASH_DURATION = 0.15  # seconds
+from config import DASH_RANGE, DASH_COOLDOWN, DASH_DURATION, DASH_DAMAGE
 
 class DashSkill(Skill):
     is_movement_skill = True
-    def __init__(self, user, cooldown=DASH_COOLDOWN, dash_range=DASH_RANGE, duration=DASH_DURATION, dash_damage=10):
+    def __init__(self, user, cooldown=DASH_COOLDOWN, dash_range=DASH_RANGE, duration=DASH_DURATION, dash_damage=DASH_DAMAGE):
         super().__init__(user, cooldown, name="Dash")
         self.dash_range = dash_range
         self.duration = duration
@@ -67,7 +64,7 @@ class DashSkill(Skill):
                 if hasattr(entity, 'take_damage'):
                     entity.take_damage(self.dash_damage, source=self, attacker=self.user)
 
-    def draw(self, surface, last_move=(1,0)):
+    def draw(self, surface, last_move=(1,0), camera=None):
         # Optionally, draw a dash effect (e.g., a trail or afterimage)
         pass
 
