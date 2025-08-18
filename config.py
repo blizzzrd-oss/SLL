@@ -13,6 +13,20 @@ BACKGROUND_TILE_BUFFER = 5  # Extra tiles for background rendering
 CAMERA_FOLLOW_SPEED = 1.0  # 1.0 = instant, lower = smoother
 CAMERA_DEADZONE = 50  # Pixel deadzone around center before camera moves
 
+# Background Biome Configuration
+BIOME_TILES = {
+    'grass': 'resources/images/Tiles/bg/tile_grass.jpg',
+    'dirt': 'resources/images/Tiles/bg/tile_dirt.jpg', 
+    'stone': 'resources/images/Tiles/bg/tile_stone.jpg'  # Add this tile if you have it
+}
+
+# Fallback colors if images don't exist
+BIOME_FALLBACK_COLORS = {
+    'grass': (60, 140, 40),
+    'dirt': (101, 67, 33),
+    'stone': (120, 120, 120)
+}
+
 # =============================================================================
 # ENEMY CONFIGURATION
 # =============================================================================

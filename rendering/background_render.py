@@ -3,9 +3,10 @@ Background rendering for tiled world.
 """
 import pygame
 import math
-from config import TILE_SIZE
+import os
+from config import TILE_SIZE, BIOME_TILES, BIOME_FALLBACK_COLORS
 
-# Simple visual background patterns
+# Background tile patterns
 _background_patterns = []
 _patterns_loaded = False
 
@@ -34,41 +35,71 @@ def get_biome_type(x, y):
         return 2  # Stone/rocky areas
 
 def load_background_patterns():
-    """Create simple visual patterns for background tiles."""
+    """Load biome tile patterns from image files specified in config."""
     global _background_patterns, _patterns_loaded
     if _patterns_loaded:
         return
     
-    # Create different tile patterns
     tile_size = TILE_SIZE
+    biome_order = ['grass', 'dirt', 'stone']  # Order matches biome indices
     
-    # Pattern 1: Grass-like (light green with darker spots)
-    grass_tile = pygame.Surface((tile_size, tile_size))
-    grass_tile.fill((60, 140, 40))  # Base green
-    for i in range(8):
-        x = (i * 13) % tile_size
-        y = (i * 17) % tile_size
-        pygame.draw.circle(grass_tile, (45, 120, 30), (x, y), 3)
-    _background_patterns.append(grass_tile)
-    
-    # Pattern 2: Dirt-like (brown with texture)
-    dirt_tile = pygame.Surface((tile_size, tile_size))
-    dirt_tile.fill((101, 67, 33))  # Base brown
-    for i in range(12):
-        x = (i * 11) % tile_size
-        y = (i * 19) % tile_size
-        pygame.draw.circle(dirt_tile, (85, 55, 25), (x, y), 2)
-    _background_patterns.append(dirt_tile)
-    
-    # Pattern 3: Stone-like (gray with darker lines)
-    stone_tile = pygame.Surface((tile_size, tile_size))
-    stone_tile.fill((120, 120, 120))  # Base gray
-    for i in range(0, tile_size, 8):
-        pygame.draw.line(stone_tile, (100, 100, 100), (i, 0), (i, tile_size), 1)
-        pygame.draw.line(stone_tile, (100, 100, 100), (0, i), (tile_size, i), 1)
-    _background_patterns.append(stone_tile)
+    for biome_name in biome_order:
+        tile_path = BIOME_TILES.get(biome_name)
+        
+        if tile_path and os.path.exists(tile_path):
+            # Load image tile
+            try:
+                tile_img = pygame.image.load(tile_path).convert()
+                # Scale to tile size if needed
+                if tile_img.get_size() != (tile_size, tile_size):
+                    tile_img = pygame.transform.scale(tile_img, (tile_size, tile_size))
+                _background_patterns.append(tile_img)
+                print(f"Loaded {biome_name} tile from {tile_path}")
+            except pygame.error as e:
+                print(f"Failed to load {biome_name} tile from {tile_path}: {e}")
+                # Create fallback tile
+                fallback_tile = create_fallback_tile(biome_name, tile_size)
+                _background_patterns.append(fallback_tile)
+        else:
+            print(f"Tile image not found for {biome_name}, using fallback")
+            # Create fallback tile
+            fallback_tile = create_fallback_tile(biome_name, tile_size)
+            _background_patterns.append(fallback_tile)
     
     _patterns_loaded = True
+
+def create_fallback_tile(biome_name, tile_size):
+    """Create a procedural fallback tile if image is not available."""
+    fallback_color = BIOME_FALLBACK_COLORS.get(biome_name, (128, 128, 128))
+    
+    if biome_name == 'grass':
+        # Grass-like pattern
+        tile = pygame.Surface((tile_size, tile_size))
+        tile.fill(fallback_color)
+        for i in range(8):
+            x = (i * 13) % tile_size
+            y = (i * 17) % tile_size
+            darker_color = tuple(max(0, c - 20) for c in fallback_color)
+            pygame.draw.circle(tile, darker_color, (x, y), 3)
+    elif biome_name == 'dirt':
+        # Dirt-like pattern
+        tile = pygame.Surface((tile_size, tile_size))
+        tile.fill(fallback_color)
+        for i in range(12):
+            x = (i * 11) % tile_size
+            y = (i * 19) % tile_size
+            darker_color = tuple(max(0, c - 16) for c in fallback_color)
+            pygame.draw.circle(tile, darker_color, (x, y), 2)
+    else:  # stone
+        # Stone-like pattern
+        tile = pygame.Surface((tile_size, tile_size))
+        tile.fill(fallback_color)
+        darker_color = tuple(max(0, c - 20) for c in fallback_color)
+        for i in range(0, tile_size, 8):
+            pygame.draw.line(tile, darker_color, (i, 0), (i, tile_size), 1)
+            pygame.draw.line(tile, darker_color, (0, i), (tile_size, i), 1)
+    
+    return tile
 
 def draw_tiled_background(surface, camera, tile_size=None, buffer_tiles=None):
     """Draw a simple visual background that clearly shows world movement."""
