@@ -6,7 +6,7 @@ def render_player_deathlog(screen, player, font):
         return
     recent = received_log.get_recent()
     center_x = screen.get_width() // 2
-    y2 = screen.get_height() // 2 + 100
+    y2 = screen.get_height() // 2
     # Try to create a smaller font based on the original font's properties
     try:
         font_path = font.name if hasattr(font, 'name') else None
