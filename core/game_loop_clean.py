@@ -6,7 +6,7 @@ Orchestrates all game systems with clear separation of concerns.
 import pygame
 from core.player_movement import handle_player_movement, get_movement_vector
 from core.init import initialize_game_state
-from rendering.game_render import draw_game
+from rendering.game_render import draw_game, invalidate_pause_cache
 from core.event_handler import GameEventHandler
 from core.game_logic import GameLogicManager
 from core.frame_timer import FrameTimer
@@ -71,6 +71,7 @@ def run_game(screen, slot, mode):
     event_handler.hud_visible = hud_visible
     
     # Main game loop
+    was_paused = False
     while event_handler.running:
         # Get frame timing
         dt, time_accum, fps = frame_timer.tick()
@@ -81,6 +82,12 @@ def run_game(screen, slot, mode):
         # Skip rest of frame if in settings menu
         if event_handler.show_settings_menu_if_active():
             continue
+        
+        # Check for pause state change to invalidate cache
+        if was_paused and not event_handler.paused:
+            # Just unpaused - invalidate cache so game renders fresh
+            invalidate_pause_cache()
+        was_paused = event_handler.paused
             
         # Handle player movement
         if not game.game_over and not event_handler.paused:

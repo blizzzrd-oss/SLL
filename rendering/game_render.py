@@ -18,12 +18,25 @@ _game_render_cache = {
     'pause_font': None
 }
 
+# --- Pause screen cache for performance ---
+_pause_screen_cache = None
+_pause_cache_valid = False
+
+def invalidate_pause_cache():
+    """Invalidate the pause screen cache when game state changes."""
+    global _pause_cache_valid
+    _pause_cache_valid = False
+
+def clear_pause_cache():
+    """Clear the pause screen cache to free memory."""
+    global _pause_screen_cache, _pause_cache_valid
+    _pause_screen_cache = None
+    _pause_cache_valid = False
+
 def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_selected=0, pause_menu_options=None, pause_menu_rects=None, hud_visible=True, fps=None):
-    # Draw background tiles first
-    draw_tiled_background(screen, game.camera)
+    global _game_render_cache, _pause_screen_cache, _pause_cache_valid
     
-    player = game.player
-    global _game_render_cache
+    # Load cached resources if needed
     if _game_render_cache['hurt_hp_img'] is None:
         _game_render_cache['hurt_hp_img'] = pygame.image.load('resources/images/player/Hurt/Slime1_Hurt_full_hp.png').convert_alpha()
     if _game_render_cache['hurt_barrier_img'] is None:
@@ -35,11 +48,52 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
     if _game_render_cache['pause_font'] is None:
         _game_render_cache['pause_font'] = pygame.font.SysFont(None, PAUSE_FONT_SIZE)
 
+    if paused and not getattr(game, 'game_over', False):
+        # PAUSE MODE OPTIMIZATION: Use cached screen + overlay only
+        if _pause_cache_valid and _pause_screen_cache:
+            # Use cached game screen
+            screen.blit(_pause_screen_cache, (0, 0))
+        else:
+            # Cache is invalid - render full game and cache it
+            render_full_game_to_cache(screen, game, last_move, time_accum, hud_visible, fps)
+        
+        # Draw pause overlay on top of cached screen
+        draw_pause_overlay(screen, pause_menu_selected, pause_menu_options, pause_menu_rects)
+        
+    else:
+        # NORMAL GAME RENDERING: Full render and invalidate pause cache
+        _pause_cache_valid = False  # Invalidate cache since game state is changing
+        
+        render_full_game(screen, game, last_move, time_accum, hud_visible, fps)
+    
+    pygame.display.flip()
+
+def render_full_game_to_cache(screen, game, last_move, time_accum, hud_visible, fps):
+    """Render the full game and cache the result for pause optimization."""
+    global _pause_screen_cache, _pause_cache_valid
+    
+    # Render everything normally
+    render_full_game(screen, game, last_move, time_accum, hud_visible, fps)
+    
+    # Cache the current screen state
+    _pause_screen_cache = screen.copy()
+    _pause_cache_valid = True
+
+def render_full_game(screen, game, last_move, time_accum, hud_visible, fps):
+    """Render the complete game state (background, player, enemies, UI, etc.)"""
+    global _game_render_cache
+    
+    # Draw background tiles first
+    draw_tiled_background(screen, game.camera)
+    
+    player = game.player
+
     if hud_visible:
         game_mode = game.mode
         active_events = game.get_active_events_for_display()
         event_notifications = game.get_event_notifications()
         draw_hud(screen, player, fps=fps, game_mode=game_mode, active_events=active_events, event_notifications=event_notifications)
+    
     # Handle hurt animation (non-interruptible)
     if player.anim_state in ('hurt_hp', 'hurt_barrier'):
         # Determine number of frames for current hurt animation
@@ -68,14 +122,10 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
     for skill in player.skills.values():
         if hasattr(skill, 'draw'):
             skill.draw(screen, last_move=last_move, camera=game.camera)
+    
     # Draw enemies and debug overlays
-    if hasattr(game, 'enemies'):
-        enemies = game.enemies
-    else:
-        enemies = []
     for enemy in getattr(game, 'enemies', []):
         enemy.draw(screen, camera=game.camera)
-    # ...removed enemy count and player position debug overlays...
 
     # Draw GAME OVER overlay if needed
     if getattr(game, 'game_over', False):
@@ -91,30 +141,36 @@ def draw_game(screen, game, last_move, time_accum, paused=False, pause_menu_sele
         tip_rect = tip.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 100))
         screen.blit(tip, tip_rect)
 
-    # --- Modular renderers for player damage stats and deathlog ---
-    if getattr(game, 'game_over', False):
+        # --- Modular renderers for player damage stats and deathlog ---
         render_player_damage_stats(screen, game.player, font2)
         render_player_deathlog(screen, game.player, font2)
-    # Draw pause menu overlay if paused
-    if paused and not getattr(game, 'game_over', False):
-        overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-        overlay.fill(PAUSE_OVERLAY_COLOR)
-        screen.blit(overlay, (0, 0))
-        font = _game_render_cache['pause_font']
-        text = font.render("Paused", True, PAUSE_MENU_TEXT_COLOR)
-        text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 120))
-        screen.blit(text, text_rect)
-        font2 = _game_render_cache['menu_font']
-        rects = []
-        for i, option in enumerate(pause_menu_options or []):
-            color = PAUSE_MENU_HIGHLIGHT_COLOR if i == pause_menu_selected else PAUSE_MENU_TEXT_COLOR
-            opt_text = font2.render(option, True, color)
-            opt_rect = opt_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 30 + i * 60))
-            screen.blit(opt_text, opt_rect)
-            # Add a slightly larger rect for mouse hitbox
-            rects.append(opt_rect.inflate(40, 20))
-        if pause_menu_rects is not None:
-            pause_menu_rects.clear()
-            pause_menu_rects.extend(rects)
 
-    pygame.display.flip()
+def draw_pause_overlay(screen, pause_menu_selected, pause_menu_options, pause_menu_rects):
+    """Draw the pause menu overlay on top of the cached game screen."""
+    global _game_render_cache
+    
+    # Semi-transparent overlay
+    overlay = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+    overlay.fill(PAUSE_OVERLAY_COLOR)
+    screen.blit(overlay, (0, 0))
+    
+    # Draw pause text
+    font = _game_render_cache['pause_font']
+    text = font.render("Paused", True, PAUSE_MENU_TEXT_COLOR)
+    text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 120))
+    screen.blit(text, text_rect)
+    
+    # Draw menu options
+    font2 = _game_render_cache['menu_font']
+    rects = []
+    for i, option in enumerate(pause_menu_options or []):
+        color = PAUSE_MENU_HIGHLIGHT_COLOR if i == pause_menu_selected else PAUSE_MENU_TEXT_COLOR
+        opt_text = font2.render(option, True, color)
+        opt_rect = opt_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 30 + i * 60))
+        screen.blit(opt_text, opt_rect)
+        # Add a slightly larger rect for mouse hitbox
+        rects.append(opt_rect.inflate(40, 20))
+    
+    if pause_menu_rects is not None:
+        pause_menu_rects.clear()
+        pause_menu_rects.extend(rects)
