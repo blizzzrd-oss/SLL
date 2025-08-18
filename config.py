@@ -16,26 +16,30 @@ CAMERA_DEADZONE = 50  # Pixel deadzone around center before camera moves
 # Background Biome Configuration
 BIOME_TILES = {
     'grass': [
-        ('resources/images/Tiles/bg/tile_grass1.jpg', 25),  # (path, weight%)
-        ('resources/images/Tiles/bg/tile_grass2.jpg', 20),
-        ('resources/images/Tiles/bg/tile_grass3.jpg', 35),
-        ('resources/images/Tiles/bg/tile_grass4.jpg', 16),
+        ('resources/images/Tiles/bg/tile_grass1.jpg', 10),  # (path, weight%)
+        ('resources/images/Tiles/bg/tile_grass2.jpg', 60),
+        ('resources/images/Tiles/bg/tile_grass3.jpg', 10),
+        ('resources/images/Tiles/bg/tile_grass4.jpg', 18),
         ('resources/images/Tiles/bg/grass_stone_5.jpg', 0.2),
-        ('resources/images/Tiles/bg/tile_grass_wood1.jpg', 0.1),
+        ('resources/images/Tiles/bg/tile_grass_wood1.jpg', 0.2),
         ('resources/images/Tiles/bg/tile_grass_wood2.jpg', 0.2),
         ('resources/images/Tiles/bg/tile_grass_wood3.jpg', 0.2),
     ],
     'grass_plant_yellow': [
-        ('resources/images/Tiles/bg/tile_plant_y_1.jpg', 40),
-        ('resources/images/Tiles/bg/tile_plant_y_2.jpg', 30),
-        ('resources/images/Tiles/bg/tile_plant_y_3.jpg', 29),
+        ('resources/images/Tiles/bg/tile_grass2.jpg', 70),
+        ('resources/images/Tiles/bg/tile_grass4.jpg', 5),
+        ('resources/images/Tiles/bg/tile_plant_y_1.jpg', 10),
+        ('resources/images/Tiles/bg/tile_plant_y_2.jpg', 10),
+        ('resources/images/Tiles/bg/tile_plant_y_3.jpg', 5),
         ('resources/images/Tiles/bg/grass_stone_1.jpg', 0.2),
 		('resources/images/Tiles/bg/grass_stone_2.jpg', 0.2),
     ],
     'grass_plant_red': [
-        ('resources/images/Tiles/bg/tile_plant_r_1.jpg', 40),
-        ('resources/images/Tiles/bg/tile_plant_r_2.jpg', 30),
-        ('resources/images/Tiles/bg/tile_plant_r_3.jpg', 29),
+        ('resources/images/Tiles/bg/tile_grass2.jpg', 70),
+        ('resources/images/Tiles/bg/tile_grass4.jpg', 5),
+        ('resources/images/Tiles/bg/tile_plant_r_1.jpg', 10),
+        ('resources/images/Tiles/bg/tile_plant_r_2.jpg', 10),
+        ('resources/images/Tiles/bg/tile_plant_r_3.jpg', 5),
         ('resources/images/Tiles/bg/grass_stone_4.jpg', 0.2),
         ('resources/images/Tiles/bg/grass_stone_3.jpg', 0.2),
     ]
