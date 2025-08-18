@@ -9,6 +9,30 @@ from config import TILE_SIZE
 _background_patterns = []
 _patterns_loaded = False
 
+def simple_noise(x, y, scale=0.1):
+    """Simple noise function for natural tile clustering."""
+    # Create pseudo-random but smooth noise using multiple octaves
+    n1 = math.sin(x * scale) * math.cos(y * scale) 
+    n2 = math.sin(x * scale * 2.1) * math.cos(y * scale * 1.7) * 0.5
+    n3 = math.sin(x * scale * 4.3) * math.cos(y * scale * 3.9) * 0.25
+    return n1 + n2 + n3
+
+def get_biome_type(x, y):
+    """Determine biome type based on position for natural clustering."""
+    # Use noise to create natural biome boundaries
+    noise_val = simple_noise(x, y, 0.02)  # Large scale for biomes
+    detail_noise = simple_noise(x, y, 0.08) * 0.3  # Smaller scale for variation
+    
+    combined = noise_val + detail_noise
+    
+    # Define biome thresholds
+    if combined < -0.5:
+        return 0  # Grass areas
+    elif combined < 0.3:
+        return 1  # Dirt/transition areas  
+    else:
+        return 2  # Stone/rocky areas
+
 def load_background_patterns():
     """Create simple visual patterns for background tiles."""
     global _background_patterns, _patterns_loaded
@@ -79,8 +103,22 @@ def draw_tiled_background(surface, camera, tile_size=None, buffer_tiles=None):
             world_x = tile_x * tile_size
             world_y = tile_y * tile_size
             
-            # Use hash of tile coordinates for consistent pattern selection
-            pattern_idx = abs(hash((tile_x, tile_y))) % len(_background_patterns)
+            # Use biome-based clustering for more natural tile distribution
+            biome_type = get_biome_type(tile_x, tile_y)
+            
+            # Add some local variation within the biome
+            local_hash = abs(hash((tile_x, tile_y))) % 100
+            if local_hash < 15:  # 15% chance for variation
+                # Occasionally use a different tile type for natural mixing
+                if biome_type == 0:  # Grass areas can have some dirt
+                    pattern_idx = 1 if local_hash < 8 else 0
+                elif biome_type == 1:  # Dirt areas can have grass or stone
+                    pattern_idx = 0 if local_hash < 5 else (2 if local_hash < 10 else 1)
+                else:  # Stone areas can have some dirt
+                    pattern_idx = 1 if local_hash < 8 else 2
+            else:
+                pattern_idx = biome_type
+            
             tile_pattern = _background_patterns[pattern_idx]
             
             # Convert world position to screen position
