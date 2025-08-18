@@ -10,6 +10,8 @@ from rendering.game_render import draw_game
 from core.event_handler import GameEventHandler
 from core.game_logic import GameLogicManager
 from core.frame_timer import FrameTimer
+from ui.loading_screen import show_loading_screen
+from rendering.background_render import print_cache_stats
 
 
 def run_game(screen, slot, mode):
@@ -21,6 +23,26 @@ def run_game(screen, slot, mode):
         slot: Save slot index
         mode: Game difficulty mode ('Easy', 'Normal', 'Hard')
     """
+    # Show loading screen and preload map tiles
+    print(f"Starting game with mode: {mode}")
+    print("Showing loading screen...")
+    
+    # Preload a large area around spawn (adjust radius as needed)
+    # radius_tiles=300 means 300 tiles in each direction = ~600x600 tile area
+    loading_success = show_loading_screen(
+        screen, 
+        preload_type="full", # area, full
+        spawn_x=0,  # Spawn at world center
+        spawn_y=0, 
+        radius_tiles=300  # Adjust this based on how much you want to preload
+    )
+    
+    if not loading_success:
+        print("Loading failed, continuing without preload...")
+    else:
+        print("Loading successful!")
+        print_cache_stats()
+    
     # Initialize game state
     (
         game, running, should_exit, last_move, time_accum, clock, paused, pause_menu_selected,
