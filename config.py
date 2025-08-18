@@ -16,31 +16,28 @@ CAMERA_DEADZONE = 50  # Pixel deadzone around center before camera moves
 # Background Biome Configuration
 BIOME_TILES = {
     'grass': [
-        ('resources/images/Tiles/bg/tile_grass1.jpg', 35),  # (path, weight%)
-        ('resources/images/Tiles/bg/tile_grass2.jpg', 30),
-        ('resources/images/Tiles/bg/tile_grass3.jpg', 35)
+        ('resources/images/Tiles/bg/tile_grass1.jpg', 25),  # (path, weight%)
+        ('resources/images/Tiles/bg/tile_grass2.jpg', 20),
+        ('resources/images/Tiles/bg/tile_grass3.jpg', 35),
+        ('resources/images/Tiles/bg/tile_grass4.jpg', 16),
+        ('resources/images/Tiles/bg/grass_stone_5.jpg', 0.2),
+        ('resources/images/Tiles/bg/tile_grass_wood1.jpg', 0.1),
+        ('resources/images/Tiles/bg/tile_grass_wood2.jpg', 0.2),
+        ('resources/images/Tiles/bg/tile_grass_wood3.jpg', 0.2),
     ],
     'grass_plant_yellow': [
         ('resources/images/Tiles/bg/tile_plant_y_1.jpg', 40),
-        ('resources/images/Tiles/bg/tile_plant_y_2.jpg', 40),
-        ('resources/images/Tiles/bg/tile_plant_y_3.jpg', 20),
+        ('resources/images/Tiles/bg/tile_plant_y_2.jpg', 30),
+        ('resources/images/Tiles/bg/tile_plant_y_3.jpg', 29),
+        ('resources/images/Tiles/bg/grass_stone_1.jpg', 0.2),
+		('resources/images/Tiles/bg/grass_stone_2.jpg', 0.2),
     ],
     'grass_plant_red': [
         ('resources/images/Tiles/bg/tile_plant_r_1.jpg', 40),
-        ('resources/images/Tiles/bg/tile_plant_r_2.jpg', 40),
-        ('resources/images/Tiles/bg/tile_plant_r_3.jpg', 20),
-    ],
-    'grass_stone': [
-        ('resources/images/Tiles/bg/grass_stone_1.jpg', 20),
-        ('resources/images/Tiles/bg/grass_stone_2.jpg', 20),
-        ('resources/images/Tiles/bg/grass_stone_3.jpg', 20),
-        ('resources/images/Tiles/bg/grass_stone_4.jpg', 20),
-        ('resources/images/Tiles/bg/grass_stone_5.jpg', 20),
-    ],
-    'stone': [
-        ('resources/images/Tiles/bg/tile_stone1.jpg', 40),
-        ('resources/images/Tiles/bg/tile_stone2.jpg', 40),
-        ('resources/images/Tiles/bg/tile_stone3.jpg', 20)
+        ('resources/images/Tiles/bg/tile_plant_r_2.jpg', 30),
+        ('resources/images/Tiles/bg/tile_plant_r_3.jpg', 29),
+        ('resources/images/Tiles/bg/grass_stone_4.jpg', 0.2),
+        ('resources/images/Tiles/bg/grass_stone_3.jpg', 0.2),
     ]
 }
 
@@ -48,9 +45,7 @@ BIOME_TILES = {
 BIOME_FALLBACK_COLORS = {
     'grass': (60, 140, 40),
     'grass_plant_yellow': (101, 67, 33),
-    'grass_plant_red': (140, 40, 40),
-    'grass_stone': (90, 100, 80),
-    'stone': (120, 120, 120)
+    'grass_plant_red': (140, 40, 40)
 }
 
 # =============================================================================

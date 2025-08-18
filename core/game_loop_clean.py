@@ -11,7 +11,7 @@ from core.event_handler import GameEventHandler
 from core.game_logic import GameLogicManager
 from core.frame_timer import FrameTimer
 from ui.loading_screen import show_loading_screen
-from rendering.background_render import print_cache_stats
+from rendering.background_render import print_cache_stats, generate_new_world
 
 
 def run_game(screen, slot, mode):
@@ -25,6 +25,11 @@ def run_game(screen, slot, mode):
     """
     # Show loading screen and preload map tiles
     print(f"Starting game with mode: {mode}")
+    print("Generating new world...")
+    
+    # Generate a new world with random seed
+    generate_new_world()
+    
     print("Showing loading screen...")
     
     # Preload a large area around spawn (adjust radius as needed)
