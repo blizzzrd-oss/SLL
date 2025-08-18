@@ -30,6 +30,13 @@ BIOME_TILES = {
         ('resources/images/Tiles/bg/tile_plant_r_2.jpg', 40),
         ('resources/images/Tiles/bg/tile_plant_r_3.jpg', 20),
     ],
+    'grass_stone': [
+        ('resources/images/Tiles/bg/grass_stone_1.jpg', 20),
+        ('resources/images/Tiles/bg/grass_stone_2.jpg', 20),
+        ('resources/images/Tiles/bg/grass_stone_3.jpg', 20),
+        ('resources/images/Tiles/bg/grass_stone_4.jpg', 20),
+        ('resources/images/Tiles/bg/grass_stone_5.jpg', 20),
+    ],
     'stone': [
         ('resources/images/Tiles/bg/tile_stone1.jpg', 40),
         ('resources/images/Tiles/bg/tile_stone2.jpg', 40),
@@ -42,6 +49,7 @@ BIOME_FALLBACK_COLORS = {
     'grass': (60, 140, 40),
     'grass_plant_yellow': (101, 67, 33),
     'grass_plant_red': (140, 40, 40),
+    'grass_stone': (90, 100, 80),
     'stone': (120, 120, 120)
 }
 

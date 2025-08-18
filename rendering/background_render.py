@@ -10,6 +10,10 @@ from config import TILE_SIZE, BIOME_TILES, BIOME_FALLBACK_COLORS
 _background_patterns = []
 _patterns_loaded = False
 
+# Tile cache for performance - stores pre-calculated tile assignments
+_tile_cache = {}
+_cache_size_limit = 10000  # Limit cache size to prevent memory issues
+
 def simple_noise(x, y, scale=0.1):
     """Simple noise function for natural tile clustering."""
     # Create pseudo-random but smooth noise using multiple octaves
@@ -18,15 +22,74 @@ def simple_noise(x, y, scale=0.1):
     n3 = math.sin(x * scale * 4.3) * math.cos(y * scale * 3.9) * 0.25
     return n1 + n2 + n3
 
-def get_biome_type(x, y):
-    """Determine biome type based on position for natural clustering."""
+def get_cached_tile(tile_x, tile_y):
+    """Get a cached tile or generate it if not cached."""
+    global _tile_cache
+    
+    tile_key = (tile_x, tile_y)
+    
+    # Check if tile is already cached
+    if tile_key in _tile_cache:
+        return _tile_cache[tile_key]
+    
+    # Limit cache size to prevent memory issues
+    if len(_tile_cache) >= _cache_size_limit:
+        # Remove oldest entries (simple LRU approximation)
+        keys_to_remove = list(_tile_cache.keys())[:_cache_size_limit // 4]
+        for key in keys_to_remove:
+            del _tile_cache[key]
+    
+    # Generate the tile
+    biome_type = get_biome_type(tile_x, tile_y)
+    
+    # Add local variation within the biome, but no grassy tiles in stone areas
+    local_hash = abs(hash((tile_x, tile_y))) % 100
+    if local_hash < 15:  # 15% chance for variation
+        if biome_type == 0:  # Grass areas can have some plant variations
+            pattern_idx = 1 if local_hash < 8 else 0
+        elif biome_type == 1:  # Yellow plant areas can have grass or red plants
+            pattern_idx = 0 if local_hash < 5 else (2 if local_hash < 10 else 1)
+        elif biome_type == 2:  # Red plant areas can have grass or yellow plants
+            pattern_idx = 0 if local_hash < 5 else (1 if local_hash < 10 else 2)
+        elif biome_type == 3:  # Grass-stone transition areas stay as grass-stone
+            pattern_idx = 3  # No mixing for transition tiles
+        else:  # Stone areas (biome_type == 4) stay pure stone
+            pattern_idx = 4  # No grassy tiles in stone areas
+    else:
+        pattern_idx = biome_type
+    
+    # Select tile from biome with weighted probability
+    biome_tiles = _background_patterns[pattern_idx]
+    tile_surface = select_tile_from_biome(biome_tiles, tile_x, tile_y)
+    
+    # Cache the result
+    _tile_cache[tile_key] = tile_surface
+    
+    return tile_surface
+
+def clear_tile_cache():
+    """Clear the tile cache to free memory or reset tiles."""
+    global _tile_cache
+    _tile_cache.clear()
+    print(f"Tile cache cleared")
+
+def get_cache_stats():
+    """Get cache statistics for debugging."""
+    return {
+        'cache_size': len(_tile_cache),
+        'cache_limit': _cache_size_limit,
+        'memory_usage_tiles': len(_tile_cache)
+    }
+
+def get_raw_biome_type(x, y):
+    """Get the base biome type without transition logic."""
     # Use noise to create natural biome boundaries
     noise_val = simple_noise(x, y, 0.02)  # Large scale for biomes
     detail_noise = simple_noise(x, y, 0.08) * 0.3  # Smaller scale for variation
     
     combined = noise_val + detail_noise
     
-    # Define biome thresholds for 4 biomes
+    # Define biome thresholds
     if combined < -0.6:
         return 0  # Grass areas
     elif combined < -0.1:
@@ -34,7 +97,29 @@ def get_biome_type(x, y):
     elif combined < 0.4:
         return 2  # Grass with red plants  
     else:
-        return 3  # Stone/rocky areas
+        return 4  # Stone/rocky areas (index 4 now since grass_stone is index 3)
+
+def is_adjacent_to_stone(x, y):
+    """Check if a tile position is adjacent to stone biome."""
+    # Check the 8 surrounding tiles
+    for dx in [-1, 0, 1]:
+        for dy in [-1, 0, 1]:
+            if dx == 0 and dy == 0:
+                continue  # Skip the center tile
+            neighbor_biome = get_raw_biome_type(x + dx, y + dy)
+            if neighbor_biome == 4:  # Stone biome
+                return True
+    return False
+
+def get_biome_type(x, y):
+    """Determine biome type based on position for natural clustering."""
+    raw_biome = get_raw_biome_type(x, y)
+    
+    # If this tile is not stone but is adjacent to stone, use grass_stone transition
+    if raw_biome != 4 and is_adjacent_to_stone(x, y):
+        return 3  # grass_stone biome
+    
+    return raw_biome
 
 def load_background_patterns():
     """Load biome tile patterns from image files specified in config with weighted selection."""
@@ -43,7 +128,7 @@ def load_background_patterns():
         return
     
     tile_size = TILE_SIZE
-    biome_order = ['grass', 'grass_plant_yellow', 'grass_plant_red', 'stone']  # Order matches biome indices
+    biome_order = ['grass', 'grass_plant_yellow', 'grass_plant_red', 'grass_stone', 'stone']  # Order matches biome indices
     
     for biome_name in biome_order:
         biome_config = BIOME_TILES.get(biome_name)
@@ -137,6 +222,20 @@ def create_fallback_tile(biome_name, tile_size):
             y = (i * 17) % tile_size
             darker_color = tuple(max(0, c - 20) for c in fallback_color)
             pygame.draw.circle(tile, darker_color, (x, y), 3)
+    elif biome_name == 'grass_stone':
+        # Grass-stone transition pattern
+        tile = pygame.Surface((tile_size, tile_size))
+        tile.fill(fallback_color)
+        # Mix of grass dots and stone lines
+        for i in range(6):
+            x = (i * 13) % tile_size
+            y = (i * 17) % tile_size
+            darker_color = tuple(max(0, c - 15) for c in fallback_color)
+            pygame.draw.circle(tile, darker_color, (x, y), 2)
+        # Add some stone-like lines
+        stone_color = tuple(max(0, c - 25) for c in fallback_color)
+        for i in range(0, tile_size, 12):
+            pygame.draw.line(tile, stone_color, (i, 0), (i, tile_size), 1)
     else:  # stone
         # Stone-like pattern
         tile = pygame.Surface((tile_size, tile_size))
@@ -182,26 +281,8 @@ def draw_tiled_background(surface, camera, tile_size=None, buffer_tiles=None):
             world_y = tile_y * tile_size
             
             # Use biome-based clustering for more natural tile distribution
-            biome_type = get_biome_type(tile_x, tile_y)
-            
-            # Add some local variation within the biome
-            local_hash = abs(hash((tile_x, tile_y))) % 100
-            if local_hash < 15:  # 15% chance for variation
-                # Occasionally use a different tile type for natural mixing
-                if biome_type == 0:  # Grass areas can have some plant variations
-                    pattern_idx = 1 if local_hash < 8 else 0
-                elif biome_type == 1:  # Yellow plant areas can have grass or red plants
-                    pattern_idx = 0 if local_hash < 5 else (2 if local_hash < 10 else 1)
-                elif biome_type == 2:  # Red plant areas can have grass or yellow plants
-                    pattern_idx = 0 if local_hash < 5 else (1 if local_hash < 10 else 2)
-                else:  # Stone areas can have some plant mixing
-                    pattern_idx = 1 if local_hash < 8 else 3
-            else:
-                pattern_idx = biome_type
-            
-            # Select tile from biome with weighted probability
-            biome_tiles = _background_patterns[pattern_idx]
-            tile_pattern = select_tile_from_biome(biome_tiles, tile_x, tile_y)
+            # Get cached tile (generates and caches if not already cached)
+            tile_pattern = get_cached_tile(tile_x, tile_y)
             
             # Convert world position to screen position
             screen_x, screen_y = camera.world_to_screen(world_x, world_y)
