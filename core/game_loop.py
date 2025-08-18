@@ -3,6 +3,7 @@
 Game main loop and event handling.
 """
 import pygame
+import sys
 import time
 import json
 #import os
@@ -104,7 +105,7 @@ def run_game(screen, slot, mode):
                 settings_menu.state = 'settings'
         elif option == "Quit":
             pygame.quit()
-            exit()
+            sys.exit()
 
 
     def handle_settings_menu_events(event):

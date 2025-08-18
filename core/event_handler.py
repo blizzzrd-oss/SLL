@@ -4,6 +4,7 @@ Separates input handling from the main game loop.
 """
 
 import pygame
+import sys
 from config import HUD_TOGGLE_KEY
 from rendering.menu import Menu
 
@@ -128,7 +129,7 @@ class GameEventHandler:
                 self.settings_menu.state = 'settings'
         elif option == "Quit":
             pygame.quit()
-            exit()
+            sys.exit()
 
     def _handle_settings_menu_events(self, event):
         """Handle events in the settings menu."""
