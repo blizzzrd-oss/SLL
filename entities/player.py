@@ -10,7 +10,8 @@ from config import (
     WORLD_SIZE, PLAYER_START_HEALTH, PLAYER_START_BARRIER, PLAYER_BARRIER_DECAY_PERCENT_PER_SEC, PLAYER_BARRIER_REGEN,
     PLAYER_START_EXP, PLAYER_EXP_TO_NEXT_LEVEL_MULT, PLAYER_START_LEVEL, PLAYER_SIZE, PLAYER_MOVEMENT_SPEED,
     PLAYER_DAMAGE_REDUCTION, PLAYER_COOLDOWN, PLAYER_ATTACK_SPEED, PLAYER_CRIT_CHANCE, PLAYER_CRIT_DAMAGE,
-    PLAYER_START_SKILL_POINTS, PLAYER_PASSIVE_SKILLS, PLAYER_ACTIVE_SKILLS
+    PLAYER_START_SKILL_POINTS, PLAYER_PASSIVE_SKILLS, PLAYER_ACTIVE_SKILLS,
+    PLAYER_AUTO_AIM, PLAYER_AUTO_ATTACK
 )
 from utils.player_damage_log import PlayerDamageLog
 from utils.player_received_log import PlayerReceivedLog
@@ -93,13 +94,13 @@ class Player:
             with open(settings_path, 'r') as f:
                 data = json.load(f)
             self.checkbox_options = [
-                {"label": "Auto Aim", "checked": bool(data.get('auto_aim', True))},
-                {"label": "Auto Attack", "checked": bool(data.get('auto_attack', True))},
+                {"label": "Auto Aim", "checked": bool(data.get('auto_aim', PLAYER_AUTO_AIM))},
+                {"label": "Auto Attack", "checked": bool(data.get('auto_attack', PLAYER_AUTO_ATTACK))},
             ]
         except Exception:
             self.checkbox_options = [
-                {"label": "Auto Aim", "checked": True},
-                {"label": "Auto Attack", "checked": True},
+                {"label": "Auto Aim", "checked": PLAYER_AUTO_AIM},
+                {"label": "Auto Attack", "checked": PLAYER_AUTO_ATTACK},
             ]
 
 

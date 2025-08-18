@@ -5,6 +5,7 @@ Handles FPS control and timing calculations.
 
 import json
 import pygame
+from config import GAME_DEFAULT_FPS
 
 
 class FrameTimer:
@@ -14,7 +15,7 @@ class FrameTimer:
         self.settings_path = settings_path
         self.clock = pygame.time.Clock()
         self.time_accum = 0.0
-        self.target_fps = 60  # Default FPS
+        self.target_fps = GAME_DEFAULT_FPS  # Default FPS from config
         
     def tick(self):
         """Advance one frame and return timing information."""
@@ -32,9 +33,9 @@ class FrameTimer:
         try:
             with open(self.settings_path, 'r') as f:
                 settings = json.load(f)
-            return int(settings.get('fps', 60))
+            return int(settings.get('fps', GAME_DEFAULT_FPS))
         except Exception:
-            return 60  # Fallback to 60 FPS
+            return GAME_DEFAULT_FPS  # Fallback to config default
             
     def get_accumulated_time(self):
         """Get total accumulated game time."""

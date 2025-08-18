@@ -132,6 +132,10 @@ PLAYER_CRIT_CHANCE = 0.05
 PLAYER_CRIT_DAMAGE = 1.5
 PLAYER_START_SKILL_POINTS = 0
 
+# Player Combat Settings
+PLAYER_AUTO_AIM = True  # Default auto-aim setting
+PLAYER_AUTO_ATTACK = True  # Default auto-attack setting
+
 # Player Skills Configuration
 PLAYER_PASSIVE_SKILLS = {
 	'toughness': 0,
@@ -245,15 +249,15 @@ RECEIVED_LOG_MAX_ENTRIES = 50
 # =============================================================================
 # AUDIO CONFIGURATION
 # =============================================================================
-MUSIC_VOLUME = 0.05  # 5%
+MUSIC_VOLUME = 0.02  # 2%
 SFX_VOLUME = 0.1    # 10%
 BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"
 
 # =============================================================================
 # LOGGING AND DEBUGGING CONFIGURATION  
 # =============================================================================
-PLAYER_DAMAGE_LOG_MAX_ENTRIES = 50
-PLAYER_RECEIVED_LOG_MAX_ENTRIES = 50
+PLAYER_DAMAGE_LOG_MAX_ENTRIES = 10
+PLAYER_RECEIVED_LOG_MAX_ENTRIES = 10  # Death log shows last 10 events before death
 
 # =============================================================================
 # FILE PATHS AND RESOURCES

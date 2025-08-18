@@ -12,7 +12,8 @@ from config import (
     COLOR_BG, COLOR_TEXT, COLOR_HIGHLIGHT, COLOR_SLIDER_MUSIC, COLOR_SLIDER_SFX, COLOR_BACK,
     GAME_FPS_OPTIONS, GAME_DEFAULT_FPS,
     COLOR_BLACK, COLOR_GRAY,
-    FONT_SIZE_LARGE, FONT_SIZE_SMALL, WINDOW_WIDTH, WINDOW_HEIGHT
+    FONT_SIZE_LARGE, FONT_SIZE_SMALL, WINDOW_WIDTH, WINDOW_HEIGHT,
+    PLAYER_AUTO_AIM, PLAYER_AUTO_ATTACK
 )
 
 # Helper for resource paths
@@ -172,18 +173,18 @@ class Menu:
             self.music_volume = min(100, max(0, (self.music_volume // 5) * 5))
             self.sfx_volume = int(round(float(sv)))
             self.sfx_volume = min(100, max(0, (self.sfx_volume // 5) * 5))
-            self.fps = int(data.get('fps', self.fps_options[0]))
+            self.fps = int(data.get('fps', GAME_DEFAULT_FPS))
             self.checkbox_options = [
-                {"label": "Auto Aim", "checked": bool(data.get('auto_aim', True))},
-                {"label": "Auto Attack", "checked": bool(data.get('auto_attack', True))},
+                {"label": "Auto Aim", "checked": bool(data.get('auto_aim', PLAYER_AUTO_AIM))},
+                {"label": "Auto Attack", "checked": bool(data.get('auto_attack', PLAYER_AUTO_ATTACK))},
             ]
         except Exception:
             self.music_volume = int(MUSIC_VOLUME * 100)
             self.sfx_volume = int(SFX_VOLUME * 100)
-            self.fps = self.fps_options[0]
+            self.fps = GAME_DEFAULT_FPS
             self.checkbox_options = [
-                {"label": "Auto Aim", "checked": True},
-                {"label": "Auto Attack", "checked": True},
+                {"label": "Auto Aim", "checked": PLAYER_AUTO_AIM},
+                {"label": "Auto Attack", "checked": PLAYER_AUTO_ATTACK},
             ]
 
     def save_settings(self, player=None):
@@ -215,7 +216,7 @@ class Menu:
                 else:
                     self.handle_event(event)
             self.draw()
-            clock.tick(60)
+            clock.tick(self.fps)
         # Only quit pygame if the whole app is closing, not if starting the game
         if not self._should_exit:
             pygame.quit()

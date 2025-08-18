@@ -14,7 +14,7 @@ from entities.enemy import PlantType
 from rendering.game_render import draw_game
 from core.game import Game
 #from config import (PLAYER_HURT_ANIMATION_FPS, PLAYER_SPRITE_FRAME_WIDTH, GAME_BG_COLOR, GAME_OVERLAY_COLOR, PAUSE_OVERLAY_COLOR, GAME_OVER_FONT_SIZE, PAUSE_FONT_SIZE, MENU_FONT_SIZE, PAUSE_MENU_HIGHLIGHT_COLOR, PAUSE_MENU_TEXT_COLOR, PAUSE_MENU_OPTIONS, HUD_TOGGLE_KEY)
-from config import (HUD_TOGGLE_KEY)
+from config import (HUD_TOGGLE_KEY, GAME_DEFAULT_FPS)
 from rendering.menu import Menu
 #from rendering.ui import draw_hud
 
@@ -131,9 +131,9 @@ def run_game(screen, slot, mode):
     try:
         with open(settings_path, 'r') as f:
             settings = json.load(f)
-        fps = int(settings.get('fps', 60))
+        fps = int(settings.get('fps', GAME_DEFAULT_FPS))
     except Exception:
-        fps = 60
+        fps = GAME_DEFAULT_FPS
     def get_frame_timing(clock, time_accum):
         dt = clock.tick(fps) / 1000.0
         time_accum += dt
