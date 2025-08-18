@@ -364,6 +364,8 @@ paket-files/
 #tools/**
 #!tools/packages.config
 
+settings.json
+
 # Tabs Studio
 *.tss
 
