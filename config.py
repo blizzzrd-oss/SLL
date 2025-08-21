@@ -71,69 +71,69 @@ ENEMY_TYPE_CONFIG = {
 # WAVE SYSTEM CONFIGURATION
 # =============================================================================
 
-# Comprehensive Wave System Configuration (Primary)
+# Comprehensive Wave System Configuration (Primary) - ADDITIVE BONUSES
 WAVE_SYSTEM_CONFIGURATION = {
     # Core wave timing
     'WAVE_DURATION': 30.0,  # Duration of each wave in seconds
     
-    # Spawn rate scaling per wave
-    'WAVE_SPAWN_RATE_SCALING': {
-        1: 1.0,   # Wave 1: Normal spawn rate
-        2: 1.2,   # Wave 2: 20% faster spawning
-        3: 1.4,   # Wave 3: 40% faster spawning
-        4: 1.7,   # Wave 4: 70% faster spawning
-        5: 2.0,   # Wave 5+: 100% faster spawning (continues)
+    # Spawn rate bonuses per wave (additive percentages)
+    'WAVE_SPAWN_RATE_BONUSES': {
+        1: 0.0,   # Wave 1: +0% spawn rate (normal)
+        2: 0.2,   # Wave 2: +20% spawn rate
+        3: 0.4,   # Wave 3: +40% spawn rate  
+        4: 0.7,   # Wave 4: +70% spawn rate
+        5: 1.0,   # Wave 5+: +100% spawn rate (continues)
     },
     
-    # XP gain multipliers per wave
-    'WAVE_XP_GAIN_SCALING': {
-        1: 1.0,   # Wave 1: Normal XP
-        2: 1.1,   # Wave 2: 10% more XP
-        3: 1.2,   # Wave 3: 20% more XP
-        4: 1.4,   # Wave 4: 40% more XP
-        5: 1.6,   # Wave 5+: 60% more XP (continues)
+    # XP gain bonuses per wave (additive percentages)
+    'WAVE_XP_GAIN_BONUSES': {
+        1: 0.0,   # Wave 1: +0% XP (normal)
+        2: 0.1,   # Wave 2: +10% XP
+        3: 0.2,   # Wave 3: +20% XP
+        4: 0.4,   # Wave 4: +40% XP
+        5: 0.6,   # Wave 5+: +60% XP (continues)
     },
     
-    # Enemy stat multipliers per wave
-    'WAVE_ENEMY_MULTIPLIERS': {
+    # Enemy stat bonuses per wave (additive percentages)
+    'WAVE_ENEMY_BONUSES': {
         'health': {
-            1: 1.0,   # Wave 1: Normal health
-            2: 1.2,   # Wave 2: 20% more health
-            3: 1.4,   # Wave 3: 40% more health
-            4: 1.7,   # Wave 4: 70% more health
-            5: 2.0,   # Wave 5+: 100% more health (continues)
+            1: 0.0,   # Wave 1: +0% health (normal)
+            2: 0.2,   # Wave 2: +20% health
+            3: 0.4,   # Wave 3: +40% health
+            4: 0.7,   # Wave 4: +70% health
+            5: 1.0,   # Wave 5+: +100% health (continues)
         },
         'damage': {
-            1: 1.0,   # Wave 1: Normal damage
-            2: 1.1,   # Wave 2: 10% more damage
-            3: 1.2,   # Wave 3: 20% more damage
-            4: 1.4,   # Wave 4: 40% more damage
-            5: 1.6,   # Wave 5+: 60% more damage (continues)
+            1: 0.0,   # Wave 1: +0% damage (normal)
+            2: 0.1,   # Wave 2: +10% damage
+            3: 0.2,   # Wave 3: +20% damage
+            4: 0.4,   # Wave 4: +40% damage
+            5: 0.6,   # Wave 5+: +60% damage (continues)
         },
         'speed': {
-            1: 1.0,   # Wave 1: Normal speed
-            2: 1.05,  # Wave 2: 5% faster
-            3: 1.1,   # Wave 3: 10% faster
-            4: 1.15,  # Wave 4: 15% faster
-            5: 1.2,   # Wave 5+: 20% faster (continues)
+            1: 0.0,   # Wave 1: +0% speed (normal)
+            2: 0.05,  # Wave 2: +5% speed
+            3: 0.1,   # Wave 3: +10% speed
+            4: 0.15,  # Wave 4: +15% speed
+            5: 0.2,   # Wave 5+: +20% speed (continues)
         },
     },
     
-    # Player progression multipliers per wave
-    'WAVE_PLAYER_MULTIPLIERS': {
+    # Player progression bonuses per wave (additive percentages)
+    'WAVE_PLAYER_BONUSES': {
         'cooldown_reduction': {
-            1: 1.0,   # Wave 1: Normal cooldowns
-            2: 0.95,  # Wave 2: 5% faster cooldowns
-            3: 0.9,   # Wave 3: 10% faster cooldowns
-            4: 0.85,  # Wave 4: 15% faster cooldowns
-            5: 0.8,   # Wave 5+: 20% faster cooldowns (continues)
+            1: 0.0,   # Wave 1: +0% cooldown reduction (normal)
+            2: 0.05,  # Wave 2: +5% cooldown reduction
+            3: 0.1,   # Wave 3: +10% cooldown reduction
+            4: 0.15,  # Wave 4: +15% cooldown reduction
+            5: 0.2,   # Wave 5+: +20% cooldown reduction (continues)
         },
         'magic_find': {
-            1: 1.0,   # Wave 1: Normal magic find
-            2: 1.1,   # Wave 2: 10% better magic find
-            3: 1.2,   # Wave 3: 20% better magic find
-            4: 1.3,   # Wave 4: 30% better magic find
-            5: 1.5,   # Wave 5+: 50% better magic find (continues)
+            1: 0.0,   # Wave 1: +0% magic find (normal)
+            2: 0.1,   # Wave 2: +10% magic find
+            3: 0.2,   # Wave 3: +20% magic find
+            4: 0.3,   # Wave 4: +30% magic find
+            5: 0.5,   # Wave 5+: +50% magic find (continues)
         },
     },
 }

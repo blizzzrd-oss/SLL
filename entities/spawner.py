@@ -172,7 +172,7 @@ class EnemySpawner:
             pass
     
     def _apply_wave_multipliers(self, enemy):
-        """Apply wave-based multipliers to a spawned enemy"""
+        """Apply wave-based multipliers to a spawned enemy using additive bonus system"""
         wave_multipliers = self.wave_manager.get_current_enemy_multipliers()
         
         # Apply wave health multiplier (cumulative with mode multiplier)
@@ -187,9 +187,17 @@ class EnemySpawner:
         enemy.wave_damage_multiplier = wave_multipliers['damage']
         enemy.wave_speed_multiplier = wave_multipliers['speed']
         
-        # Combine mode and wave multipliers
-        enemy.total_damage_multiplier = current_damage_mult * wave_multipliers['damage']
-        enemy.total_speed_multiplier = current_speed_mult * wave_multipliers['speed']
+        # Combine mode and wave multipliers using additive bonus system
+        # Convert multipliers back to bonuses, add them, then convert back to final multiplier
+        mode_damage_bonus = current_damage_mult - 1.0  # Extract bonus from mode multiplier
+        wave_damage_bonus = wave_multipliers['damage'] - 1.0  # Extract bonus from wave multiplier
+        total_damage_bonus = mode_damage_bonus + wave_damage_bonus  # Add bonuses together
+        enemy.total_damage_multiplier = 1.0 + total_damage_bonus  # Convert back to multiplier
+        
+        mode_speed_bonus = current_speed_mult - 1.0  # Extract bonus from mode multiplier
+        wave_speed_bonus = wave_multipliers['speed'] - 1.0  # Extract bonus from wave multiplier
+        total_speed_bonus = mode_speed_bonus + wave_speed_bonus  # Add bonuses together
+        enemy.total_speed_multiplier = 1.0 + total_speed_bonus  # Convert back to multiplier
 
 # Example usage:
 # from entities.enemy import PlantType

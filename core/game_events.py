@@ -95,20 +95,32 @@ class GameEventManager:
             print(f"[GAME EVENT] {notification_text} - {new_event.description}")
     
     def get_active_multipliers(self):
-        """Get all active multipliers from events"""
-        multipliers = {
-            'damage_to_enemies': 1.0,
-            'loot_drop_rate': 1.0,
-            'elite_spawn_rate': 1.0,
+        """Get all active multipliers from events using additive bonus system"""
+        # Start with base bonuses (no bonus = 0.0)
+        bonuses = {
+            'damage_to_enemies': 0.0,
+            'loot_drop_rate': 0.0,
+            'elite_spawn_rate': 0.0,
         }
         
+        # Add up all event bonuses
         for event in self.active_events:
             if event.effect_type == 'damage_multiplier':
-                multipliers['damage_to_enemies'] *= event.effect_value
+                # Convert multiplier to bonus and add (e.g., 1.5 -> +0.5)
+                bonuses['damage_to_enemies'] += (event.effect_value - 1.0)
             elif event.effect_type == 'loot_multiplier':
-                multipliers['loot_drop_rate'] *= event.effect_value
+                # Convert multiplier to bonus and add (e.g., 1.2 -> +0.2)
+                bonuses['loot_drop_rate'] += (event.effect_value - 1.0)
             elif event.effect_type == 'elite_spawn_rate':
-                multipliers['elite_spawn_rate'] *= event.effect_value
+                # Convert multiplier to bonus and add (e.g., 0.8 -> -0.2)
+                bonuses['elite_spawn_rate'] += (event.effect_value - 1.0)
+        
+        # Convert bonuses back to multipliers
+        multipliers = {
+            'damage_to_enemies': 1.0 + bonuses['damage_to_enemies'],
+            'loot_drop_rate': 1.0 + bonuses['loot_drop_rate'],
+            'elite_spawn_rate': 1.0 + bonuses['elite_spawn_rate'],
+        }
         
         return multipliers
     

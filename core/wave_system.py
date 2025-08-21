@@ -64,14 +64,20 @@ class WaveManager:
         self.enemies_killed_this_wave = 0
         
     def _generate_wave_config(self, wave_number: int) -> WaveConfig:
-        """Generate configuration for a specific wave number."""
-        # Get multipliers from centralized config
-        spawn_scaling = self.wave_config['WAVE_SPAWN_RATE_SCALING']
-        enemy_multipliers = self.wave_config['WAVE_ENEMY_MULTIPLIERS']
+        """Generate configuration for a specific wave number using additive bonuses."""
+        # Get bonus configuration from centralized config
+        spawn_bonuses = self.wave_config['WAVE_SPAWN_RATE_BONUSES']
+        enemy_bonuses = self.wave_config['WAVE_ENEMY_BONUSES']
         
         # Use the highest defined wave as fallback for waves beyond configuration
-        max_defined_wave = max(spawn_scaling.keys())
+        max_defined_wave = max(spawn_bonuses.keys())
         effective_wave = min(wave_number, max_defined_wave)
+        
+        # Calculate additive bonuses and convert to multipliers
+        spawn_bonus = spawn_bonuses[effective_wave]
+        health_bonus = enemy_bonuses['health'][effective_wave]
+        damage_bonus = enemy_bonuses['damage'][effective_wave]
+        speed_bonus = enemy_bonuses['speed'][effective_wave]
         
         # Mode-specific adjustments
         mode_multipliers = self._get_mode_multipliers()
@@ -79,26 +85,28 @@ class WaveManager:
         config = WaveConfig(
             wave_number=wave_number,
             duration=self.default_wave_interval,
-            spawn_rate_multiplier=spawn_scaling[effective_wave] * mode_multipliers.get('spawn_rate', 1.0),
-            enemy_health_multiplier=enemy_multipliers['health'][effective_wave] * mode_multipliers.get('enemy_health', 1.0),
-            enemy_damage_multiplier=enemy_multipliers['damage'][effective_wave],
-            enemy_speed_multiplier=enemy_multipliers['speed'][effective_wave],
+            spawn_rate_multiplier=(1.0 + spawn_bonus) * mode_multipliers.get('spawn_rate', 1.0),
+            enemy_health_multiplier=(1.0 + health_bonus) * mode_multipliers.get('enemy_health', 1.0),
+            enemy_damage_multiplier=(1.0 + damage_bonus),
+            enemy_speed_multiplier=(1.0 + speed_bonus),
         )
         
         # Add wave-specific events
         self._configure_wave_events(config)
         
-        # Special wave types - use config values
+        # Special wave types - use config values (also additive)
         if wave_number % BOSS_WAVE_INTERVAL == 0:  # Boss waves
             config.is_boss_wave = True
             config.description = f"Boss Wave {wave_number}"
-            config.spawn_rate_multiplier *= 1.5
-            config.enemy_health_multiplier *= BOSS_WAVE_HEALTH_BONUS
-            config.enemy_damage_multiplier *= BOSS_WAVE_DAMAGE_BONUS
+            config.spawn_rate_multiplier *= 1.5  # This can remain multiplicative for special waves
+            # Convert boss bonuses to additive system
+            config.enemy_health_multiplier *= (1.0 + (BOSS_WAVE_HEALTH_BONUS - 1.0))  # Convert to additive
+            config.enemy_damage_multiplier *= (1.0 + (BOSS_WAVE_DAMAGE_BONUS - 1.0))  # Convert to additive
         elif wave_number % ELITE_WAVE_INTERVAL == 0:  # Elite waves
             config.description = f"Elite Wave {wave_number}"
-            config.enemy_health_multiplier *= ELITE_WAVE_HEALTH_BONUS
-            config.enemy_speed_multiplier *= ELITE_WAVE_SPEED_BONUS
+            # Convert elite bonuses to additive system
+            config.enemy_health_multiplier *= (1.0 + (ELITE_WAVE_HEALTH_BONUS - 1.0))  # Convert to additive
+            config.enemy_speed_multiplier *= (1.0 + (ELITE_WAVE_SPEED_BONUS - 1.0))  # Convert to additive
         else:
             config.description = f"Wave {wave_number}"
             
@@ -197,27 +205,33 @@ class WaveManager:
         }
     
     def get_current_player_multipliers(self) -> Dict[str, float]:
-        """Get current player progression multipliers for this wave."""
-        player_multipliers = self.wave_config['WAVE_PLAYER_MULTIPLIERS']
+        """Get current player progression multipliers for this wave using additive bonuses."""
+        player_bonuses = self.wave_config['WAVE_PLAYER_BONUSES']
         
         # Use the highest defined wave as fallback for waves beyond configuration
-        max_defined_wave = max(player_multipliers['cooldown_reduction'].keys())
+        max_defined_wave = max(player_bonuses['cooldown_reduction'].keys())
         effective_wave = min(self.current_wave, max_defined_wave)
         
+        # Calculate additive bonuses and convert to multipliers
+        cooldown_bonus = player_bonuses['cooldown_reduction'][effective_wave]
+        magic_find_bonus = player_bonuses['magic_find'][effective_wave]
+        
         return {
-            'cooldown_reduction': player_multipliers['cooldown_reduction'][effective_wave],
-            'magic_find': player_multipliers['magic_find'][effective_wave],
+            'cooldown_reduction': 1.0 - cooldown_bonus,  # For cooldowns, bonus reduces the time
+            'magic_find': 1.0 + magic_find_bonus,        # For magic find, bonus increases the chance
         }
     
     def get_current_xp_multiplier(self) -> float:
-        """Get current XP gain multiplier for this wave."""
-        xp_scaling = self.wave_config['WAVE_XP_GAIN_SCALING']
+        """Get current XP gain multiplier for this wave using additive bonuses."""
+        xp_bonuses = self.wave_config['WAVE_XP_GAIN_BONUSES']
         
         # Use the highest defined wave as fallback for waves beyond configuration
-        max_defined_wave = max(xp_scaling.keys())
+        max_defined_wave = max(xp_bonuses.keys())
         effective_wave = min(self.current_wave, max_defined_wave)
         
-        return xp_scaling[effective_wave]
+        # Calculate additive bonus and convert to multiplier
+        xp_bonus = xp_bonuses[effective_wave]
+        return 1.0 + xp_bonus
     
     def get_wave_progress(self) -> float:
         """Get current wave progress as a percentage (0.0 to 1.0)."""
