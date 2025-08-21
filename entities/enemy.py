@@ -44,10 +44,13 @@ class Enemy:
                 self.logic.anim_timer = 0.0
                 
                 # Play death sound if state changed to death (only once)
-                if prev_state != 'death' and hasattr(self.logic, '_death_sound_cache'):
-                    if self.logic._death_sound_cache is not None:
+                if prev_state != 'death' and hasattr(self.logic, '_death_sounds_cache'):
+                    if self.logic._death_sounds_cache is not None and len(self.logic._death_sounds_cache) > 0:
                         try:
-                            self.logic._death_sound_cache.play()
+                            # Randomly select one of the death sounds
+                            import random
+                            random_sound = random.choice(self.logic._death_sounds_cache)
+                            random_sound.play()
                         except Exception as e:
                             print(f"[WARNING] Failed to play enemy death sound: {e}")
                 

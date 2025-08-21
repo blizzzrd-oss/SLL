@@ -258,7 +258,11 @@ SKILL_DASH_SOUND_PATH = "resources/sounds/skill_dash.mp3"
 SKILL_SLASH_SOUND_PATH = "resources/sounds/skill_slash.wav"
 
 # Enemy Sound Effects
-ENEMY_PLANT_DEATH_SOUND_PATH = "resources/sounds/death_enemy_plant01.wav"
+ENEMY_PLANT_DEATH_SOUND_PATHS = [
+    "resources/sounds/death_enemy_plant01.wav",
+    "resources/sounds/death_enemy_plant02.wav", 
+    "resources/sounds/death_enemy_plant03.wav"
+]
 
 # =============================================================================
 # LOGGING AND DEBUGGING CONFIGURATION  
