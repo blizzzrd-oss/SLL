@@ -17,7 +17,9 @@ _hud_cache = {
     'bottom': None,
     'left': None,
     'right': None,
-    'font': None
+    'font': None,
+    'fps_text': None,
+    'fps_value': None
 }
 
 def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event_notifications=None, game_time=None):
@@ -135,11 +137,17 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
     # screen.blit(font.render("RIGHT HUD", True, HUD_LABEL_COLOR), (width - HUD_RIGHT_WIDTH + 10, height//2 - 20))
 
     # --- Right HUD Display (FPS and Game Mode) ---
-    # Show FPS in the top right corner
+    # Show FPS in the top right corner with caching
     if fps is not None:
-        fps_text = font.render(f"FPS: {int(fps)}", True, HUD_LABEL_COLOR)
-        text_rect = fps_text.get_rect(topright=(width - 20, 10))
-        screen.blit(fps_text, text_rect)
+        fps_int = int(fps)
+        # Only re-render FPS text if the value changed
+        if _hud_cache['fps_value'] != fps_int:
+            _hud_cache['fps_value'] = fps_int
+            _hud_cache['fps_text'] = font.render(f"FPS: {fps_int}", True, HUD_LABEL_COLOR)
+        
+        if _hud_cache['fps_text'] is not None:
+            text_rect = _hud_cache['fps_text'].get_rect(topright=(width - 20, 10))
+            screen.blit(_hud_cache['fps_text'], text_rect)
 
     # Show Game Mode under FPS in right HUD
     if game_mode:
