@@ -38,9 +38,19 @@ class Enemy:
         if self.logic and hasattr(self.logic, 'state'):
             if self.health <= 0:
                 # Death overrides everything
+                prev_state = self.logic.state
                 self.logic.state = 'death'
                 self.logic.anim_frame = 0
                 self.logic.anim_timer = 0.0
+                
+                # Play death sound if state changed to death (only once)
+                if prev_state != 'death' and hasattr(self.logic, '_death_sound_cache'):
+                    if self.logic._death_sound_cache is not None:
+                        try:
+                            self.logic._death_sound_cache.play()
+                        except Exception as e:
+                            print(f"[WARNING] Failed to play enemy death sound: {e}")
+                
                 # Fix position for death animation to prevent jitter
                 if hasattr(self.logic, 'fixed_draw_pos'):
                     self.logic.fixed_draw_pos = (int(self.position[0]), int(self.position[1]))

@@ -1,6 +1,7 @@
 import pygame
 import os
 from utils.resource_path import resource_path
+from config import ENEMY_PLANT_DEATH_SOUND_PATH, SFX_VOLUME
 
 
 class PlantEnemyLogic:
@@ -22,8 +23,9 @@ class PlantEnemyLogic:
         'death': 10,  # Updated: 10 frames per direction
         'attack': 7,  # 448px / 7 = 64px per frame
     }
-    # Class-level sprite cache
+    # Class-level sprite and sound cache
     _sprite_cache = None
+    _death_sound_cache = None
 
     def __init__(self, enemy):
         self.enemy = enemy
@@ -33,6 +35,21 @@ class PlantEnemyLogic:
         if PlantEnemyLogic._sprite_cache is None:
             PlantEnemyLogic._sprite_cache = self._load_sprites()
         self.sprites = PlantEnemyLogic._sprite_cache
+        
+        # Load death sound effect (use class cache to avoid loading multiple times)
+        if PlantEnemyLogic._death_sound_cache is None:
+            try:
+                sound_path = resource_path(ENEMY_PLANT_DEATH_SOUND_PATH)
+                if os.path.exists(sound_path):
+                    PlantEnemyLogic._death_sound_cache = pygame.mixer.Sound(sound_path)
+                    PlantEnemyLogic._death_sound_cache.set_volume(SFX_VOLUME)
+                else:
+                    print(f"[WARNING] Plant death sound file not found: {sound_path}")
+                    PlantEnemyLogic._death_sound_cache = None
+            except Exception as e:
+                print(f"[WARNING] Failed to load plant death sound: {e}")
+                PlantEnemyLogic._death_sound_cache = None
+        
         # Use attack_cooldown from type if available, else default
         self.attack_cooldown = getattr(self.enemy.type, 'attack_cooldown', 1.0)
         self.last_attack = -float('inf')
