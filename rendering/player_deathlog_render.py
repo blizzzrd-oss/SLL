@@ -28,8 +28,8 @@ def render_player_deathlog(screen, player, font):
     for entry in recent:
         hp = entry.get('health', 0)
         barrier = entry.get('barrier', 0)
-        hp_str = f"{max(0, hp)}/{max_hp}"
-        barrier_str = f"{max(0, barrier)}/{max_barrier}"
+        hp_str = f"{int(max(0, hp))}/{int(max_hp)}"
+        barrier_str = f"{int(max(0, barrier))}/{int(max_barrier)}"
         if entry['type'] == 'damage':
             color = (255, 80, 80)
             change_type = "-" + str(abs(entry['amount']))
