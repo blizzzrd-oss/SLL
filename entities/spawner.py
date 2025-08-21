@@ -3,7 +3,7 @@
 import random
 import time
 from config import (
-    SPAWNER_DEFAULT_INTERVAL, SPAWNER_ENEMY_WEIGHTS, SPAWNER_TIME_WEIGHT_EVENTS, 
+    SPAWNER_DEFAULT_INTERVAL, SPAWNER_ENEMY_WEIGHTS,
     WINDOW_WIDTH, WINDOW_HEIGHT, SPAWNER_RATE_INCREASE_ENABLED, 
     SPAWNER_RATE_INCREASE_INTERVAL, SPAWNER_RATE_INCREASE_FACTOR, SPAWNER_MIN_INTERVAL,
     SPAWNER_WAVE_WEIGHT_EVENTS, WAVE_SCALING_ENABLED
@@ -42,13 +42,7 @@ class EnemySpawner:
                     enemy_name, wave_threshold, multiplier = event
                     if etype.name == enemy_name and current_wave >= wave_threshold:
                         weight *= multiplier
-            else:
-                # Fallback to time-based scaling
-                t = self.get_game_time()
-                for event in SPAWNER_TIME_WEIGHT_EVENTS:
-                    enemy_name, time_threshold, multiplier = event
-                    if etype.name == enemy_name and t > time_threshold:
-                        weight *= multiplier
+            # Note: Legacy time-based scaling removed - wave system is always available
             
             weights.append(weight)
         

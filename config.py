@@ -138,21 +138,11 @@ WAVE_SYSTEM_CONFIGURATION = {
     },
 }
 
-# Core Wave Settings (Legacy - kept for backward compatibility)
+# Core Wave Settings
 WAVE_DURATION = 30.0  # Duration of each wave in seconds (central config)
 WAVE_SCALING_ENABLED = True  # Enable wave-based progression
 
-# Legacy Wave Progression Multipliers (DEPRECATED - use WAVE_SYSTEM_CONFIGURATION instead)
-# These are kept for backward compatibility but should not be used in new code
-WAVE_SPAWN_RATE_MULTIPLIER = 1.15     # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_SPAWN_RATE_BONUSES']
-WAVE_ENEMY_HEALTH_MULTIPLIER = 1.08   # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_ENEMY_BONUSES']['health']
-WAVE_ENEMY_DAMAGE_MULTIPLIER = 1.05   # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_ENEMY_BONUSES']['damage']
-WAVE_ENEMY_SPEED_MULTIPLIER = 1.03    # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_ENEMY_BONUSES']['speed']
-WAVE_ENEMY_COOLDOWN_MULTIPLIER = 0.98 # DEPRECATED: Not implemented in new additive system
-WAVE_EXP_GAIN_MULTIPLIER = 1.04       # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_XP_GAIN_BONUSES']
-WAVE_MAGIC_FIND_MULTIPLIER = 1.02     # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_PLAYER_BONUSES']['magic_find']
-
-# Special Wave Types - CONVERTED TO ADDITIVE BONUSES
+# Special Wave Types - ADDITIVE BONUSES
 BOSS_WAVE_INTERVAL = 10      # Every 10th wave is a boss wave
 ELITE_WAVE_INTERVAL = 5      # Every 5th wave is an elite wave
 BOSS_WAVE_HEALTH_BONUS = 1.0 # Boss waves: +100% enemy health (additive bonus)
@@ -219,10 +209,7 @@ SPAWNER_WAVE_WEIGHT_EVENTS = [
 SPAWNER_MIN_INTERVAL = 0.1           # Minimum spawn interval (maximum spawn rate)
 SPAWNER_MAX_SPAWN_MULTIPLIER = 10.0  # Maximum spawn rate multiplier (caps at 10x)
 
-# Legacy time-based scaling (kept for fallback when no wave manager is available)
-SPAWNER_TIME_WEIGHT_EVENTS = [
-	('Plant', 60, 2.0),  # After 60s, double plant spawn chance (fallback only)
-]
+# Legacy time-based scaling (fallback when no wave manager is available)
 SPAWNER_RATE_INCREASE_ENABLED = True  # Enable spawn rate increases over time (fallback)
 SPAWNER_RATE_INCREASE_INTERVAL = 30.0  # Every 30 seconds, increase spawn rate (fallback) 
 SPAWNER_RATE_INCREASE_FACTOR = 0.9    # Multiply interval by 0.9 (10% faster spawning) (fallback)
