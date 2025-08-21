@@ -34,6 +34,8 @@ def init_pygame():
     # Load and play background music
     try:
         pygame.mixer.init()
+        # Set more channels to prevent sound dropping when multiple sounds play simultaneously
+        pygame.mixer.set_num_channels(32)  # Increase from default 8 to 32 channels
         music_path = resource_path(BG_MUSIC_PATH)
         pygame.mixer.music.load(music_path)
         pygame.mixer.music.set_volume(MUSIC_VOLUME)

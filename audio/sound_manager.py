@@ -155,7 +155,14 @@ class SoundManager:
         
         if sound:
             try:
-                sound.play()
+                # Try to play the sound, and if no channels are available, find a free one
+                channel = sound.play()
+                if channel is None:
+                    # No free channels, try to stop the oldest channel and play again
+                    pygame.mixer.stop()  # Stop all sounds briefly to free channels
+                    channel = sound.play()
+                    if channel is None:
+                        print(f"[WARNING] Could not play skill sound {skill_name}: No available channels")
             except Exception as e:
                 print(f"[WARNING] Failed to play skill sound {skill_name}: {e}")
     
@@ -164,10 +171,8 @@ class SoundManager:
         """Play a random plant death sound if available."""
         sound = cls.get_random_plant_death_sound()
         if sound:
-            try:
-                sound.play()
-            except Exception as e:
-                print(f"[WARNING] Failed to play plant death sound: {e}")
+            # Death sounds are important for player feedback, so force-play them
+            cls.force_play_sound(sound, "plant death sound")
     
     @classmethod
     def play_hit_sound(cls, hit_type):
@@ -175,8 +180,68 @@ class SoundManager:
         sound = cls._sounds_cache.get(f'hit_{hit_type}')
         if sound:
             try:
-                sound.play()
+                # Hit sounds should play reliably for feedback
+                channel = sound.play()
+                if channel is None:
+                    # Try to find a free channel
+                    for i in range(pygame.mixer.get_num_channels()):
+                        channel_obj = pygame.mixer.Channel(i)
+                        if not channel_obj.get_busy():
+                            channel = channel_obj.play(sound)
+                            break
+                    if channel is None:
+                        print(f"[WARNING] Could not play hit sound {hit_type}: All channels busy")
             except Exception as e:
                 print(f"[WARNING] Failed to play hit sound {hit_type}: {e}")
         else:
             print(f"[WARNING] Hit sound {hit_type} not found in cache")
+    
+    @classmethod
+    def force_play_sound(cls, sound, sound_type="unknown"):
+        """Force play a sound with higher priority, stopping other sounds if needed."""
+        if not sound:
+            return False
+            
+        try:
+            # First try normal play
+            channel = sound.play()
+            if channel is not None:
+                return True
+                
+            # If no channels available, stop the oldest non-priority sounds
+            # We'll use a simple approach: stop channels that have been playing longest
+            oldest_channel = None
+            oldest_time = 0
+            
+            for i in range(pygame.mixer.get_num_channels()):
+                channel_obj = pygame.mixer.Channel(i)
+                if channel_obj.get_busy():
+                    # For simplicity, we'll just stop the first busy channel we find
+                    # In a more complex system, we'd track sound priorities and ages
+                    channel_obj.stop()
+                    channel = channel_obj.play(sound)
+                    if channel is not None:
+                        print(f"[SOUND] Force-played {sound_type} by stopping another sound")
+                        return True
+                    break
+                    
+            print(f"[WARNING] Could not force-play {sound_type}: Unable to free channels")
+            return False
+            
+        except Exception as e:
+            print(f"[WARNING] Failed to force-play {sound_type}: {e}")
+            return False
+    
+    @classmethod
+    def get_channel_info(cls):
+        """Get information about current channel usage for debugging."""
+        total_channels = pygame.mixer.get_num_channels()
+        busy_channels = sum(1 for i in range(total_channels) if pygame.mixer.Channel(i).get_busy())
+        return f"Channels: {busy_channels}/{total_channels} busy"
+    
+    @classmethod
+    def debug_sound_system(cls):
+        """Print debug information about the sound system."""
+        print(f"[SOUND DEBUG] {cls.get_channel_info()}")
+        print(f"[SOUND DEBUG] Cached sounds: {list(cls._sounds_cache.keys())}")
+        print(f"[SOUND DEBUG] Initialized: {cls._initialized}")
