@@ -1,6 +1,7 @@
 # Import plant logic
 from entities.plant_logic import PlantEnemyLogic
 from config import ENEMY_TYPE_CONFIG
+from audio.sound_manager import SoundManager
 import pygame
 """
 Enemy entity and logic.
@@ -44,15 +45,10 @@ class Enemy:
                 self.logic.anim_timer = 0.0
                 
                 # Play death sound if state changed to death (only once)
-                if prev_state != 'death' and hasattr(self.logic, '_death_sounds_cache'):
-                    if self.logic._death_sounds_cache is not None and len(self.logic._death_sounds_cache) > 0:
-                        try:
-                            # Randomly select one of the death sounds
-                            import random
-                            random_sound = random.choice(self.logic._death_sounds_cache)
-                            random_sound.play()
-                        except Exception as e:
-                            print(f"[WARNING] Failed to play enemy death sound: {e}")
+                if prev_state != 'death':
+                    # Check if this is a plant enemy and play random plant death sound
+                    if isinstance(self.logic, PlantEnemyLogic):
+                        SoundManager.play_random_plant_death_sound()
                 
                 # Fix position for death animation to prevent jitter
                 if hasattr(self.logic, 'fixed_draw_pos'):

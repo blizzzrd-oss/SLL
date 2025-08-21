@@ -5,6 +5,7 @@ import pygame
 import time
 from rendering.background_render import preload_map_area, preload_map_tiles
 from config import WORLD_SIZE, TILE_SIZE
+from audio.sound_manager import SoundManager
 
 class LoadingScreen:
     def __init__(self, screen):
@@ -102,6 +103,14 @@ class LoadingScreen:
         # Start preloading in background (we'll simulate async behavior)
         start_time = time.time()
         
+        # First, preload sounds
+        self.status_text = "Loading sounds..."
+        self.draw()
+        sound_success = SoundManager.preload_all_sounds()
+        if not sound_success:
+            print("[WARNING] Some sounds failed to load")
+        
+        # Then preload map tiles
         if preload_type == "full":
             success = self.preload_world_map()
         elif preload_type == "area":
