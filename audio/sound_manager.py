@@ -7,7 +7,8 @@ import random
 from utils.resource_path import resource_path
 from config import (
     SKILL_DASH_SOUND_PATH, SKILL_SLASH_SOUND_PATH,
-    ENEMY_PLANT_DEATH_SOUND_PATHS, SFX_VOLUME
+    ENEMY_PLANT_DEATH_SOUND_PATHS, SFX_VOLUME,
+    HIT_ENEMY_SOUND_PATH, HIT_PLAYER_SOUND_PATH
 )
 
 
@@ -74,6 +75,27 @@ class SoundManager:
         if plant_death_sounds:
             cls._sounds_cache['plant_death_sounds'] = plant_death_sounds
         
+        # Hit sounds
+        hit_sounds = {
+            'enemy': HIT_ENEMY_SOUND_PATH,
+            'player': HIT_PLAYER_SOUND_PATH
+        }
+        
+        for hit_type, sound_path in hit_sounds.items():
+            total_sounds += 1
+            try:
+                full_path = resource_path(sound_path)
+                if os.path.exists(full_path):
+                    sound = pygame.mixer.Sound(full_path)
+                    sound.set_volume(SFX_VOLUME)
+                    cls._sounds_cache[f'hit_{hit_type}'] = sound
+                    success_count += 1
+                    print(f"[SOUND] Loaded hit sound: {hit_type}")
+                else:
+                    print(f"[WARNING] Hit sound file not found: {full_path}")
+            except Exception as e:
+                print(f"[WARNING] Failed to load hit sound {hit_type}: {e}")
+        
         cls._initialized = True
         print(f"[SOUND] Preloading complete: {success_count}/{total_sounds} sounds loaded")
         return success_count > 0
@@ -110,3 +132,15 @@ class SoundManager:
                 sound.play()
             except Exception as e:
                 print(f"[WARNING] Failed to play plant death sound: {e}")
+    
+    @classmethod
+    def play_hit_sound(cls, hit_type):
+        """Play a hit sound (enemy or player)."""
+        sound = cls._sounds_cache.get(f'hit_{hit_type}')
+        if sound:
+            try:
+                sound.play()
+            except Exception as e:
+                print(f"[WARNING] Failed to play hit sound {hit_type}: {e}")
+        else:
+            print(f"[WARNING] Hit sound {hit_type} not found in cache")

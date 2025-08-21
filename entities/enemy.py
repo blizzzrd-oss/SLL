@@ -31,6 +31,10 @@ class Enemy:
 
         self.health -= amount
 
+        # Play hit sound when enemy takes damage (but not fatal damage)
+        if self.health > 0:
+            SoundManager.play_hit_sound('enemy')
+
         # Log outgoing damage for player stats if attacker is a Player
         if attacker and hasattr(attacker, 'damage_log'):
             attacker.damage_log.add_entry(amount, source, self.__class__.__name__)

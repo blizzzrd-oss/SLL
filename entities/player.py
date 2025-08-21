@@ -6,6 +6,7 @@ import pygame
 import os
 import json
 from skills.base import Skill
+from audio.sound_manager import SoundManager
 from config import (
     WORLD_SIZE, PLAYER_START_HEALTH, PLAYER_START_BARRIER, PLAYER_BARRIER_DECAY_PERCENT_PER_SEC, PLAYER_BARRIER_REGEN,
     PLAYER_START_EXP, PLAYER_EXP_TO_NEXT_LEVEL_MULT, PLAYER_START_LEVEL, PLAYER_SIZE, PLAYER_MOVEMENT_SPEED,
@@ -123,6 +124,8 @@ class Player:
                 self.anim_state = self.ANIM_HURT_BARRIER
                 self.anim_timer = 0.0
                 self.anim_lock = True
+                # Play hit sound for barrier damage
+                SoundManager.play_hit_sound('player')
             # Log barrier reduction
             self.received_log.add_entry(-absorbed, skill_name, 'damage', health=self.health, barrier=self.barrier)
         if damage_to_health > 0:
@@ -130,6 +133,8 @@ class Player:
                 self.anim_state = self.ANIM_HURT_HP
                 self.anim_timer = 0.0
                 self.anim_lock = True
+                # Play hit sound for health damage
+                SoundManager.play_hit_sound('player')
             self.health -= damage_to_health
             # Log health reduction
             self.received_log.add_entry(-damage_to_health, skill_name, 'damage', health=self.health, barrier=self.barrier)
