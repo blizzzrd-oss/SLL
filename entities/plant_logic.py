@@ -110,6 +110,12 @@ class PlantEnemyLogic:
         # Apply game mode speed multiplier
         if hasattr(self.enemy, 'mode_speed_multiplier'):
             speed *= self.enemy.mode_speed_multiplier
+        
+        # Apply combined mode and wave speed multiplier
+        if hasattr(self.enemy, 'total_speed_multiplier'):
+            speed *= self.enemy.total_speed_multiplier
+        elif hasattr(self.enemy, 'wave_speed_multiplier'):
+            speed *= self.enemy.wave_speed_multiplier
         # Map movement to sprite row: 0=down, 1=up, 2=left, 3=right
         if abs(dx) > abs(dy):
             if dx > 0:
@@ -181,10 +187,18 @@ class PlantEnemyLogic:
             impact_frame = 3
             if self.anim_frame == impact_frame and not getattr(self, '_damage_dealt', False):
                 if dist < attack_damage_range:
-                    # Calculate damage with mode multiplier
+                    # Calculate damage with mode and wave multipliers
                     base_damage = 5
-                    mode_multiplier = getattr(self.enemy, 'mode_damage_multiplier', 1.0)
-                    final_damage = int(base_damage * mode_multiplier)
+                    
+                    # Apply combined damage multiplier
+                    if hasattr(self.enemy, 'total_damage_multiplier'):
+                        final_damage = int(base_damage * self.enemy.total_damage_multiplier)
+                    else:
+                        # Fallback to individual multipliers
+                        mode_multiplier = getattr(self.enemy, 'mode_damage_multiplier', 1.0)
+                        wave_multiplier = getattr(self.enemy, 'wave_damage_multiplier', 1.0)
+                        final_damage = int(base_damage * mode_multiplier * wave_multiplier)
+                    
                     player.take_damage(final_damage, source="Plant Attack")
                 self._damage_dealt = True
             # After animation, return to movement and set cooldown

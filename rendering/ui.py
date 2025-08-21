@@ -22,7 +22,7 @@ _hud_cache = {
     'fps_value': None
 }
 
-def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event_notifications=None, game_time=None):
+def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event_notifications=None, game_time=None, wave_info=None):
     width, height = screen.get_size()
     # --- Skill Bar ---
     # Skill bar config
@@ -171,6 +171,34 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
         time_text = font.render(time_str, True, (255, 255, 255))
         time_rect = time_text.get_rect(topright=(width - 20, 65))  # Below mode display
         screen.blit(time_text, time_rect)
+
+    # --- Wave Information Display (Top HUD, Right) ---
+    if wave_info is not None:
+        # Wave number and description
+        wave_text = font.render(f"Wave {wave_info['number']}", True, (255, 255, 100))
+        wave_rect = wave_text.get_rect(topright=(width - 20, 95))  # Below time display
+        screen.blit(wave_text, wave_rect)
+        
+        # Wave progress bar
+        if wave_info.get('progress', 0) < 1.0:
+            bar_width = 120
+            bar_height = 8
+            bar_x = width - 20 - bar_width
+            bar_y = 115
+            
+            # Background bar
+            pygame.draw.rect(screen, (60, 60, 60), (bar_x, bar_y, bar_width, bar_height))
+            
+            # Progress bar
+            progress_width = int(bar_width * wave_info['progress'])
+            color = (255, 100, 100) if wave_info.get('is_boss_wave', False) else (100, 150, 255)
+            pygame.draw.rect(screen, color, (bar_x, bar_y, progress_width, bar_height))
+            
+            # Time remaining
+            time_remaining = int(wave_info.get('time_remaining', 0))
+            remaining_text = font.render(f"{time_remaining}s", True, (200, 200, 200))
+            remaining_rect = remaining_text.get_rect(topright=(width - 20, 125))
+            screen.blit(remaining_text, remaining_rect)
 
     # --- Active Events Display (Top HUD, Left) ---
     if active_events:

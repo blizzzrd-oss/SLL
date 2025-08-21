@@ -67,21 +67,164 @@ ENEMY_TYPE_CONFIG = {
 	},
 }
 
+# =============================================================================
+# WAVE SYSTEM CONFIGURATION
+# =============================================================================
+
+# Comprehensive Wave System Configuration (Primary)
+WAVE_SYSTEM_CONFIGURATION = {
+    # Core wave timing
+    'WAVE_DURATION': 30.0,  # Duration of each wave in seconds
+    
+    # Spawn rate scaling per wave
+    'WAVE_SPAWN_RATE_SCALING': {
+        1: 1.0,   # Wave 1: Normal spawn rate
+        2: 1.2,   # Wave 2: 20% faster spawning
+        3: 1.4,   # Wave 3: 40% faster spawning
+        4: 1.7,   # Wave 4: 70% faster spawning
+        5: 2.0,   # Wave 5+: 100% faster spawning (continues)
+    },
+    
+    # XP gain multipliers per wave
+    'WAVE_XP_GAIN_SCALING': {
+        1: 1.0,   # Wave 1: Normal XP
+        2: 1.1,   # Wave 2: 10% more XP
+        3: 1.2,   # Wave 3: 20% more XP
+        4: 1.4,   # Wave 4: 40% more XP
+        5: 1.6,   # Wave 5+: 60% more XP (continues)
+    },
+    
+    # Enemy stat multipliers per wave
+    'WAVE_ENEMY_MULTIPLIERS': {
+        'health': {
+            1: 1.0,   # Wave 1: Normal health
+            2: 1.2,   # Wave 2: 20% more health
+            3: 1.4,   # Wave 3: 40% more health
+            4: 1.7,   # Wave 4: 70% more health
+            5: 2.0,   # Wave 5+: 100% more health (continues)
+        },
+        'damage': {
+            1: 1.0,   # Wave 1: Normal damage
+            2: 1.1,   # Wave 2: 10% more damage
+            3: 1.2,   # Wave 3: 20% more damage
+            4: 1.4,   # Wave 4: 40% more damage
+            5: 1.6,   # Wave 5+: 60% more damage (continues)
+        },
+        'speed': {
+            1: 1.0,   # Wave 1: Normal speed
+            2: 1.05,  # Wave 2: 5% faster
+            3: 1.1,   # Wave 3: 10% faster
+            4: 1.15,  # Wave 4: 15% faster
+            5: 1.2,   # Wave 5+: 20% faster (continues)
+        },
+    },
+    
+    # Player progression multipliers per wave
+    'WAVE_PLAYER_MULTIPLIERS': {
+        'cooldown_reduction': {
+            1: 1.0,   # Wave 1: Normal cooldowns
+            2: 0.95,  # Wave 2: 5% faster cooldowns
+            3: 0.9,   # Wave 3: 10% faster cooldowns
+            4: 0.85,  # Wave 4: 15% faster cooldowns
+            5: 0.8,   # Wave 5+: 20% faster cooldowns (continues)
+        },
+        'magic_find': {
+            1: 1.0,   # Wave 1: Normal magic find
+            2: 1.1,   # Wave 2: 10% better magic find
+            3: 1.2,   # Wave 3: 20% better magic find
+            4: 1.3,   # Wave 4: 30% better magic find
+            5: 1.5,   # Wave 5+: 50% better magic find (continues)
+        },
+    },
+}
+
+# Core Wave Settings (Legacy - kept for backward compatibility)
+WAVE_DURATION = 30.0  # Duration of each wave in seconds (central config)
+WAVE_SCALING_ENABLED = True  # Enable wave-based progression
+
+# Wave Progression Multipliers (applied per wave)
+WAVE_SPAWN_RATE_MULTIPLIER = 1.15     # 15% faster spawning each wave
+WAVE_ENEMY_HEALTH_MULTIPLIER = 1.08   # 8% more enemy health each wave
+WAVE_ENEMY_DAMAGE_MULTIPLIER = 1.05   # 5% more enemy damage each wave
+WAVE_ENEMY_SPEED_MULTIPLIER = 1.03    # 3% faster enemy movement each wave
+WAVE_ENEMY_COOLDOWN_MULTIPLIER = 0.98 # 2% faster enemy attack cooldowns each wave
+WAVE_EXP_GAIN_MULTIPLIER = 1.04       # 4% more experience each wave
+WAVE_MAGIC_FIND_MULTIPLIER = 1.02     # 2% better loot quality each wave
+
+# Special Wave Types
+BOSS_WAVE_INTERVAL = 10      # Every 10th wave is a boss wave
+ELITE_WAVE_INTERVAL = 5      # Every 5th wave is an elite wave
+BOSS_WAVE_HEALTH_BONUS = 2.0 # Boss waves: 2x enemy health
+BOSS_WAVE_DAMAGE_BONUS = 1.5 # Boss waves: 1.5x enemy damage
+ELITE_WAVE_HEALTH_BONUS = 1.5 # Elite waves: 1.5x enemy health
+ELITE_WAVE_SPEED_BONUS = 1.3  # Elite waves: 1.3x enemy speed
+
+# Wave Event Configuration
+WAVE_EVENT_CHANCES = {
+    # Event chances per wave (0.0 to 1.0)
+    'healing_shrine': {
+        'unlock_wave': 2,    # Available starting from wave 2
+        'base_chance': 0.3,  # 30% chance per wave
+        'mode_multipliers': {
+            'Easy': 1.5,     # 45% chance in Easy mode
+            'Normal': 1.0,   # 30% chance in Normal mode
+            'Hard': 0.7,     # 21% chance in Hard mode
+        }
+    },
+    'loot_blessing': {
+        'unlock_wave': 3,
+        'base_chance': 0.25,
+        'mode_multipliers': {
+            'Easy': 1.2,
+            'Normal': 1.0,
+            'Hard': 1.3,     # More loot events in hard mode as reward
+        }
+    },
+    'enemy_weakness': {
+        'unlock_wave': 5,
+        'base_chance': 0.2,
+        'mode_multipliers': {
+            'Easy': 1.4,
+            'Normal': 1.0,
+            'Hard': 0.8,
+        }
+    },
+    'boss_swarm': {
+        'unlock_wave': 4,
+        'base_chance': 0.15,
+        'mode_multipliers': {
+            'Easy': 0.5,
+            'Normal': 1.0,
+            'Hard': 1.5,     # More challenging events in hard mode
+        }
+    }
+}
+
 # Enemy Spawner Configuration
 SPAWNER_DEFAULT_INTERVAL = 0.5  # seconds between spawns
 SPAWNER_SPAWN_BUFFER = 100  # Distance outside camera view to spawn enemies
 SPAWNER_ENEMY_WEIGHTS = {
 	'Plant': 1.0,
 }
-SPAWNER_TIME_WEIGHT_EVENTS = [
-	('Plant', 60, 2.0),  # After 60s, double plant spawn chance
+
+# Wave-based Enemy Scaling (replaces time-based scaling)
+SPAWNER_WAVE_WEIGHT_EVENTS = [
+	('Plant', 3, 1.5),   # Starting from wave 3, increase plant spawn chance by 50%
+	('Plant', 5, 2.0),   # Starting from wave 5, double plant spawn chance
+	('Plant', 10, 3.0),  # Starting from wave 10, triple plant spawn chance
 ]
 
-# Spawn Rate Scaling Over Time
-SPAWNER_RATE_INCREASE_ENABLED = True  # Enable spawn rate increases over time
-SPAWNER_RATE_INCREASE_INTERVAL = 30.0  # Every 30 seconds, increase spawn rate
-SPAWNER_RATE_INCREASE_FACTOR = 0.9  # Multiply interval by 0.9 (10% faster spawning)
-SPAWNER_MIN_INTERVAL = 0.1  # Minimum spawn interval (maximum spawn rate)
+# Spawn Rate Limits
+SPAWNER_MIN_INTERVAL = 0.1           # Minimum spawn interval (maximum spawn rate)
+SPAWNER_MAX_SPAWN_MULTIPLIER = 10.0  # Maximum spawn rate multiplier (caps at 10x)
+
+# Legacy time-based scaling (kept for fallback when no wave manager is available)
+SPAWNER_TIME_WEIGHT_EVENTS = [
+	('Plant', 60, 2.0),  # After 60s, double plant spawn chance (fallback only)
+]
+SPAWNER_RATE_INCREASE_ENABLED = True  # Enable spawn rate increases over time (fallback)
+SPAWNER_RATE_INCREASE_INTERVAL = 30.0  # Every 30 seconds, increase spawn rate (fallback) 
+SPAWNER_RATE_INCREASE_FACTOR = 0.9    # Multiply interval by 0.9 (10% faster spawning) (fallback)
 
 # =============================================================================
 # ENEMY LOGIC CONFIGURATION

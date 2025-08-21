@@ -33,53 +33,42 @@ def test_game_modes():
         print()
 
 def test_game_events():
-    """Test game event system"""
-    print("=== GAME EVENT SYSTEM TEST ===\n")
+    """Test wave-based event system"""
+    print("=== WAVE-BASED EVENT SYSTEM TEST ===\n")
+    
+    from core.wave_system import WaveManager
     
     for mode_name in ['Easy', 'Normal', 'Hard']:
-        print(f"--- {mode_name} Mode Events ---")
-        event_manager = GameEventManager(mode_name)
+        print(f"--- {mode_name} Mode Wave System ---")
+        wave_manager = WaveManager(mode_name)
         
-        # Simulate 60 seconds of gameplay
-        print("Simulating 60 seconds of gameplay...")
-        dt = 1.0  # 1 second per update
+        # Simulate multiple waves
+        print("Simulating 5 waves...")
         events_triggered = []
         
-        for second in range(60):
-            event_manager.update(dt)
+        for wave_num in range(1, 6):
+            print(f"\n  Wave {wave_num}:")
+            wave_info = wave_manager.get_wave_info()
+            print(f"    Description: {wave_info['description']}")
+            print(f"    Spawn Rate Multiplier: {wave_manager.get_current_spawn_multiplier():.2f}x")
             
-            # Check for new events
-            active_events = event_manager.get_active_events_display()
-            for event in active_events:
-                event_id = f"{event['type']}_{event.get('start_time', second)}"
-                if event_id not in [e.get('id', '') for e in events_triggered]:
-                    event_copy = event.copy()
-                    event_copy['id'] = event_id
-                    events_triggered.append(event_copy)
-                    print(f"  Second {second+1}: {event['type']} event started!")
+            multipliers = wave_manager.get_current_enemy_multipliers()
+            print(f"    Enemy Health: {multipliers['health']:.2f}x")
+            print(f"    Enemy Damage: {multipliers['damage']:.2f}x")
+            print(f"    Enemy Speed: {multipliers['speed']:.2f}x")
+            
+            # Check for events in this wave
+            pending_events = wave_manager.get_pending_events()
+            if pending_events:
+                for event in pending_events:
+                    events_triggered.append(event)
+                    print(f"    Event Triggered: {event['type']}")
+            
+            # Force advance to next wave
+            wave_manager.force_next_wave()
         
-        print(f"Total events triggered: {len(events_triggered)}")
-        
-        # Show event probabilities from the mode config
-        mode_config = GAME_MODES[mode_name]
-        print(f"Event Probabilities:")
-        if 'healing_shrine_chance' in mode_config:
-            prob_per_min = mode_config['healing_shrine_chance']
-            prob_per_sec = prob_per_min / 60.0
-            print(f"  healing_shrine: {prob_per_sec:.4f}/sec ({prob_per_min:.2f}/min)")
-        if 'bonus_loot_event_chance' in mode_config:
-            prob_per_min = mode_config['bonus_loot_event_chance']
-            prob_per_sec = prob_per_min / 60.0
-            print(f"  loot_blessing: {prob_per_sec:.4f}/sec ({prob_per_min:.2f}/min)")
-        if 'enemy_weakness_event_chance' in mode_config:
-            prob_per_min = mode_config['enemy_weakness_event_chance']
-            prob_per_sec = prob_per_min / 60.0
-            print(f"  enemy_weakness: {prob_per_sec:.4f}/sec ({prob_per_min:.2f}/min)")
-        if 'boss_swarm_event_chance' in mode_config:
-            prob_per_min = mode_config['boss_swarm_event_chance']
-            prob_per_sec = prob_per_min / 60.0
-            print(f"  boss_swarm: {prob_per_sec:.4f}/sec ({prob_per_min:.2f}/min)")
-        
+        print(f"\nTotal events triggered: {len(events_triggered)}")
+        print(f"Wave system successfully tested for {mode_name} mode!")
         print()
 
 if __name__ == "__main__":
@@ -88,9 +77,14 @@ if __name__ == "__main__":
     
     print("=== SUMMARY ===")
     print("✅ Game mode system successfully implemented with:")
-    print("   - Easy Mode: Player-friendly with healing events")
+    print("   - Easy Mode: Player-friendly with more healing events")
     print("   - Normal Mode: Balanced baseline gameplay")
-    print("   - Hard Mode: Challenging with XP rewards and elite enemies")
-    print("✅ Event system working with timed special effects")
-    print("✅ UI enhancements showing mode and active events")
-    print("✅ Complete multiplier integration throughout gameplay")
+    print("   - Hard Mode: Challenging with higher enemy scaling")
+    print("✅ Wave-based progression system implemented:")
+    print("   - 30-second waves (configurable)")
+    print("   - Progressive enemy scaling per wave") 
+    print("   - Wave-triggered events instead of time-based")
+    print("   - Boss waves every 10th wave")
+    print("   - Elite waves every 5th wave")
+    print("✅ UI enhancements showing wave progress and information")
+    print("✅ Complete wave-based multiplier integration throughout gameplay")

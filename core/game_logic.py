@@ -7,6 +7,7 @@ import pygame
 import time
 from entities.spawner import EnemySpawner
 from entities.enemy import PlantType
+from core.wave_system import WaveManager
 
 
 class GameLogicManager:
@@ -16,6 +17,9 @@ class GameLogicManager:
         self.game = game
         self.screen = screen
         
+        # Initialize wave system
+        self.wave_manager = WaveManager(game.mode)
+        
         # Initialize enemy management
         self.enemies = []
         self.game.enemies = self.enemies
@@ -23,7 +27,8 @@ class GameLogicManager:
             [PlantType], 
             get_game_time_fn=lambda: self.game_time,
             screen=screen,
-            game=game
+            game=game,
+            wave_manager=self.wave_manager  # Pass wave manager to spawner
         )
         self.game_time = 0.0
 
@@ -35,6 +40,13 @@ class GameLogicManager:
         
         if self.game.game_over or event_handler.paused:
             return
+        
+        # Update wave system
+        wave_changed = self.wave_manager.update(dt)
+        if wave_changed:
+            print(f"[GAME] Wave {self.wave_manager.current_wave} started!")
+            # Handle wave events
+            self._process_wave_events()
             
         # Update core game systems
         self.game.update(dt)
@@ -48,6 +60,16 @@ class GameLogicManager:
         # Update player animation timers
         if self.game.player.anim_lock:
             self.game.player.anim_timer += dt
+    
+    def _process_wave_events(self):
+        """Process events triggered by wave progression."""
+        pending_events = self.wave_manager.get_pending_events()
+        
+        for event_data in pending_events:
+            # Trigger the event in the game's event system
+            if hasattr(self.game, 'event_manager'):
+                self.game.event_manager.force_event(event_data['type'])
+                print(f"[WAVE] Triggered event: {event_data['type']}")
 
     def _update_enemies(self, dt):
         """Handle enemy spawning and updates."""
@@ -62,6 +84,8 @@ class GameLogicManager:
             enemy.update(dt, self.game.player)
             if hasattr(enemy, 'dead') and enemy.dead:
                 self.enemies.remove(enemy)
+                # Notify wave manager of enemy death
+                self.wave_manager.on_enemy_killed()
                 
         self.game.enemies = self.enemies
 
@@ -96,6 +120,18 @@ class GameLogicManager:
         # Update all skills
         for skill in self.game.player.skills.values():
             skill.update(dt, self.enemies)
+    
+    def get_wave_info(self):
+        """Get current wave information for UI display."""
+        return self.wave_manager.get_wave_info()
+    
+    def get_current_wave(self):
+        """Get current wave number."""
+        return self.wave_manager.current_wave
+    
+    def force_next_wave(self):
+        """Force advance to next wave (for testing/debugging)."""
+        self.wave_manager.force_next_wave()
 
     def _get_player_settings(self):
         """Extract auto-attack and auto-aim settings from player."""
