@@ -29,7 +29,9 @@ class GameLogicManager:
 
     def update(self, dt, event_handler):
         """Update all game logic for this frame."""
-        self.game_time += dt
+        # Only update game time if the game is not over and not paused
+        if not self.game.game_over and not event_handler.paused:
+            self.game_time += dt
         
         if self.game.game_over or event_handler.paused:
             return

@@ -137,6 +137,17 @@ def render_full_game(screen, game, last_move, time_accum, hud_visible, fps, game
         text = font.render("GAME OVER", True, (255, 0, 0))
         text_rect = text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 200))
         screen.blit(text, text_rect)
+        
+        # Display final game time
+        if game_time is not None:
+            font2 = _game_render_cache['menu_font']
+            minutes = int(game_time // 60)
+            seconds = int(game_time % 60)
+            time_str = f"Survival Time: {minutes:02d}:{seconds:02d}"
+            time_text = font2.render(time_str, True, (255, 255, 100))  # Yellow color
+            time_rect = time_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 140))
+            screen.blit(time_text, time_rect)
+        
         font2 = _game_render_cache['menu_font']
         tip = font2.render("Press ESC or Enter to return to menu", True, (255, 255, 255))
         tip_rect = tip.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2 - 100))
