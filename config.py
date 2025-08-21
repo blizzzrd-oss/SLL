@@ -142,22 +142,23 @@ WAVE_SYSTEM_CONFIGURATION = {
 WAVE_DURATION = 30.0  # Duration of each wave in seconds (central config)
 WAVE_SCALING_ENABLED = True  # Enable wave-based progression
 
-# Wave Progression Multipliers (applied per wave)
-WAVE_SPAWN_RATE_MULTIPLIER = 1.15     # 15% faster spawning each wave
-WAVE_ENEMY_HEALTH_MULTIPLIER = 1.08   # 8% more enemy health each wave
-WAVE_ENEMY_DAMAGE_MULTIPLIER = 1.05   # 5% more enemy damage each wave
-WAVE_ENEMY_SPEED_MULTIPLIER = 1.03    # 3% faster enemy movement each wave
-WAVE_ENEMY_COOLDOWN_MULTIPLIER = 0.98 # 2% faster enemy attack cooldowns each wave
-WAVE_EXP_GAIN_MULTIPLIER = 1.04       # 4% more experience each wave
-WAVE_MAGIC_FIND_MULTIPLIER = 1.02     # 2% better loot quality each wave
+# Legacy Wave Progression Multipliers (DEPRECATED - use WAVE_SYSTEM_CONFIGURATION instead)
+# These are kept for backward compatibility but should not be used in new code
+WAVE_SPAWN_RATE_MULTIPLIER = 1.15     # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_SPAWN_RATE_BONUSES']
+WAVE_ENEMY_HEALTH_MULTIPLIER = 1.08   # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_ENEMY_BONUSES']['health']
+WAVE_ENEMY_DAMAGE_MULTIPLIER = 1.05   # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_ENEMY_BONUSES']['damage']
+WAVE_ENEMY_SPEED_MULTIPLIER = 1.03    # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_ENEMY_BONUSES']['speed']
+WAVE_ENEMY_COOLDOWN_MULTIPLIER = 0.98 # DEPRECATED: Not implemented in new additive system
+WAVE_EXP_GAIN_MULTIPLIER = 1.04       # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_XP_GAIN_BONUSES']
+WAVE_MAGIC_FIND_MULTIPLIER = 1.02     # DEPRECATED: Use WAVE_SYSTEM_CONFIGURATION['WAVE_PLAYER_BONUSES']['magic_find']
 
-# Special Wave Types
+# Special Wave Types - CONVERTED TO ADDITIVE BONUSES
 BOSS_WAVE_INTERVAL = 10      # Every 10th wave is a boss wave
 ELITE_WAVE_INTERVAL = 5      # Every 5th wave is an elite wave
-BOSS_WAVE_HEALTH_BONUS = 2.0 # Boss waves: 2x enemy health
-BOSS_WAVE_DAMAGE_BONUS = 1.5 # Boss waves: 1.5x enemy damage
-ELITE_WAVE_HEALTH_BONUS = 1.5 # Elite waves: 1.5x enemy health
-ELITE_WAVE_SPEED_BONUS = 1.3  # Elite waves: 1.3x enemy speed
+BOSS_WAVE_HEALTH_BONUS = 1.0 # Boss waves: +100% enemy health (additive bonus)
+BOSS_WAVE_DAMAGE_BONUS = 0.5 # Boss waves: +50% enemy damage (additive bonus)
+ELITE_WAVE_HEALTH_BONUS = 0.5 # Elite waves: +50% enemy health (additive bonus)
+ELITE_WAVE_SPEED_BONUS = 0.3  # Elite waves: +30% enemy speed (additive bonus)
 
 # Wave Event Configuration
 WAVE_EVENT_CHANCES = {

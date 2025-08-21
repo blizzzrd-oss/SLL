@@ -79,14 +79,18 @@ class WaveManager:
         damage_bonus = enemy_bonuses['damage'][effective_wave]
         speed_bonus = enemy_bonuses['speed'][effective_wave]
         
-        # Mode-specific adjustments
+        # Mode-specific adjustments using additive bonuses
         mode_multipliers = self._get_mode_multipliers()
+        
+        # Convert mode multipliers to bonuses for additive combination
+        spawn_mode_bonus = mode_multipliers.get('spawn_rate', 1.0) - 1.0
+        health_mode_bonus = mode_multipliers.get('enemy_health', 1.0) - 1.0
         
         config = WaveConfig(
             wave_number=wave_number,
             duration=self.default_wave_interval,
-            spawn_rate_multiplier=(1.0 + spawn_bonus) * mode_multipliers.get('spawn_rate', 1.0),
-            enemy_health_multiplier=(1.0 + health_bonus) * mode_multipliers.get('enemy_health', 1.0),
+            spawn_rate_multiplier=1.0 + spawn_bonus + spawn_mode_bonus,  # Additive combination
+            enemy_health_multiplier=1.0 + health_bonus + health_mode_bonus,  # Additive combination
             enemy_damage_multiplier=(1.0 + damage_bonus),
             enemy_speed_multiplier=(1.0 + speed_bonus),
         )
@@ -94,38 +98,38 @@ class WaveManager:
         # Add wave-specific events
         self._configure_wave_events(config)
         
-        # Special wave types - use config values (also additive)
+        # Special wave types - use additive bonuses
         if wave_number % BOSS_WAVE_INTERVAL == 0:  # Boss waves
             config.is_boss_wave = True
             config.description = f"Boss Wave {wave_number}"
-            config.spawn_rate_multiplier *= 1.5  # This can remain multiplicative for special waves
-            # Convert boss bonuses to additive system
-            config.enemy_health_multiplier *= (1.0 + (BOSS_WAVE_HEALTH_BONUS - 1.0))  # Convert to additive
-            config.enemy_damage_multiplier *= (1.0 + (BOSS_WAVE_DAMAGE_BONUS - 1.0))  # Convert to additive
+            config.spawn_rate_multiplier *= 1.5  # Special spawn rate boost for boss waves
+            # Apply additive bonuses for boss waves
+            config.enemy_health_multiplier *= (1.0 + BOSS_WAVE_HEALTH_BONUS)  # Direct additive bonus
+            config.enemy_damage_multiplier *= (1.0 + BOSS_WAVE_DAMAGE_BONUS)  # Direct additive bonus
         elif wave_number % ELITE_WAVE_INTERVAL == 0:  # Elite waves
             config.description = f"Elite Wave {wave_number}"
-            # Convert elite bonuses to additive system
-            config.enemy_health_multiplier *= (1.0 + (ELITE_WAVE_HEALTH_BONUS - 1.0))  # Convert to additive
-            config.enemy_speed_multiplier *= (1.0 + (ELITE_WAVE_SPEED_BONUS - 1.0))  # Convert to additive
+            # Apply additive bonuses for elite waves
+            config.enemy_health_multiplier *= (1.0 + ELITE_WAVE_HEALTH_BONUS)  # Direct additive bonus
+            config.enemy_speed_multiplier *= (1.0 + ELITE_WAVE_SPEED_BONUS)  # Direct additive bonus
         else:
             config.description = f"Wave {wave_number}"
             
         return config
     
     def _get_mode_multipliers(self) -> Dict[str, float]:
-        """Get mode-specific multipliers."""
+        """Get mode-specific multipliers using additive bonus system."""
         mode_configs = {
             'Easy': {
-                'spawn_rate': 0.8,
-                'enemy_health': 0.8,
+                'spawn_rate': 0.8,    # Easy: -20% spawn rate (easier)
+                'enemy_health': 0.8,  # Easy: -20% enemy health (easier)
             },
             'Normal': {
-                'spawn_rate': 1.0,
-                'enemy_health': 1.0,
+                'spawn_rate': 1.0,    # Normal: +0% spawn rate (baseline)
+                'enemy_health': 1.0,  # Normal: +0% enemy health (baseline)
             },
             'Hard': {
-                'spawn_rate': 1.3,
-                'enemy_health': 1.2,
+                'spawn_rate': 1.3,    # Hard: +30% spawn rate (harder)
+                'enemy_health': 1.2,  # Hard: +20% enemy health (harder)
             }
         }
         return mode_configs.get(self.game_mode, mode_configs['Normal'])
