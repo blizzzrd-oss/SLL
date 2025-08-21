@@ -253,6 +253,9 @@ MUSIC_VOLUME = 0.02  # 2%
 SFX_VOLUME = 0.1    # 10%
 BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"
 
+# Skill Sound Effects
+SKILL_DASH_SOUND_PATH = "resources/sounds/skill_dash.mp3"
+
 # =============================================================================
 # LOGGING AND DEBUGGING CONFIGURATION  
 # =============================================================================

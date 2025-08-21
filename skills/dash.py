@@ -2,10 +2,14 @@ import pygame
 import math
 import os
 from skills.base import Skill
-from config import DASH_RANGE, DASH_COOLDOWN, DASH_DURATION, DASH_DAMAGE
+from config import DASH_RANGE, DASH_COOLDOWN, DASH_DURATION, DASH_DAMAGE, SKILL_DASH_SOUND_PATH, SFX_VOLUME
+from utils.resource_path import resource_path
 
 class DashSkill(Skill):
     is_movement_skill = True
+    # Class-level cache for sound
+    _cached_sound = None
+    
     def __init__(self, user, cooldown=DASH_COOLDOWN, dash_range=DASH_RANGE, duration=DASH_DURATION, dash_damage=DASH_DAMAGE):
         super().__init__(user, cooldown, name="Dash")
         self.dash_range = dash_range
@@ -16,11 +20,33 @@ class DashSkill(Skill):
         self.dash_start = None
         self.dash_end = None
         self.elapsed = 0.0
+        
+        # Load sound effect (use class cache to avoid loading multiple times)
+        if DashSkill._cached_sound is None:
+            try:
+                sound_path = resource_path(SKILL_DASH_SOUND_PATH)
+                if os.path.exists(sound_path):
+                    DashSkill._cached_sound = pygame.mixer.Sound(sound_path)
+                    DashSkill._cached_sound.set_volume(SFX_VOLUME)
+                else:
+                    print(f"[WARNING] Dash sound file not found: {sound_path}")
+                    DashSkill._cached_sound = None
+            except Exception as e:
+                print(f"[WARNING] Failed to load dash sound: {e}")
+                DashSkill._cached_sound = None
 
     def use(self, target_pos=None):
         now = pygame.time.get_ticks() / 1000
         if not self.can_use(now):
             return False
+            
+        # Play dash sound effect
+        if DashSkill._cached_sound is not None:
+            try:
+                DashSkill._cached_sound.play()
+            except Exception as e:
+                print(f"[WARNING] Failed to play dash sound: {e}")
+                
         self.last_used = now
         self.active = True
         self.elapsed = 0.0
