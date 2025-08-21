@@ -255,7 +255,11 @@ BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"
 
 # Skill Sound Effects
 SKILL_DASH_SOUND_PATH = "resources/sounds/skill_dash.mp3"
-SKILL_SLASH_SOUND_PATH = "resources/sounds/skill_slash.wav"
+SKILL_SLASH_SOUND_PATHS = [
+    "resources/sounds/skill_slash01.wav",
+    "resources/sounds/skill_slash02.wav",
+    "resources/sounds/skill_slash03.mp3"
+]
 
 # Hit Sound Effects
 HIT_ENEMY_SOUND_PATH = "resources/sounds/hit_enemy.mp3"

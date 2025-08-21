@@ -6,7 +6,7 @@ import os
 import random
 from utils.resource_path import resource_path
 from config import (
-    SKILL_DASH_SOUND_PATH, SKILL_SLASH_SOUND_PATH,
+    SKILL_DASH_SOUND_PATH, SKILL_SLASH_SOUND_PATHS,
     ENEMY_PLANT_DEATH_SOUND_PATHS, SFX_VOLUME,
     HIT_ENEMY_SOUND_PATH, HIT_PLAYER_SOUND_PATH
 )
@@ -18,6 +18,7 @@ class SoundManager:
     _instance = None
     _sounds_cache = {}
     _initialized = False
+    _slash_sound_index = 0  # For rotating slash sounds
     
     def __new__(cls):
         if cls._instance is None:
@@ -34,13 +35,12 @@ class SoundManager:
         success_count = 0
         total_sounds = 0
         
-        # Skill sounds
-        skill_sounds = {
-            'dash': SKILL_DASH_SOUND_PATH,
-            'slash': SKILL_SLASH_SOUND_PATH
+        # Single skill sounds
+        single_skill_sounds = {
+            'dash': SKILL_DASH_SOUND_PATH
         }
         
-        for skill_name, sound_path in skill_sounds.items():
+        for skill_name, sound_path in single_skill_sounds.items():
             total_sounds += 1
             try:
                 full_path = resource_path(sound_path)
@@ -54,6 +54,26 @@ class SoundManager:
                     print(f"[WARNING] Skill sound file not found: {full_path}")
             except Exception as e:
                 print(f"[WARNING] Failed to load skill sound {skill_name}: {e}")
+        
+        # Multiple slash sounds
+        slash_sounds = []
+        for i, sound_path in enumerate(SKILL_SLASH_SOUND_PATHS):
+            total_sounds += 1
+            try:
+                full_path = resource_path(sound_path)
+                if os.path.exists(full_path):
+                    sound = pygame.mixer.Sound(full_path)
+                    sound.set_volume(SFX_VOLUME)
+                    slash_sounds.append(sound)
+                    success_count += 1
+                    print(f"[SOUND] Loaded slash sound {i+1}")
+                else:
+                    print(f"[WARNING] Slash sound file not found: {full_path}")
+            except Exception as e:
+                print(f"[WARNING] Failed to load slash sound {i+1}: {e}")
+        
+        if slash_sounds:
+            cls._sounds_cache['slash_sounds'] = slash_sounds
         
         # Enemy death sounds
         plant_death_sounds = []
@@ -114,9 +134,25 @@ class SoundManager:
         return None
     
     @classmethod
+    def get_next_slash_sound(cls):
+        """Get the next slash sound in rotation."""
+        sounds = cls._sounds_cache.get('slash_sounds')
+        if sounds and len(sounds) > 0:
+            sound = sounds[cls._slash_sound_index]
+            cls._slash_sound_index = (cls._slash_sound_index + 1) % len(sounds)
+            return sound
+        return None
+    
+    @classmethod
     def play_skill_sound(cls, skill_name):
         """Play a skill sound if available."""
-        sound = cls.get_skill_sound(skill_name)
+        if skill_name == 'slash':
+            # Special handling for slash sounds (rotating)
+            sound = cls.get_next_slash_sound()
+        else:
+            # Normal skill sounds
+            sound = cls.get_skill_sound(skill_name)
+        
         if sound:
             try:
                 sound.play()
