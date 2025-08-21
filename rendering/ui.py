@@ -130,6 +130,29 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
     shield_label = font.render(shield_text, True, (255,255,255))
     shield_label_rect = shield_label.get_rect(center=(BAR_X + BAR_WIDTH // 2, shield_y + BAR_HEIGHT // 2))
     screen.blit(shield_label, shield_label_rect)
+    
+    # Experience bar (purple), below shield
+    exp_val = player.exp
+    exp_needed = player.get_exp_to_next_level()
+    exp_frac = player.get_experience_progress()
+    exp_y = shield_y + BAR_HEIGHT + BAR_GAP
+    
+    # XP bar colors (purple theme)
+    EXP_BAR_BG = (60, 30, 80)    # Dark purple background
+    EXP_BAR_FILL = (120, 60, 160) # Bright purple fill
+    
+    pygame.draw.rect(screen, EXP_BAR_BG, (BAR_X, exp_y, BAR_WIDTH, BAR_HEIGHT), border_radius=8)
+    pygame.draw.rect(screen, EXP_BAR_FILL, (BAR_X, exp_y, int(BAR_WIDTH * exp_frac), BAR_HEIGHT), border_radius=8)
+    
+    # Display level and XP text
+    if player.level >= player.max_level:
+        exp_text = f"Level {player.level} (MAX)"
+    else:
+        exp_text = f"Level {player.level} - {exp_val}/{exp_needed} XP"
+    
+    exp_label = font.render(exp_text, True, (255,255,255))
+    exp_label_rect = exp_label.get_rect(center=(BAR_X + BAR_WIDTH // 2, exp_y + BAR_HEIGHT // 2))
+    screen.blit(exp_label, exp_label_rect)
 
     # Remove debug labels for cleaner look
     # screen.blit(font.render("TOP HUD", True, HUD_LABEL_COLOR), (width//2 - 60, 20))

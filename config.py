@@ -64,6 +64,7 @@ ENEMY_TYPE_CONFIG = {
 		'attack_range': 32,
 		'attack_damage': 5,
 		'attack_cooldown': 1.0,
+		'experience_reward': 1,  # Base XP reward for killing this enemy
 	},
 }
 
@@ -251,9 +252,15 @@ PLAYER_START_HEALTH = 100
 PLAYER_START_BARRIER = 100
 PLAYER_BARRIER_DECAY_PERCENT_PER_SEC = 10
 PLAYER_BARRIER_REGEN = 0
+
+# Player Experience and Leveling System (Additive Scaling)
 PLAYER_START_EXP = 0
-PLAYER_EXP_TO_NEXT_LEVEL_MULT = 1.02
 PLAYER_START_LEVEL = 1
+PLAYER_BASE_EXP_REQUIREMENT = 50     # XP needed for level 2 (first level up)
+PLAYER_EXP_REQUIREMENT_BONUS = 0.1   # +10% XP requirement per level (additive)
+PLAYER_MAX_LEVEL = 100               # Maximum player level
+
+# Player Stats
 PLAYER_SIZE = 48
 PLAYER_MOVEMENT_SPEED = 2
 PLAYER_DAMAGE_REDUCTION = 0.0

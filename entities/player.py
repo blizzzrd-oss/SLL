@@ -9,9 +9,9 @@ from skills.base import Skill
 from audio.sound_manager import SoundManager
 from config import (
     WORLD_SIZE, PLAYER_START_HEALTH, PLAYER_START_BARRIER, PLAYER_BARRIER_DECAY_PERCENT_PER_SEC, PLAYER_BARRIER_REGEN,
-    PLAYER_START_EXP, PLAYER_EXP_TO_NEXT_LEVEL_MULT, PLAYER_START_LEVEL, PLAYER_SIZE, PLAYER_MOVEMENT_SPEED,
-    PLAYER_DAMAGE_REDUCTION, PLAYER_COOLDOWN, PLAYER_ATTACK_SPEED, PLAYER_CRIT_CHANCE, PLAYER_CRIT_DAMAGE,
-    PLAYER_START_SKILL_POINTS, PLAYER_PASSIVE_SKILLS, PLAYER_ACTIVE_SKILLS,
+    PLAYER_START_EXP, PLAYER_START_LEVEL, PLAYER_BASE_EXP_REQUIREMENT, PLAYER_EXP_REQUIREMENT_BONUS, PLAYER_MAX_LEVEL,
+    PLAYER_SIZE, PLAYER_MOVEMENT_SPEED, PLAYER_DAMAGE_REDUCTION, PLAYER_COOLDOWN, PLAYER_ATTACK_SPEED, 
+    PLAYER_CRIT_CHANCE, PLAYER_CRIT_DAMAGE, PLAYER_START_SKILL_POINTS, PLAYER_PASSIVE_SKILLS, PLAYER_ACTIVE_SKILLS,
     PLAYER_AUTO_AIM, PLAYER_AUTO_ATTACK
 )
 from utils.player_damage_log import PlayerDamageLog
@@ -64,9 +64,13 @@ class Player:
         self.barrier = PLAYER_START_BARRIER
         self.barrier_decay_percent_per_sec = PLAYER_BARRIER_DECAY_PERCENT_PER_SEC
         self.barrier_regen = PLAYER_BARRIER_REGEN
+        
+        # Experience and Leveling System (Additive)
         self.exp = PLAYER_START_EXP
-        self.exp_to_next_level_mult = PLAYER_EXP_TO_NEXT_LEVEL_MULT
         self.level = PLAYER_START_LEVEL
+        self.max_level = PLAYER_MAX_LEVEL
+        
+        # Other stats
         self.movement_speed = PLAYER_MOVEMENT_SPEED
         self.buffs = []  # List of current temporary positive effects
         self.debuffs = []  # List of current temporary negative effects
@@ -151,3 +155,61 @@ class Player:
             skill_name = 'Unknown'
         self.health = min(self.max_health, self.health + amount)
         self.received_log.add_entry(amount, skill_name, 'heal', health=self.health, barrier=self.barrier)
+
+    def get_exp_to_next_level(self):
+        """Calculate XP required for next level using additive bonus system."""
+        if self.level >= self.max_level:
+            return 0  # Max level reached
+        
+        # Calculate additive bonus: each level adds 10% to the base requirement
+        level_bonus = (self.level - 1) * PLAYER_EXP_REQUIREMENT_BONUS  # -1 because level 1->2 has no bonus
+        total_requirement = PLAYER_BASE_EXP_REQUIREMENT * (1.0 + level_bonus)
+        return int(total_requirement)
+    
+    def add_experience(self, amount):
+        """Add experience and handle level ups."""
+        if self.level >= self.max_level:
+            return False  # No more leveling possible
+        
+        self.exp += amount
+        leveled_up = False
+        
+        # Check for level ups (can level multiple times with large XP gains)
+        while self.level < self.max_level and self.exp >= self.get_exp_to_next_level():
+            self.exp -= self.get_exp_to_next_level()
+            self.level += 1
+            leveled_up = True
+            
+            # Gain skill point on level up
+            self.skill_points += 1
+            
+            print(f"[PLAYER] Level up! Now level {self.level}")
+            
+            # Optional: Add level up bonuses (health, damage, etc.)
+            self._apply_level_up_bonuses()
+        
+        return leveled_up
+    
+    def _apply_level_up_bonuses(self):
+        """Apply stat bonuses when leveling up."""
+        # Small health increase per level (additive)
+        health_bonus = 5  # +5 HP per level
+        self.max_health += health_bonus
+        self.health += health_bonus  # Also heal the player
+        
+        # Small damage increase per level (additive)
+        damage_bonus = 0.02  # +2% damage per level
+        self.crit_damage += damage_bonus
+        
+        print(f"[PLAYER] Level {self.level}: +{health_bonus} HP, +{damage_bonus*100:.0f}% crit damage")
+    
+    def get_experience_progress(self):
+        """Get current XP progress as percentage (0.0 to 1.0)."""
+        if self.level >= self.max_level:
+            return 1.0
+        
+        exp_needed = self.get_exp_to_next_level()
+        if exp_needed <= 0:
+            return 1.0
+        
+        return min(self.exp / exp_needed, 1.0)

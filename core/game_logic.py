@@ -83,6 +83,22 @@ class GameLogicManager:
         for enemy in self.enemies[:]:
             enemy.update(dt, self.game.player)
             if hasattr(enemy, 'dead') and enemy.dead:
+                # Award experience to player for killing the enemy
+                if hasattr(enemy.type, 'experience_reward'):
+                    exp_reward = enemy.type.experience_reward
+                    
+                    # Apply wave multiplier to experience if available
+                    if self.wave_manager:
+                        wave_xp_multiplier = self.wave_manager.get_current_xp_multiplier()
+                        exp_reward = int(exp_reward * wave_xp_multiplier)
+                    
+                    # Award experience and check for level up
+                    leveled_up = self.game.player.add_experience(exp_reward)
+                    print(f"[XP] Gained {exp_reward} experience from {enemy.type.name}")
+                    
+                    if leveled_up:
+                        print(f"[XP] Player leveled up to level {self.game.player.level}!")
+                
                 self.enemies.remove(enemy)
                 # Notify wave manager of enemy death
                 self.wave_manager.on_enemy_killed()
