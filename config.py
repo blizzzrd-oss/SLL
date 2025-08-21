@@ -255,6 +255,7 @@ BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"
 
 # Skill Sound Effects
 SKILL_DASH_SOUND_PATH = "resources/sounds/skill_dash.mp3"
+SKILL_SLASH_SOUND_PATH = "resources/sounds/skill_slash.wav"
 
 # =============================================================================
 # LOGGING AND DEBUGGING CONFIGURATION  

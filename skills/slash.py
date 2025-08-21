@@ -1,4 +1,4 @@
-from config import PLAYER_SIZE, SLASH_COOLDOWN, SLASH_DAMAGE, SLASH_ARC_DEGREES, SLASH_DURATION, SLASH_SHEET_PATH, SLASH_FRAME_COUNT
+from config import PLAYER_SIZE, SLASH_COOLDOWN, SLASH_DAMAGE, SLASH_ARC_DEGREES, SLASH_DURATION, SLASH_SHEET_PATH, SLASH_FRAME_COUNT, SKILL_SLASH_SOUND_PATH, SFX_VOLUME
 import pygame
 import math
 import os
@@ -6,8 +6,9 @@ from skills.base import Skill
 from utils.resource_path import resource_path
 
 class SlashSkill(Skill):
-    # Class-level cache for frames
+    # Class-level cache for frames and sound
     _cached_frames = None
+    _cached_sound = None
 
     def __init__(self, user, cooldown=SLASH_COOLDOWN, damage=SLASH_DAMAGE, arc_deg=SLASH_ARC_DEGREES, duration=SLASH_DURATION):
         super().__init__(user, cooldown, name="Slash")
@@ -18,6 +19,20 @@ class SlashSkill(Skill):
         if SlashSkill._cached_frames is None:
             SlashSkill._cached_frames = self._load_frames()
         self.frames = SlashSkill._cached_frames
+        
+        # Load sound effect (use class cache to avoid loading multiple times)
+        if SlashSkill._cached_sound is None:
+            try:
+                sound_path = resource_path(SKILL_SLASH_SOUND_PATH)
+                if os.path.exists(sound_path):
+                    SlashSkill._cached_sound = pygame.mixer.Sound(sound_path)
+                    SlashSkill._cached_sound.set_volume(SFX_VOLUME)
+                else:
+                    print(f"[WARNING] Slash sound file not found: {sound_path}")
+                    SlashSkill._cached_sound = None
+            except Exception as e:
+                print(f"[WARNING] Failed to load slash sound: {e}")
+                SlashSkill._cached_sound = None
         self.total_frames = len(self.frames)
         self.frame_time = duration / max(1, self.total_frames)
         self.active = False
@@ -44,6 +59,14 @@ class SlashSkill(Skill):
         now = pygame.time.get_ticks() / 1000
         if not self.can_use(now):
             return False
+            
+        # Play slash sound effect
+        if SlashSkill._cached_sound is not None:
+            try:
+                SlashSkill._cached_sound.play()
+            except Exception as e:
+                print(f"[WARNING] Failed to play slash sound: {e}")
+                
         self.last_used = now
         self.active = True
         self.animation_frame = 0
