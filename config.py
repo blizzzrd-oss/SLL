@@ -396,6 +396,10 @@ MUSIC_VOLUME = 0.02  # 2%
 SFX_VOLUME = 0.1    # 10%
 BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"
 
+# Audio Performance Settings
+AUDIO_CHANNELS = 64  # Number of audio channels (increased for better performance)
+AUDIO_FORCE_PLAY_MAX_CHANNELS_TO_STOP = 3  # Max channels to stop when force-playing important sounds
+
 # Skill Sound Effects
 SKILL_DASH_SOUND_PATH = "resources/sounds/skill_dash.mp3"
 SKILL_SLASH_SOUND_PATHS = [

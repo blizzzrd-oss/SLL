@@ -1,6 +1,6 @@
 import pygame
 import os
-from config import BG_MUSIC_PATH, MUSIC_VOLUME, WINDOW_WIDTH, WINDOW_HEIGHT, PAUSE_MENU_OPTIONS
+from config import BG_MUSIC_PATH, MUSIC_VOLUME, WINDOW_WIDTH, WINDOW_HEIGHT, PAUSE_MENU_OPTIONS, AUDIO_CHANNELS
 from utils.resource_path import resource_path
 from rendering.menu import Menu
 from core.game import Game
@@ -35,7 +35,7 @@ def init_pygame():
     try:
         pygame.mixer.init()
         # Set more channels to prevent sound dropping when multiple sounds play simultaneously
-        pygame.mixer.set_num_channels(32)  # Increase from default 8 to 32 channels
+        pygame.mixer.set_num_channels(AUDIO_CHANNELS)  # Use configurable channel count for optimal audio performance
         music_path = resource_path(BG_MUSIC_PATH)
         pygame.mixer.music.load(music_path)
         pygame.mixer.music.set_volume(MUSIC_VOLUME)

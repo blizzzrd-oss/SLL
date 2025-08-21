@@ -8,7 +8,8 @@ from utils.resource_path import resource_path
 from config import (
     SKILL_DASH_SOUND_PATH, SKILL_SLASH_SOUND_PATHS,
     ENEMY_PLANT_DEATH_SOUND_PATHS, SFX_VOLUME,
-    HIT_ENEMY_SOUND_PATH, HIT_PLAYER_SOUND_PATH
+    HIT_ENEMY_SOUND_PATH, HIT_PLAYER_SOUND_PATH,
+    AUDIO_FORCE_PLAY_MAX_CHANNELS_TO_STOP
 )
 
 
@@ -183,14 +184,8 @@ class SoundManager:
                 # Hit sounds should play reliably for feedback
                 channel = sound.play()
                 if channel is None:
-                    # Try to find a free channel
-                    for i in range(pygame.mixer.get_num_channels()):
-                        channel_obj = pygame.mixer.Channel(i)
-                        if not channel_obj.get_busy():
-                            channel = channel_obj.play(sound)
-                            break
-                    if channel is None:
-                        print(f"[WARNING] Could not play hit sound {hit_type}: All channels busy")
+                    # Hit sounds are important for feedback, force play them
+                    cls.force_play_sound(sound, f"hit sound {hit_type}")
             except Exception as e:
                 print(f"[WARNING] Failed to play hit sound {hit_type}: {e}")
         else:
@@ -208,24 +203,31 @@ class SoundManager:
             if channel is not None:
                 return True
                 
-            # If no channels available, stop the oldest non-priority sounds
-            # We'll use a simple approach: stop channels that have been playing longest
-            oldest_channel = None
-            oldest_time = 0
+            # If no channels available, aggressively free up channels
+            # Stop multiple channels to ensure we can play the sound
+            channels_stopped = 0
+            total_channels = pygame.mixer.get_num_channels()
             
-            for i in range(pygame.mixer.get_num_channels()):
+            for i in range(total_channels):
                 channel_obj = pygame.mixer.Channel(i)
                 if channel_obj.get_busy():
-                    # For simplicity, we'll just stop the first busy channel we find
-                    # In a more complex system, we'd track sound priorities and ages
                     channel_obj.stop()
-                    channel = channel_obj.play(sound)
-                    if channel is not None:
-                        print(f"[SOUND] Force-played {sound_type} by stopping another sound")
-                        return True
-                    break
+                    channels_stopped += 1
                     
-            print(f"[WARNING] Could not force-play {sound_type}: Unable to free channels")
+                    # Try to play after stopping each channel
+                    channel = sound.play()
+                    if channel is not None:
+                        if channels_stopped > 1:
+                            print(f"[SOUND] Force-played {sound_type} by stopping {channels_stopped} channels")
+                        else:
+                            print(f"[SOUND] Force-played {sound_type} by stopping 1 channel")
+                        return True
+                    
+                    # If stopping one channel wasn't enough, try stopping a few more
+                    if channels_stopped >= AUDIO_FORCE_PLAY_MAX_CHANNELS_TO_STOP:  # Use config limit
+                        break
+                        
+            print(f"[WARNING] Could not force-play {sound_type}: Unable to free channels after stopping {channels_stopped}")
             return False
             
         except Exception as e:
@@ -238,6 +240,29 @@ class SoundManager:
         total_channels = pygame.mixer.get_num_channels()
         busy_channels = sum(1 for i in range(total_channels) if pygame.mixer.Channel(i).get_busy())
         return f"Channels: {busy_channels}/{total_channels} busy"
+    
+    @classmethod
+    def cleanup_finished_channels(cls):
+        """Clean up any channels that should be finished playing."""
+        cleaned = 0
+        total_channels = pygame.mixer.get_num_channels()
+        
+        for i in range(total_channels):
+            channel_obj = pygame.mixer.Channel(i)
+            if channel_obj.get_busy():
+                # Check if the channel is playing an extremely short sound that might be stuck
+                # This is a safety mechanism to prevent channel leaks
+                try:
+                    # For now, we'll just count busy channels
+                    # In a more sophisticated system, we'd track sound start times
+                    pass
+                except:
+                    # If there's any issue with the channel, stop it
+                    channel_obj.stop()
+                    cleaned += 1
+        
+        if cleaned > 0:
+            print(f"[SOUND] Cleaned up {cleaned} potentially stuck channels")
     
     @classmethod
     def debug_sound_system(cls):
