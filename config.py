@@ -411,6 +411,14 @@ REROLL_DICE_ANIMATION_FPS = 4  # Slow animation for visibility
 REROLL_DICE_DROP_CHANCE = 0.5  # 0.8% chance to drop from plants
 REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 
+# XP Pickable Configuration
+XP_GREEN_SPRITE = "resources/images/pickabels/crystal_green.png"
+XP_GREEN_FRAME_SIZE = (11, 16)  # Each frame is 11x16 pixels
+XP_GREEN_FRAME_COUNT = 6  # 6 frames in the animation
+XP_GREEN_ANIMATION_FPS = 8  # Animation speed
+XP_GREEN_XP_VALUE = 1  # Each green crystal gives 1 XP
+XP_GREEN_DROP_CHANCE = 1.0  # 100% chance to drop from all monsters
+
 # General Pickable Configuration
 PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
 PICKABLE_COLLECTION_RANGE = 16  # DEPRECATED: Now uses player's pickup range instead

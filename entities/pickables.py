@@ -10,6 +10,8 @@ from abc import ABC, abstractmethod
 from config import (
     REROLL_DICE_SPRITE, REROLL_DICE_FRAME_SIZE, REROLL_DICE_FRAME_COUNT,
     REROLL_DICE_ANIMATION_FPS, REROLL_DICE_REROLL_CHARGES,
+    XP_GREEN_SPRITE, XP_GREEN_FRAME_SIZE, XP_GREEN_FRAME_COUNT, 
+    XP_GREEN_ANIMATION_FPS, XP_GREEN_XP_VALUE,
     PICKABLE_DESPAWN_TIME, PICKABLE_FLOAT_HEIGHT, PICKABLE_FLOAT_SPEED
 )
 from utils.resource_path import resource_path
@@ -163,6 +165,93 @@ class RerollDicePickable(Pickable):
         surface.blit(current_frame, rect)
 
 
+class XpPickable(Pickable):
+    """XP crystal pickable that grants experience points."""
+    
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self._frames = []
+        self.animation_timer = 0.0  # Added missing animation timer
+        self.xp_value = XP_GREEN_XP_VALUE
+        self._load_sprite_frames()
+    
+    def _load_sprite_frames(self):
+        """Load and split the animated XP crystal sprite."""
+        try:
+            full_path = resource_path(XP_GREEN_SPRITE)
+            if os.path.exists(full_path):
+                sprite_sheet = pygame.image.load(full_path).convert_alpha()
+                
+                # Split sprite sheet into individual frames
+                frame_width, frame_height = XP_GREEN_FRAME_SIZE
+                for i in range(XP_GREEN_FRAME_COUNT):
+                    frame_rect = pygame.Rect(i * frame_width, 0, frame_width, frame_height)
+                    frame = sprite_sheet.subsurface(frame_rect).copy()
+                    self._frames.append(frame)
+                
+                print(f"[PICKABLES] Loaded {len(self._frames)} XP crystal frames")
+            else:
+                print(f"[WARNING] XP crystal sprite not found: {full_path}")
+                self._create_fallback_frames()
+        except Exception as e:
+            print(f"[WARNING] Failed to load XP crystal sprite: {e}")
+            self._create_fallback_frames()
+    
+    def _create_fallback_frames(self):
+        """Create fallback green frames if sprite loading fails."""
+        frame_width, frame_height = XP_GREEN_FRAME_SIZE
+        for i in range(XP_GREEN_FRAME_COUNT):
+            frame = pygame.Surface((frame_width, frame_height))
+            # Create slightly different shades of green for animation effect
+            green_value = 200 + (i * 10)  # Vary brightness
+            frame.fill((0, min(255, green_value), 0))
+            self._frames.append(frame)
+    
+    def update(self, dt):
+        """Update animation and base pickable behavior."""
+        if not super().update(dt):
+            return False
+            
+        self.animation_timer += dt
+        return True
+    
+    def collect(self, player):
+        """Grant XP to the player."""
+        # Give XP directly to player
+        player.add_experience(self.xp_value)
+        
+        # Play collection sound
+        try:
+            SoundManager.play_pickable_collect_sound()
+        except Exception as e:
+            print(f"[PICKABLES] Failed to play collection sound: {e}")
+            
+        print(f"[PICKABLES] Player collected XP crystal! Gained {self.xp_value} XP")
+        self.collected = True
+        
+    def draw(self, surface, camera=None):
+        """Draw the animated XP crystal."""
+        if not self._frames:
+            return
+            
+        # Calculate current frame
+        frame_index = int(self.animation_timer * XP_GREEN_ANIMATION_FPS) % len(self._frames)
+        current_frame = self._frames[frame_index]
+        
+        # Get floating position
+        render_x, render_y = self.get_render_position()
+        
+        # Apply camera transformation
+        if camera:
+            screen_x, screen_y = camera.world_to_screen(render_x, render_y)
+        else:
+            screen_x, screen_y = int(render_x), int(render_y)
+            
+        # Center the sprite
+        rect = current_frame.get_rect(center=(screen_x, screen_y))
+        surface.blit(current_frame, rect)
+
+
 class PickableManager:
     """Manages all pickables in the game."""
     
@@ -185,6 +274,19 @@ class PickableManager:
             print(f"[PICKABLES] Failed to play drop sound: {e}")
             
         return dice
+        
+    def create_xp_pickable(self, x, y):
+        """Create an XP crystal pickable at the specified position."""
+        xp_crystal = XpPickable(x, y)
+        self.add_pickable(xp_crystal)
+        
+        # Play drop sound
+        try:
+            SoundManager.play_pickable_drop_sound()
+        except Exception as e:
+            print(f"[PICKABLES] Failed to play drop sound: {e}")
+            
+        return xp_crystal
         
     def update(self, dt, player):
         """Update all pickables and handle collection."""

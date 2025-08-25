@@ -88,7 +88,7 @@ class GameLogicManager:
         for enemy in self.enemies[:]:
             enemy.update(dt, self.game.player)
             if hasattr(enemy, 'dead') and enemy.dead:
-                # Award experience to player for killing the enemy
+                # Drop XP pickable instead of giving XP directly
                 if hasattr(enemy.type, 'experience_reward'):
                     exp_reward = enemy.type.experience_reward
                     
@@ -97,14 +97,31 @@ class GameLogicManager:
                         wave_xp_multiplier = self.wave_manager.get_current_xp_multiplier()
                         exp_reward = int(exp_reward * wave_xp_multiplier)
                     
-                    # Award experience and check for level up
-                    leveled_up = self.game.player.add_experience(exp_reward)
-                    print(f"[XP] Gained {exp_reward} experience from {enemy.type.name}")
+                    # Drop XP pickables (one pickable per XP point, up to reasonable limit)
+                    max_pickables = min(exp_reward, 10)  # Limit to 10 pickables max per enemy
+                    xp_per_pickable = max(1, exp_reward // max_pickables)  # Each pickable worth at least 1 XP
                     
-                    if leveled_up:
-                        print(f"[XP] Player leveled up to level {self.game.player.level}!")
+                    for i in range(max_pickables):
+                        # Spread XP pickables around the enemy position
+                        import random
+                        offset_x = random.uniform(-20, 20)
+                        offset_y = random.uniform(-20, 20)
+                        xp_crystal = self.game.pickable_manager.create_xp_pickable(
+                            enemy.x + offset_x, 
+                            enemy.y + offset_y
+                        )
+                        # Set the XP value for this pickable
+                        xp_crystal.xp_value = xp_per_pickable
+                    
+                    # Handle any remaining XP
+                    remaining_xp = exp_reward - (max_pickables * xp_per_pickable)
+                    if remaining_xp > 0 and max_pickables > 0:
+                        # Add remaining XP to the last pickable created
+                        xp_crystal.xp_value += remaining_xp
+                    
+                    print(f"[XP] Dropped {max_pickables} XP crystals (total {exp_reward} XP) from {enemy.type.name}")
                 
-                # Check for pickable drops (only for plant enemies)
+                # Check for other pickable drops (reroll dice, etc.)
                 if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
                     self._check_pickable_drops(enemy)
                 
