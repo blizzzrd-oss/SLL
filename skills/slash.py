@@ -124,10 +124,11 @@ class SlashSkill(Skill):
         angle = math.degrees(math.atan2(dy, dx)) % 360
         # Sprite faces right (0°) by default, so rotate by -angle
         draw_frame = pygame.transform.rotate(frame, -angle)
-        # Scale sprite 20% bigger for better visual impact
-        sprite_scale = 1.5
-        scaled_width = int(draw_frame.get_width() * sprite_scale)
-        scaled_height = int(draw_frame.get_height() * sprite_scale)
+        # Scale sprite for visual impact and apply AOE enhancement
+        base_sprite_scale = 1.2  # Base 20% bigger for visual impact
+        total_sprite_scale = base_sprite_scale * self.size_multiplier  # Apply AOE enhancement
+        scaled_width = int(draw_frame.get_width() * total_sprite_scale)
+        scaled_height = int(draw_frame.get_height() * total_sprite_scale)
         draw_frame = pygame.transform.scale(draw_frame, (scaled_width, scaled_height))
         # Offset: place slash just next to player in target direction
         offset_dist = PLAYER_SIZE // 2 + 4
