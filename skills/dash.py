@@ -25,6 +25,7 @@ class DashSkill(Skill):
         self.current_charges = 1
         self.charge_regen_time = 0
         self.last_charge_regen = 0
+        self.last_debug_log = 0  # For throttling debug output
 
     def use(self, target_pos=None):
         now = pygame.time.get_ticks() / 1000
@@ -49,6 +50,7 @@ class DashSkill(Skill):
         # Consume charge safely (prevent going negative)
         if self.current_charges > 0:
             self.current_charges = max(0, self.current_charges - 1)
+            print(f"[DASH] Consumed charge - charges after: {self.current_charges}/{self.max_charges}")
         
         self.last_used = now
         self.active = True
@@ -121,20 +123,44 @@ class DashSkill(Skill):
         """Update charge system for double dash enhancement."""
         # Update max charges based on enhancement
         double_dash_level = self.user.get_enhancement_level('double_dash', 'dash')
+        old_max_charges = self.max_charges
         self.max_charges = 1 + double_dash_level
         
-        # Ensure current charges don't exceed max
+        # Debug: Show current enhancement state (throttled)
+        if double_dash_level > 0 and now - self.last_debug_log > 1.0:  # Log every 1 second max
+            print(f"[DASH DEBUG] Enhancement level: {double_dash_level}, max_charges: {self.max_charges}, current_charges: {self.current_charges}, regen_timer: {now - self.last_charge_regen:.1f}s")
+            self.last_debug_log = now
+        
+        # If max charges increased due to enhancement, grant full charges
+        if self.max_charges > old_max_charges:
+            self.current_charges = self.max_charges  # Start with full charges
+            self.last_charge_regen = now  # Reset regeneration timer
+            print(f"[DASH] Enhancement increased max charges to {self.max_charges}, granting full charges: {self.current_charges}/{self.max_charges}")
+        
+        # Ensure current charges don't exceed max (in case enhancement was removed)
         self.current_charges = min(self.current_charges, self.max_charges)
         
         if double_dash_level > 0:
             from config_enhancements import SKILL_SPECIFIC_ENHANCEMENTS
             self.charge_regen_time = SKILL_SPECIFIC_ENHANCEMENTS['dash']['double_dash']['charge_regen_time']
             
-            # Regenerate charges over time
+            # Initialize last_charge_regen if not set
+            if self.last_charge_regen == 0:
+                self.last_charge_regen = now
+            
+            # Regenerate charges over time if we're below max
             if self.current_charges < self.max_charges:
-                if self.last_charge_regen == 0:
-                    self.last_charge_regen = now
-                elif now - self.last_charge_regen >= self.charge_regen_time:
-                    self.current_charges = min(self.max_charges, self.current_charges + 1)
-                    self.last_charge_regen = now
-                    print(f"[DASH] Regenerated charge: {self.current_charges}/{self.max_charges}")
+                # Calculate how many charges we should have regenerated
+                time_since_last_regen = now - self.last_charge_regen
+                charges_to_regen = int(time_since_last_regen / self.charge_regen_time)
+                
+                if charges_to_regen > 0:
+                    # Add the charges and advance the timer
+                    charges_added = min(charges_to_regen, self.max_charges - self.current_charges)
+                    self.current_charges += charges_added
+                    # Advance the timer by the time for the charges we actually added
+                    self.last_charge_regen += charges_added * self.charge_regen_time
+                    print(f"[DASH] Regenerated {charges_added} charge(s): {self.current_charges}/{self.max_charges}")
+            else:
+                # If at max charges, reset the timer so we start tracking when we use a charge
+                self.last_charge_regen = now
