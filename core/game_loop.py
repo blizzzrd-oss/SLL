@@ -133,7 +133,16 @@ def run_game(screen, slot, mode):
             pygame.display.flip()
             continue
         
-        # Handle all input events (only when enhancement UI is not active)
+        # Handle settings menu (priority after enhancement UI)
+        if event_handler.in_settings_menu:
+            # Handle events first (this is done in handle_all_events)
+            event_handler.handle_all_events()
+            # Then render settings menu
+            if event_handler.show_settings_menu_if_active():
+                pygame.display.flip()
+                continue
+        
+        # Handle all input events (only when enhancement UI and settings menu are not active)
         event_handler.handle_all_events()
         
         # Check for pause state change to invalidate cache

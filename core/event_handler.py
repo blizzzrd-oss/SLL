@@ -121,7 +121,10 @@ class GameEventHandler:
         if option == "Resume":
             self.paused = False
         elif option == "Surrender":
-            self.running = False
+            # Trigger death screen by setting player health to 0 and game over state
+            self.game.player.health = 0
+            self.game.game_over = True
+            self.paused = False  # Exit pause menu to show death screen
         elif option == "Settings":
             self.in_settings_menu = True
             if self.settings_menu is None:
@@ -152,7 +155,7 @@ class GameEventHandler:
             self.settings_menu.state = 'settings'
             
         self.settings_menu.draw()
-        pygame.display.flip()
+        # Don't call pygame.display.flip() here - let game loop handle it
         return True
 
     def is_skill_pressed(self, skill_name):
