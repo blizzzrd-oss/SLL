@@ -398,10 +398,6 @@ class DemonEnemyLogic:
             # Use current position
             return (int(self.enemy.position[0]), int(self.enemy.position[1]))
 
-    def should_show_hurt_overlay(self):
-        """Check if hurt overlay should be shown - deprecated, now using hurt sprite animation."""
-        return False
-    
     def draw(self, surface, camera=None):
         """Draw the demon with proper directional sprites."""
         sprite = self.get_current_sprite()

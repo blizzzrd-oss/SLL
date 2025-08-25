@@ -74,7 +74,6 @@ XP_DEMON_LIGHT_BLUE_CHANCE = 0.1  # 10% chance for light blue (higher value)
 # GENERAL PICKABLE CONFIGURATION
 # =============================================================================
 PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
-PICKABLE_COLLECTION_RANGE = 16  # DEPRECATED: Now uses player's pickup range instead
 PICKABLE_FLOAT_HEIGHT = 8  # How high pickables float above ground
 PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
 
