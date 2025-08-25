@@ -51,6 +51,12 @@ class DashSkill(Skill):
         range_bonus = self.user.get_enhancement_value('increased_range', 'dash')
         effective_range = self.base_dash_range * (1.0 + range_bonus)
         
+        # Apply immunity on dash enhancement
+        immunity_duration = self.user.get_enhancement_value('immunity_on_dash', 'dash')
+        if immunity_duration > 0:
+            self.user.grant_immunity(immunity_duration)
+            print(f"[DASH] Immunity granted for {immunity_duration} seconds")
+        
         # Play dash sound effect using sound manager
         SoundManager.play_skill_sound('dash')
         

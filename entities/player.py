@@ -38,6 +38,13 @@ class Player:
         if barrier_regen > 0 and self.barrier < self.max_barrier:
             self.barrier = min(self.max_barrier, self.barrier + barrier_regen * dt)
         
+        # Update immunity timer
+        if self.is_immune and self.immunity_timer > 0:
+            self.immunity_timer -= dt
+            if self.immunity_timer <= 0:
+                self.is_immune = False
+                self.immunity_timer = 0.0
+        
         # Barrier decay (float, smooth)
         if not hasattr(self, '_barrier_decay_accum'):
             self._barrier_decay_accum = 0.0
@@ -107,6 +114,10 @@ class Player:
         self.damage_log = PlayerDamageLog()
         self.received_log = PlayerReceivedLog()
         self.last_move = (1, 0)
+        
+        # Immunity system
+        self.is_immune = False
+        self.immunity_timer = 0.0
 
 
         # Animation state
@@ -131,6 +142,10 @@ class Player:
 
 
     def take_damage(self, amount, source=None, barrier_damage=False):
+        # Check immunity first
+        if self.is_immune:
+            return  # Immune to all damage
+            
         # Barrier absorbs damage first unless barrier_damage is True
         damage_to_health = amount
         # Use actual skill name for damage logging
@@ -182,6 +197,11 @@ class Player:
         self.received_log.add_entry(amount, skill_name, 'heal', 
                                     health=self.health, barrier=self.barrier,
                                     max_health=self.max_health, max_barrier=self.max_barrier)
+    
+    def grant_immunity(self, duration):
+        """Grant damage immunity for the specified duration in seconds."""
+        self.is_immune = True
+        self.immunity_timer = max(self.immunity_timer, duration)  # Don't reduce existing immunity time
 
     def get_exp_to_next_level(self):
         """Calculate XP required for next level using progressive additive bonus system."""
