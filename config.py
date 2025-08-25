@@ -446,6 +446,16 @@ ENEMY_PLANT_DEATH_SOUND_PATHS = [
 PICKABLE_DROP_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"
 PICKABLE_COLLECT_SOUND_PATH = "resources/sounds/pickable.mp3"
 
+# Player Sound Effects
+PLAYER_LEVEL_UP_SOUND_PATH = "resources/sounds/player_level_up.mp3"
+
+# Wave Sound Effects
+NEW_WAVE_SOUND_PATH = "resources/sounds/new_wave.mp3"
+
+# Enhancement UI Sound Effects  
+ENHANCEMENT_SELECT_SOUND_PATH = "resources/sounds/pickable.mp3"
+ENHANCEMENT_REROLL_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"
+
 # =============================================================================
 # LOGGING AND DEBUGGING CONFIGURATION  
 # =============================================================================

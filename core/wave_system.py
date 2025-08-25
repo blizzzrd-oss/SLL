@@ -6,6 +6,7 @@ Replaces time-based progression with wave-based progression.
 import time
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
+from audio.sound_manager import SoundManager
 from config import (
     WAVE_DURATION, WAVE_SYSTEM_CONFIGURATION, WAVE_EVENT_CHANCES,
     BOSS_WAVE_INTERVAL, ELITE_WAVE_INTERVAL, BOSS_WAVE_HEALTH_BONUS, 
@@ -178,6 +179,12 @@ class WaveManager:
         
         # Trigger wave events based on chances
         self._trigger_wave_events()
+        
+        # Play new wave sound
+        try:
+            SoundManager.play_new_wave_sound()
+        except Exception as e:
+            print(f"[WARNING] Failed to play new wave sound: {e}")
         
         print(f"[WAVE] {self.current_wave_config.description} started!")
         return True

@@ -10,6 +10,8 @@ from config import (
     ENEMY_PLANT_DEATH_SOUND_PATHS, SFX_VOLUME,
     HIT_ENEMY_SOUND_PATH, HIT_PLAYER_SOUND_PATH,
     PICKABLE_DROP_SOUND_PATH, PICKABLE_COLLECT_SOUND_PATH,
+    PLAYER_LEVEL_UP_SOUND_PATH, NEW_WAVE_SOUND_PATH,
+    ENHANCEMENT_SELECT_SOUND_PATH, ENHANCEMENT_REROLL_SOUND_PATH,
     AUDIO_FORCE_PLAY_MAX_CHANNELS_TO_STOP
 )
 
@@ -117,6 +119,29 @@ class SoundManager:
                     print(f"[WARNING] Pickable sound file not found: {full_path}")
             except Exception as e:
                 print(f"[WARNING] Failed to load pickable sound {sound_type}: {e}")
+        
+        # Player sounds
+        player_sounds = {
+            'level_up': PLAYER_LEVEL_UP_SOUND_PATH,
+            'new_wave': NEW_WAVE_SOUND_PATH,
+            'enhancement_select': ENHANCEMENT_SELECT_SOUND_PATH,
+            'enhancement_reroll': ENHANCEMENT_REROLL_SOUND_PATH
+        }
+        
+        for sound_type, sound_path in player_sounds.items():
+            total_sounds += 1
+            try:
+                full_path = resource_path(sound_path)
+                if os.path.exists(full_path):
+                    sound = pygame.mixer.Sound(full_path)
+                    sound.set_volume(SFX_VOLUME)
+                    cls._sounds_cache[f'player_{sound_type}'] = sound
+                    success_count += 1
+                    print(f"[SOUND] Loaded player sound: {sound_type}")
+                else:
+                    print(f"[WARNING] Player sound file not found: {full_path}")
+            except Exception as e:
+                print(f"[WARNING] Failed to load player sound {sound_type}: {e}")
         
         # Hit sounds
         hit_sounds = {
@@ -238,6 +263,58 @@ class SoundManager:
                     cls.force_play_sound(sound, "pickable collect sound")
             except Exception as e:
                 print(f"[WARNING] Failed to play pickable collect sound: {e}")
+    
+    @classmethod
+    def play_player_level_up_sound(cls):
+        """Play the player level up sound."""
+        sound = cls._sounds_cache.get('player_level_up')
+        if sound:
+            try:
+                channel = sound.play()
+                if channel is None:
+                    # Force play level up sound as it's important player feedback
+                    cls.force_play_sound(sound, "player level up sound")
+            except Exception as e:
+                print(f"[WARNING] Failed to play player level up sound: {e}")
+    
+    @classmethod
+    def play_new_wave_sound(cls):
+        """Play the new wave sound."""
+        sound = cls._sounds_cache.get('player_new_wave')
+        if sound:
+            try:
+                channel = sound.play()
+                if channel is None:
+                    # Force play new wave sound as it's important game feedback
+                    cls.force_play_sound(sound, "new wave sound")
+            except Exception as e:
+                print(f"[WARNING] Failed to play new wave sound: {e}")
+    
+    @classmethod
+    def play_enhancement_select_sound(cls):
+        """Play the enhancement selection sound."""
+        sound = cls._sounds_cache.get('player_enhancement_select')
+        if sound:
+            try:
+                channel = sound.play()
+                if channel is None:
+                    # Force play enhancement sound as it's important UI feedback
+                    cls.force_play_sound(sound, "enhancement select sound")
+            except Exception as e:
+                print(f"[WARNING] Failed to play enhancement select sound: {e}")
+    
+    @classmethod
+    def play_enhancement_reroll_sound(cls):
+        """Play the enhancement reroll sound."""
+        sound = cls._sounds_cache.get('player_enhancement_reroll')
+        if sound:
+            try:
+                channel = sound.play()
+                if channel is None:
+                    # Force play reroll sound as it's important UI feedback
+                    cls.force_play_sound(sound, "enhancement reroll sound")
+            except Exception as e:
+                print(f"[WARNING] Failed to play enhancement reroll sound: {e}")
     
     @classmethod
     def force_play_sound(cls, sound, sound_type="unknown"):

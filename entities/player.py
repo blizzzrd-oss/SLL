@@ -215,6 +215,12 @@ class Player:
             
             print(f"[PLAYER] Level up! Now level {self.level}")
             
+            # Play level up sound
+            try:
+                SoundManager.play_player_level_up_sound()
+            except Exception as e:
+                print(f"[WARNING] Failed to play level up sound: {e}")
+            
             # Optional: Add level up bonuses (health, damage, etc.)
             self._apply_level_up_bonuses()
             

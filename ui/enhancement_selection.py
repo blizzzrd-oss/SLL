@@ -4,6 +4,7 @@ Provides interface for selecting skill enhancements on level up.
 """
 
 import pygame
+from audio.sound_manager import SoundManager
 from config_enhancements import ENHANCEMENT_UI
 from config import (
     ENHANCEMENT_OVERLAY_COLOR, ENHANCEMENT_PANEL_COLOR, ENHANCEMENT_BORDER_COLOR,
@@ -84,6 +85,13 @@ class EnhancementSelectionUI:
                     if button_rect.collidepoint(mouse_pos):
                         enhancement_id = self.choices[i][0]
                         self.selected_choice = enhancement_id
+                        
+                        # Play enhancement selection sound
+                        try:
+                            SoundManager.play_enhancement_select_sound()
+                        except Exception as e:
+                            print(f"[WARNING] Failed to play enhancement select sound: {e}")
+                        
                         self.is_active = False
                         return enhancement_id
                 
@@ -91,6 +99,13 @@ class EnhancementSelectionUI:
                 if (self.reroll_button_rect and self.reroll_button_rect.collidepoint(mouse_pos) 
                     and self.reroll_charges > 0 and self.on_reroll_callback):
                     self.reroll_charges -= 1
+                    
+                    # Play reroll sound
+                    try:
+                        SoundManager.play_enhancement_reroll_sound()
+                    except Exception as e:
+                        print(f"[WARNING] Failed to play enhancement reroll sound: {e}")
+                    
                     new_choices = self.on_reroll_callback()
                     if new_choices:
                         self.choices = new_choices
