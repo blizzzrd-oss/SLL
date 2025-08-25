@@ -65,6 +65,17 @@ ENEMY_TYPE_CONFIG = {
 		'attack_damage': 5,
 		'attack_cooldown': 1.0,
 	},
+	'Demon': {
+		'max_health': 35,
+		'size': (81, 70),  # Width x Height
+		'speed': 35,  # Slower than plants
+		'color': (150, 50, 50),
+		'attack_range': 200,  # Long range for projectiles
+		'attack_damage': 8,
+		'attack_cooldown': 2.0,
+		'projectile_speed': 150,
+		'projectile_damage': 8,
+	},
 }
 
 # =============================================================================
@@ -196,6 +207,7 @@ SPAWNER_DEFAULT_INTERVAL = 0.5  # seconds between spawns
 SPAWNER_SPAWN_BUFFER = 100  # Distance outside camera view to spawn enemies
 SPAWNER_ENEMY_WEIGHTS = {
 	'Plant': 1.0,
+	'Demon': 0.3,  # Lower spawn weight - demons are more dangerous
 }
 
 # Wave-based Enemy Scaling (replaces time-based scaling)
@@ -203,6 +215,9 @@ SPAWNER_WAVE_WEIGHT_EVENTS = [
 	('Plant', 3, 1.5),   # Starting from wave 3, increase plant spawn chance by 50%
 	('Plant', 5, 2.0),   # Starting from wave 5, double plant spawn chance
 	('Plant', 10, 3.0),  # Starting from wave 10, triple plant spawn chance
+	('Demon', 4, 0.5),   # Starting from wave 4, demons begin spawning
+	('Demon', 7, 1.0),   # Starting from wave 7, normal demon spawn rate
+	('Demon', 12, 1.5),  # Starting from wave 12, increase demon spawn rate
 ]
 
 # Spawn Rate Limits

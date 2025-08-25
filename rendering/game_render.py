@@ -136,6 +136,10 @@ def render_full_game(screen, game, last_move, time_accum, hud_visible, fps, game
     for enemy in getattr(game, 'enemies', []):
         enemy.draw(screen, camera=game.camera)
     
+    # Draw projectiles
+    if hasattr(game, 'projectile_manager'):
+        game.projectile_manager.draw(screen, camera=game.camera)
+    
     # Draw pickables
     if hasattr(game, 'pickable_manager'):
         game.pickable_manager.draw(screen, camera=game.camera)

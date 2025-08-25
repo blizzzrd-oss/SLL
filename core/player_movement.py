@@ -29,3 +29,6 @@ def handle_player_movement(player, dt):
     player.x += dx * player.movement_speed * dt * 60
     player.y += dy * player.movement_speed * dt * 60
     player.position = [player.x, player.y]
+    
+    # Update rect to match new position
+    player.rect.center = (int(player.x), int(player.y))

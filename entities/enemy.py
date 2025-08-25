@@ -12,7 +12,7 @@ Enemy entity and logic.
 
 # EnemyType: defines archetype attributes and skills for enemies
 class EnemyType:
-    def __init__(self, name, max_health, size, skills=None, speed=1.0, color=(255,0,0), logic_cls=None, attack_range=32, attack_damage=5):
+    def __init__(self, name, max_health, size, skills=None, speed=1.0, color=(255,0,0), logic_cls=None, attack_range=32, attack_damage=5, attack_cooldown=1.0, projectile_speed=150, projectile_damage=5):
         self.name = name
         self.max_health = max_health
         self.size = size
@@ -22,6 +22,9 @@ class EnemyType:
         self.logic_cls = logic_cls
         self.attack_range = attack_range
         self.attack_damage = attack_damage
+        self.attack_cooldown = attack_cooldown
+        self.projectile_speed = projectile_speed
+        self.projectile_damage = projectile_damage
 
 # Enemy: instance of an enemy in the game, based on EnemyType
 class Enemy:
@@ -68,7 +71,15 @@ class Enemy:
         self.health = enemy_type.max_health
         self.position = position
         self.size = enemy_type.size
-        self.rect = pygame.Rect(self.position[0] - self.size // 2, self.position[1] - self.size // 2, self.size, self.size)
+        
+        # Handle size as either integer (square) or tuple (width, height)
+        if isinstance(self.size, tuple):
+            width, height = self.size
+            self.rect = pygame.Rect(self.position[0] - width // 2, self.position[1] - height // 2, width, height)
+        else:
+            # Size is an integer (square)
+            self.rect = pygame.Rect(self.position[0] - self.size // 2, self.position[1] - self.size // 2, self.size, self.size)
+            
         self.facing_angle = 0
         self.skills = {name: skill for name, skill in (enemy_type.skills or [])}
         self.speed = enemy_type.speed
@@ -108,7 +119,14 @@ class Enemy:
                 screen_x, screen_y = camera.world_to_screen(self.position[0], self.position[1])
             else:
                 screen_x, screen_y = int(self.position[0]), int(self.position[1])
-            pygame.draw.circle(surface, (220, 40, 40), (screen_x, screen_y), self.size // 2)
+            
+            # Handle size as either integer or tuple for fallback drawing
+            if isinstance(self.size, tuple):
+                radius = max(self.size) // 2  # Use larger dimension for circle radius
+            else:
+                radius = self.size // 2
+                
+            pygame.draw.circle(surface, (220, 40, 40), (screen_x, screen_y), radius)
 
 # Register the Plant enemy type using config
 plant_cfg = ENEMY_TYPE_CONFIG['Plant']
@@ -121,4 +139,21 @@ PlantType = EnemyType(
     logic_cls=PlantEnemyLogic,
     attack_range=plant_cfg.get('attack_range', 32),
     attack_damage=plant_cfg.get('attack_damage', 5)
+)
+
+# Register the Demon enemy type using config
+demon_cfg = ENEMY_TYPE_CONFIG['Demon']
+from entities.demon_logic import DemonEnemyLogic
+DemonType = EnemyType(
+    name='Demon',
+    max_health=demon_cfg['max_health'],
+    size=demon_cfg['size'],
+    speed=demon_cfg['speed'],
+    color=demon_cfg['color'],
+    logic_cls=DemonEnemyLogic,
+    attack_range=demon_cfg.get('attack_range', 200),
+    attack_damage=demon_cfg.get('attack_damage', 8),
+    attack_cooldown=demon_cfg.get('attack_cooldown', 2.0),
+    projectile_speed=demon_cfg.get('projectile_speed', 150),
+    projectile_damage=demon_cfg.get('projectile_damage', 8)
 )

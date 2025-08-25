@@ -7,7 +7,7 @@ import pygame
 import time
 import random
 from entities.spawner import EnemySpawner
-from entities.enemy import PlantType
+from entities.enemy import PlantType, DemonType
 from core.wave_system import WaveManager
 from config import REROLL_DICE_DROP_CHANCE
 
@@ -26,7 +26,7 @@ class GameLogicManager:
         self.enemies = []
         self.game.enemies = self.enemies
         self.spawner = EnemySpawner(
-            [PlantType], 
+            [PlantType, DemonType], 
             get_game_time_fn=lambda: self.game_time,
             screen=screen,
             game=game,
@@ -55,6 +55,9 @@ class GameLogicManager:
         
         # Update enemy management
         self._update_enemies(dt)
+        
+        # Update projectile system
+        self.game.projectile_manager.update(dt, self.game.player)
         
         # Update pickable system
         self.game.pickable_manager.update(dt, self.game.player)
@@ -109,7 +112,7 @@ class GameLogicManager:
                     print(f"[XP] Dropped {crystal_type} XP crystal from {enemy.type.name} (early drop)")
                     
                     # Check for other pickable drops (reroll dice, etc.)
-                    if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
+                    if hasattr(enemy.type, 'name') and enemy.type.name in ['Plant', 'Demon']:
                         self._check_pickable_drops(enemy)
                     
                     # Mark as dropped to avoid dropping again
@@ -189,6 +192,13 @@ class GameLogicManager:
         if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
             rand = random.random()
             if rand < XP_PLANT_GREEN_CHANCE:
+                return 'green'
+            else:
+                return 'yellow'
+        # For demons: 80% green, 20% yellow (higher chance for better crystals)
+        elif hasattr(enemy.type, 'name') and enemy.type.name == 'Demon':
+            rand = random.random()
+            if rand < 0.8:
                 return 'green'
             else:
                 return 'yellow'

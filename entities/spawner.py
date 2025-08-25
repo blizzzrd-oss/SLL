@@ -137,6 +137,9 @@ class EnemySpawner:
         pos = self.random_edge_position()
         enemy = Enemy(etype, position=pos)
         
+        # Add reference to game for projectile access
+        enemy.game = self.game
+        
         # Apply game mode and wave multipliers if available
         if self.game and hasattr(self.game, 'mode_config'):
             self._apply_mode_multipliers(enemy)
