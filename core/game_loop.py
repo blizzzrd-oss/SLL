@@ -84,6 +84,9 @@ def run_game(screen, slot, mode):
     frame_timer = FrameTimer(settings_path)
     enhancement_ui = EnhancementSelectionUI(screen)
     
+    # Connect enhancement UI to player for pickable system
+    game.player.enhancement_ui = enhancement_ui
+    
     # Sync initial state with event handler
     event_handler.running = running
     event_handler.should_exit = should_exit
@@ -105,16 +108,23 @@ def run_game(screen, slot, mode):
         if game.player.has_pending_enhancement_selection() and not enhancement_ui.is_active:
             choices = game.player.get_enhancement_choices()
             if choices:
-                enhancement_ui.show_enhancement_selection(choices)
+                # Don't reset reroll charges - they persist and come from pickables
+                # Create reroll callback that generates new choices
+                def reroll_callback():
+                    return game.player.get_enhancement_choices()
+                enhancement_ui.show_enhancement_selection(choices, reroll_callback)
         
         # Handle enhancement selection events (priority over normal events)
         if enhancement_ui.is_active:
             for event in pygame.event.get():
                 selected_enhancement = enhancement_ui.handle_event(event)
-                if selected_enhancement:
+                if selected_enhancement and selected_enhancement != "reroll":
                     game.player.apply_enhancement_choice(selected_enhancement)
                     enhancement_ui.close()
                     print(f"[ENHANCEMENT] Selected: {selected_enhancement}")
+                elif selected_enhancement == "reroll":
+                    print(f"[ENHANCEMENT] Rerolled choices")
+                    # The reroll is already handled in the UI, just continue
             
             # Render game background using pause cache system (without pause overlay)
             from rendering.game_render import _pause_screen_cache, _pause_cache_valid, render_full_game_to_cache

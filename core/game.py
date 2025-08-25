@@ -5,6 +5,7 @@ Handles player, monsters, loot, skills, and inventory.
 
 import pygame
 from entities.player import Player
+from entities.pickables import PickableManager
 from rendering.player_render import draw_player_idle, draw_player_walk
 from core.player_movement import handle_player_movement
 from core.game_modes import get_game_mode_config
@@ -27,6 +28,9 @@ class Game:
         
         # Initialize game event manager
         self.event_manager = GameEventManager(mode)
+        
+        # Initialize pickable system
+        self.pickable_manager = PickableManager()
         
         # Initialize player with mode-specific stats
         self.player = Player()

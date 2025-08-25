@@ -23,6 +23,21 @@ from skills.registry import get_skill
 class Player:
 
     def update(self, dt):
+        # Apply movement speed enhancement
+        base_movement_speed = PLAYER_MOVEMENT_SPEED
+        movement_speed_bonus = self.enhancement_manager.get_enhancement_value('movement_speed')
+        self.movement_speed = base_movement_speed * (1.0 + movement_speed_bonus)
+        
+        # Apply life regeneration enhancement
+        life_regen = self.enhancement_manager.get_enhancement_value('life_regeneration')
+        if life_regen > 0 and self.health < self.max_health:
+            self.health = min(self.max_health, self.health + life_regen * dt)
+        
+        # Apply barrier regeneration enhancement
+        barrier_regen = self.enhancement_manager.get_enhancement_value('barrier_regeneration')
+        if barrier_regen > 0 and self.barrier < self.max_barrier:
+            self.barrier = min(self.max_barrier, self.barrier + barrier_regen * dt)
+        
         # Barrier decay (float, smooth)
         if not hasattr(self, '_barrier_decay_accum'):
             self._barrier_decay_accum = 0.0
@@ -33,7 +48,6 @@ class Player:
                 to_sub = int(self._barrier_decay_accum)
                 self.barrier = max(0, self.barrier - to_sub)
                 self._barrier_decay_accum -= to_sub
-        # TODO: barrier regen, buffs, debuffs, etc.
     # Animation states
     ANIM_IDLE = 'idle'
     ANIM_WALK = 'walk'
@@ -183,7 +197,11 @@ class Player:
         if self.level >= self.max_level:
             return False  # No more leveling possible
         
-        self.exp += amount
+        # Apply XP enhancement bonus
+        xp_bonus = self.enhancement_manager.get_enhancement_value('increased_xp')
+        enhanced_amount = amount * (1.0 + xp_bonus)
+        
+        self.exp += enhanced_amount
         leveled_up = False
         
         # Check for level ups (can level multiple times with large XP gains)

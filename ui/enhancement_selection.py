@@ -22,13 +22,17 @@ class EnhancementSelectionUI:
         self.choices = []
         self.selected_choice = None
         self.button_rects = []
+        self.reroll_button_rect = None
         self.is_active = False
+        self.reroll_charges = 0  # Start with 0 reroll charges (must find pickables)
+        self.on_reroll_callback = None  # Callback function for reroll
         
-    def show_enhancement_selection(self, enhancement_choices):
+    def show_enhancement_selection(self, enhancement_choices, reroll_callback=None):
         """Show the enhancement selection screen."""
         self.choices = enhancement_choices
         self.selected_choice = None
         self.is_active = True
+        self.on_reroll_callback = reroll_callback
         self._calculate_button_positions()
     
     def _calculate_button_positions(self):
@@ -37,7 +41,9 @@ class EnhancementSelectionUI:
         screen_width = self.screen.get_width()
         screen_height = self.screen.get_height()
         
-        panel_x = (screen_width - ENHANCEMENT_UI['panel_width']) // 2
+        # Increase panel width
+        panel_width = ENHANCEMENT_UI['panel_width'] + 200  # Increase width by 200px
+        panel_x = (screen_width - panel_width) // 2
         panel_y = (screen_height - ENHANCEMENT_UI['panel_height']) // 2
         
         # Calculate button layout
@@ -45,8 +51,8 @@ class EnhancementSelectionUI:
         total_button_width = (button_count * ENHANCEMENT_UI['button_width'] + 
                              (button_count - 1) * ENHANCEMENT_UI['button_spacing'])
         
-        start_x = panel_x + (ENHANCEMENT_UI['panel_width'] - total_button_width) // 2
-        button_y = panel_y + 150  # Position buttons below text
+        start_x = panel_x + (panel_width - total_button_width) // 2
+        button_y = panel_y + 120  # Position buttons below title (removed subtitle)
         
         for i in range(button_count):
             button_x = start_x + i * (ENHANCEMENT_UI['button_width'] + ENHANCEMENT_UI['button_spacing'])
@@ -56,6 +62,13 @@ class EnhancementSelectionUI:
                 ENHANCEMENT_UI['button_height']
             )
             self.button_rects.append(button_rect)
+        
+        # Calculate reroll button position (where instructions used to be)
+        reroll_button_width = 200
+        reroll_button_height = 40
+        reroll_x = (screen_width - reroll_button_width) // 2
+        reroll_y = panel_y + ENHANCEMENT_UI['panel_height'] - 60
+        self.reroll_button_rect = pygame.Rect(reroll_x, reroll_y, reroll_button_width, reroll_button_height)
     
     def handle_event(self, event):
         """Handle input events for enhancement selection."""
@@ -65,12 +78,24 @@ class EnhancementSelectionUI:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left click
                 mouse_pos = pygame.mouse.get_pos()
+                
+                # Check enhancement buttons
                 for i, button_rect in enumerate(self.button_rects):
                     if button_rect.collidepoint(mouse_pos):
                         enhancement_id = self.choices[i][0]
                         self.selected_choice = enhancement_id
                         self.is_active = False
                         return enhancement_id
+                
+                # Check reroll button
+                if (self.reroll_button_rect and self.reroll_button_rect.collidepoint(mouse_pos) 
+                    and self.reroll_charges > 0 and self.on_reroll_callback):
+                    self.reroll_charges -= 1
+                    new_choices = self.on_reroll_callback()
+                    if new_choices:
+                        self.choices = new_choices
+                        self._calculate_button_positions()
+                    return "reroll"
         
         return None
     
@@ -87,27 +112,28 @@ class EnhancementSelectionUI:
         overlay.fill(ENHANCEMENT_OVERLAY_COLOR)
         self.screen.blit(overlay, (0, 0))
         
-        # Draw main panel
-        panel_x = (screen_width - ENHANCEMENT_UI['panel_width']) // 2
+        # Draw main panel (semi-transparent)
+        panel_width = ENHANCEMENT_UI['panel_width'] + 200  # Increased width
+        panel_x = (screen_width - panel_width) // 2
         panel_y = (screen_height - ENHANCEMENT_UI['panel_height']) // 2
         panel_rect = pygame.Rect(
             panel_x, panel_y,
-            ENHANCEMENT_UI['panel_width'],
+            panel_width,
             ENHANCEMENT_UI['panel_height']
         )
         
-        pygame.draw.rect(self.screen, ENHANCEMENT_PANEL_COLOR, panel_rect, border_radius=10)
+        # Create semi-transparent panel surface
+        panel_surface = pygame.Surface((panel_width, ENHANCEMENT_UI['panel_height']), pygame.SRCALPHA)
+        panel_color_with_alpha = (*ENHANCEMENT_PANEL_COLOR, 200)  # Add alpha channel (200/255 = ~78% opacity)
+        panel_surface.fill(panel_color_with_alpha)
+        self.screen.blit(panel_surface, (panel_x, panel_y))
+        
         pygame.draw.rect(self.screen, ENHANCEMENT_BORDER_COLOR, panel_rect, 3, border_radius=10)
         
         # Draw title
         title_text = self.font_large.render("Choose Enhancement", True, ENHANCEMENT_TEXT_COLOR)
         title_rect = title_text.get_rect(center=(screen_width // 2, panel_y + 40))
         self.screen.blit(title_text, title_rect)
-        
-        # Draw subtitle
-        subtitle_text = self.font_medium.render("Select a skill enhancement:", True, ENHANCEMENT_TEXT_COLOR)
-        subtitle_rect = subtitle_text.get_rect(center=(screen_width // 2, panel_y + 70))
-        self.screen.blit(subtitle_text, subtitle_rect)
         
         # Draw enhancement buttons
         mouse_pos = pygame.mouse.get_pos()
@@ -144,10 +170,24 @@ class EnhancementSelectionUI:
                 line_rect = line_text.get_rect(center=(button_rect.centerx, button_rect.y + 60 + j * 16))
                 self.screen.blit(line_text, line_rect)
         
-        # Draw instructions
-        instruction_text = self.font_small.render("Click on an enhancement to select it", True, ENHANCEMENT_TEXT_COLOR)
-        instruction_rect = instruction_text.get_rect(center=(screen_width // 2, panel_y + ENHANCEMENT_UI['panel_height'] - 30))
-        self.screen.blit(instruction_text, instruction_rect)
+        # Draw reroll button
+        if self.reroll_button_rect:
+            is_reroll_hovering = self.reroll_button_rect.collidepoint(mouse_pos)
+            reroll_enabled = self.reroll_charges > 0
+            
+            if reroll_enabled:
+                reroll_color = ENHANCEMENT_BUTTON_HOVER_COLOR if is_reroll_hovering else ENHANCEMENT_BUTTON_COLOR
+            else:
+                reroll_color = (100, 100, 100)  # Gray when disabled
+            
+            pygame.draw.rect(self.screen, reroll_color, self.reroll_button_rect, border_radius=8)
+            pygame.draw.rect(self.screen, ENHANCEMENT_BORDER_COLOR, self.reroll_button_rect, 2, border_radius=8)
+            
+            reroll_text = f"Reroll ({self.reroll_charges} left)"
+            text_color = ENHANCEMENT_TEXT_COLOR if reroll_enabled else (150, 150, 150)
+            reroll_label = self.font_medium.render(reroll_text, True, text_color)
+            reroll_label_rect = reroll_label.get_rect(center=self.reroll_button_rect.center)
+            self.screen.blit(reroll_label, reroll_label_rect)
     
     def _wrap_text(self, text, max_width):
         """Wrap text to fit within max width."""
@@ -176,3 +216,16 @@ class EnhancementSelectionUI:
         self.is_active = False
         self.choices = []
         self.selected_choice = None
+    
+    def add_reroll_charges(self, amount):
+        """Add reroll charges (for events, boss kills, etc.)."""
+        self.reroll_charges += amount
+        print(f"[ENHANCEMENT] Gained {amount} reroll charge(s). Total: {self.reroll_charges}")
+    
+    def get_reroll_charges(self):
+        """Get current number of reroll charges."""
+        return self.reroll_charges
+    
+    def reset_reroll_charges(self):
+        """Reset reroll charges to base amount (0)."""
+        self.reroll_charges = 0

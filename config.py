@@ -399,6 +399,26 @@ MUSIC_VOLUME = 0.02  # 2%
 SFX_VOLUME = 0.1    # 10%
 BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"
 
+# =============================================================================
+# PICKABLE SYSTEM CONFIGURATION
+# =============================================================================
+# Reroll Dice Pickable
+REROLL_DICE_SPRITE = "resources/images/pickabels/reroll_dice.png"
+REROLL_DICE_FRAME_SIZE = 16  # 16x16 frames
+REROLL_DICE_FRAME_COUNT = 6  # 6 different frames
+REROLL_DICE_ANIMATION_FPS = 4  # Slow animation for visibility
+REROLL_DICE_DROP_CHANCE = 0.1  # 10% chance to drop from plants
+REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
+
+# General Pickable Configuration
+PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
+PICKABLE_COLLECTION_RANGE = 16  # Collection range in pixels
+PICKABLE_FLOAT_HEIGHT = 8  # How high pickables float above ground
+PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
+
+# Enhancement System Configuration
+ENHANCEMENT_BASE_REROLL_CHARGES = 0  # Player starts with 0 reroll charges (changed from 1)
+
 # Audio Performance Settings
 AUDIO_CHANNELS = 64  # Number of audio channels (increased for better performance)
 AUDIO_FORCE_PLAY_MAX_CHANNELS_TO_STOP = 3  # Max channels to stop when force-playing important sounds

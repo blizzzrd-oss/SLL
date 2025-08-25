@@ -170,8 +170,8 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
     screen.blit(shield_label, shield_label_rect)
     
     # Experience bar (purple), below shield
-    exp_val = player.exp
-    exp_needed = player.get_exp_to_next_level()
+    exp_val = int(player.exp)  # Convert to integer for display
+    exp_needed = int(player.get_exp_to_next_level())  # Convert to integer for display
     exp_frac = player.get_experience_progress()
     exp_y = shield_y + BAR_HEIGHT + BAR_GAP
     

@@ -135,6 +135,10 @@ def render_full_game(screen, game, last_move, time_accum, hud_visible, fps, game
     # Draw enemies and debug overlays
     for enemy in getattr(game, 'enemies', []):
         enemy.draw(screen, camera=game.camera)
+    
+    # Draw pickables
+    if hasattr(game, 'pickable_manager'):
+        game.pickable_manager.draw(screen, camera=game.camera)
 
     # Draw GAME OVER overlay if needed
     if getattr(game, 'game_over', False):

@@ -32,6 +32,34 @@ GENERAL_ENHANCEMENTS = {
         'base_value': 0.05,  # 5% chance per level
         'max_level': 4,
         'value_per_level': 0.04,  # Additional 4% per level
+    },
+    'movement_speed': {
+        'name': 'Movement Speed',
+        'description': 'Increases movement speed',
+        'base_value': 0.10,  # 10% increase per level
+        'max_level': 5,
+        'value_per_level': 0.10,  # Additional 10% per level
+    },
+    'life_regeneration': {
+        'name': 'Life Regeneration',
+        'description': 'Regenerates health over time',
+        'base_value': 1.0,   # +1 HP per second per level
+        'max_level': 10,
+        'value_per_level': 1.0,  # Additional +1 HP per second per level
+    },
+    'barrier_regeneration': {
+        'name': 'Barrier Regeneration',
+        'description': 'Regenerates barrier over time',
+        'base_value': 2.0,   # +2 barrier per second per level
+        'max_level': 10,
+        'value_per_level': 2.0,  # Additional +2 barrier per second per level
+    },
+    'increased_xp': {
+        'name': 'Increased XP',
+        'description': 'Increases experience gain',
+        'base_value': 0.02,  # 2% increase per level
+        'max_level': 10,
+        'value_per_level': 0.02,  # Additional 2% per level
     }
 }
 

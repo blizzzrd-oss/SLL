@@ -5,9 +5,11 @@ Handles all non-rendering game state updates.
 
 import pygame
 import time
+import random
 from entities.spawner import EnemySpawner
 from entities.enemy import PlantType
 from core.wave_system import WaveManager
+from config import REROLL_DICE_DROP_CHANCE
 
 
 class GameLogicManager:
@@ -54,6 +56,9 @@ class GameLogicManager:
         # Update enemy management
         self._update_enemies(dt)
         
+        # Update pickable system
+        self.game.pickable_manager.update(dt, self.game.player)
+        
         # Update player skills with auto-targeting
         self._update_player_skills(dt, event_handler)
         
@@ -98,6 +103,10 @@ class GameLogicManager:
                     
                     if leveled_up:
                         print(f"[XP] Player leveled up to level {self.game.player.level}!")
+                
+                # Check for pickable drops (only for plant enemies)
+                if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
+                    self._check_pickable_drops(enemy)
                 
                 self.enemies.remove(enemy)
                 # Notify wave manager of enemy death
@@ -148,6 +157,16 @@ class GameLogicManager:
     def force_next_wave(self):
         """Force advance to next wave (for testing/debugging)."""
         self.wave_manager.force_next_wave()
+        
+    def _check_pickable_drops(self, enemy):
+        """Check if enemy should drop pickables."""
+        # Check for reroll dice drop
+        if random.random() < REROLL_DICE_DROP_CHANCE:
+            # Drop at enemy position
+            drop_x = enemy.position[0]
+            drop_y = enemy.position[1]
+            self.game.pickable_manager.create_reroll_dice(drop_x, drop_y)
+            print(f"[PICKABLES] Reroll dice dropped at ({drop_x}, {drop_y})")
 
     def _get_player_settings(self):
         """Extract auto-attack and auto-aim settings from player."""
