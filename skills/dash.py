@@ -120,37 +120,8 @@ class DashSkill(Skill):
                     entity.take_damage(damage, source=self, attacker=self.user)
 
     def draw(self, surface, last_move=(1,0), camera=None):
-        # Draw yellow debug hitbox when dash is active
-        if self.active and hasattr(self.user, 'rect'):
-            # Get player position
-            if camera:
-                # Convert world coordinates to screen coordinates
-                if hasattr(self.user, 'x') and hasattr(self.user, 'y'):
-                    screen_x, screen_y = camera.world_to_screen(self.user.x, self.user.y)
-                    # Create enhanced rect with AOE scaling
-                    enhanced_width = int(self.user.rect.width * self.size_multiplier)
-                    enhanced_height = int(self.user.rect.height * self.size_multiplier)
-                    debug_rect = pygame.Rect(0, 0, enhanced_width, enhanced_height)
-                    debug_rect.center = (screen_x, screen_y)
-                else:
-                    # Use rect position directly if no x/y attributes
-                    debug_rect = self.user.rect.copy()
-                    # Apply AOE enhancement scaling
-                    enhanced_width = int(debug_rect.width * self.size_multiplier)
-                    enhanced_height = int(debug_rect.height * self.size_multiplier)
-                    debug_rect.width = enhanced_width
-                    debug_rect.height = enhanced_height
-                    debug_rect.x, debug_rect.y = camera.world_to_screen(debug_rect.x, debug_rect.y)
-            else:
-                # No camera, use rect directly with AOE enhancement
-                debug_rect = self.user.rect.copy()
-                enhanced_width = int(debug_rect.width * self.size_multiplier)
-                enhanced_height = int(debug_rect.height * self.size_multiplier)
-                debug_rect.width = enhanced_width
-                debug_rect.height = enhanced_height
-            
-            # Draw yellow border to show enhanced dash hitbox
-            pygame.draw.rect(surface, (255, 255, 0), debug_rect, 2)
+        # Yellow debug hitbox removed - no longer needed
+        pass
 
     def can_use(self, now):
         # Don't allow dashing while already dashing
