@@ -294,7 +294,7 @@ PICKABLE_FLOAT_HEIGHT = 8  # How high pickables float above ground
 PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
 
 # Enhancement System Configuration
-ENHANCEMENT_BASE_REROLL_CHARGES = 0  # Player starts with 0 reroll charges (changed from 1)
+ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge
 
 # Audio Performance Settings
 AUDIO_CHANNELS = 64  # Number of audio channels (increased for better performance)

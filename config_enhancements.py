@@ -67,6 +67,13 @@ GENERAL_ENHANCEMENTS = {
         'base_value': 0.10,  # 10% increase per level
         'max_level': 50,     # No max limit as requested
         'value_per_level': 0.20,  # Additional 10% per level
+    },
+    'increased_damage': {
+        'name': 'Increased Damage',
+        'description': 'Increases all skill damage',
+        'base_value': 0.10,  # 10% increase per level
+        'max_level': 10,
+        'value_per_level': 0.10,  # Additional 10% per level
     }
 }
 
@@ -111,6 +118,13 @@ SKILL_SPECIFIC_ENHANCEMENTS = {
             'max_level': 2,
             'value_per_level': 1,  # One more dash per level
             'charge_regen_time': 2.0,  # seconds to regen one charge
+        },
+        'immunity_on_dash': {
+            'name': 'Dash Immunity',
+            'description': 'Become immune to damage for 1 second when dashing',
+            'base_value': 1.0,  # Duration in seconds
+            'max_level': 2,
+            'value_per_level': 0.5,  # Additional 0.5 seconds per level (1.0, 1.5, 2.0)
         }
     }
 }

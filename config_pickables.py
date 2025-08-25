@@ -62,8 +62,8 @@ XP_PURPLE_XP_VALUE = 50
 # XP DROP CHANCES BY ENEMY TYPE
 # =============================================================================
 # XP Drop Chances for Plants
-XP_PLANT_GREEN_CHANCE = 0.99  # 99% chance for green
-XP_PLANT_YELLOW_CHANCE = 0.01  # 1% chance for yellow
+XP_PLANT_GREEN_CHANCE = 0.98  # 98% chance for green
+XP_PLANT_YELLOW_CHANCE = 0.02  # 2% chance for yellow
 
 # XP Drop Chances for Demons
 XP_DEMON_GREEN_CHANCE = 0.0   # 0% chance for green
