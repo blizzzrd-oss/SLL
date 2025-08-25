@@ -100,12 +100,20 @@ class PlantEnemyLogic:
         return sprites
 
     def update(self, dt, player):
-        # Movement towards player
-        dx = player.position[0] - self.enemy.position[0]
-        dy = player.position[1] - self.enemy.position[1]
-        dist = (dx**2 + dy**2) ** 0.5
-        # Calculate speed based on distance to player
-        speed = self.enemy.type.speed
+        # Check if enemy is stunned
+        if getattr(self.enemy, 'is_stunned', False):
+            # Skip movement but still handle animations and other logic
+            dx = 0
+            dy = 0
+            dist = 0
+            speed = 0
+        else:
+            # Movement towards player
+            dx = player.position[0] - self.enemy.position[0]
+            dy = player.position[1] - self.enemy.position[1]
+            dist = (dx**2 + dy**2) ** 0.5
+            # Use movement_speed instead of type.speed (for status effects)
+            speed = getattr(self.enemy, 'movement_speed', self.enemy.type.speed)
         
         # Apply game mode speed multiplier
         if hasattr(self.enemy, 'mode_speed_multiplier'):
@@ -161,14 +169,17 @@ class PlantEnemyLogic:
         prev_state = self.state
         # Always move toward player unless dead or hurt
         min_dist = attack_damage_range
-        if dist > min_dist:
+        if dist > min_dist and speed > 0:
             move_x = dx / dist
             move_y = dy / dist
-            self.enemy.position = (
-                self.enemy.position[0] + move_x * speed * dt,
-                self.enemy.position[1] + move_y * speed * dt
-            )
-            self.enemy.rect.center = (int(self.enemy.position[0]), int(self.enemy.position[1]))
+            # Update both position tuple and x,y coordinates
+            new_x = self.enemy.position[0] + move_x * speed * dt
+            new_y = self.enemy.position[1] + move_y * speed * dt
+            
+            self.enemy.position = (new_x, new_y)
+            self.enemy.x = new_x
+            self.enemy.y = new_y
+            self.enemy.rect.center = (int(new_x), int(new_y))
         
         # Set movement state unless attacking
         if self.state != 'attack':

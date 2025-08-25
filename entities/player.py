@@ -6,6 +6,7 @@ import pygame
 import os
 import json
 from skills.base import Skill
+from skills.enhancements import SkillEnhancementManager
 from audio.sound_manager import SoundManager
 from config import (
     WORLD_SIZE, PLAYER_START_HEALTH, PLAYER_START_BARRIER, PLAYER_BARRIER_DECAY_PERCENT_PER_SEC, PLAYER_BARRIER_REGEN,
@@ -58,6 +59,10 @@ class Player:
             skill_cls = get_skill(skill_name)
             if skill_cls:
                 self.skills[skill_name] = skill_cls(self)
+
+        # Enhancement system
+        self.enhancement_manager = SkillEnhancementManager(self)
+        self.pending_enhancement_selection = False
 
         self.health = PLAYER_START_HEALTH
         self.max_health = PLAYER_START_HEALTH  # Add max_health attribute
@@ -194,6 +199,9 @@ class Player:
             
             # Optional: Add level up bonuses (health, damage, etc.)
             self._apply_level_up_bonuses()
+            
+            # Trigger enhancement selection
+            self.pending_enhancement_selection = True
         
         return leveled_up
     
@@ -220,3 +228,27 @@ class Player:
             return 1.0
         
         return min(self.exp / exp_needed, 1.0)
+    
+    def has_pending_enhancement_selection(self):
+        """Check if player has pending enhancement selection."""
+        return self.pending_enhancement_selection
+    
+    def get_enhancement_choices(self):
+        """Get available enhancement choices for level up."""
+        return self.enhancement_manager.generate_enhancement_choices()
+    
+    def apply_enhancement_choice(self, enhancement_id):
+        """Apply selected enhancement and clear pending selection."""
+        success = self.enhancement_manager.apply_enhancement(enhancement_id)
+        if success:
+            self.pending_enhancement_selection = False
+            print(f"[PLAYER] Applied enhancement: {enhancement_id}")
+        return success
+    
+    def get_enhancement_value(self, enhancement_type, skill_name=None):
+        """Get current value of an enhancement."""
+        return self.enhancement_manager.get_enhancement_value(enhancement_type, skill_name)
+    
+    def get_enhancement_level(self, enhancement_type, skill_name=None):
+        """Get current level of an enhancement."""
+        return self.enhancement_manager.get_enhancement_level(enhancement_type, skill_name)

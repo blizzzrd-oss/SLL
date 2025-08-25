@@ -11,6 +11,7 @@ from core.event_handler import GameEventHandler
 from core.game_logic import GameLogicManager
 from core.frame_timer import FrameTimer
 from ui.loading_screen import show_loading_screen
+from ui.enhancement_selection import EnhancementSelectionUI
 from rendering.background_render import print_cache_stats, generate_new_world
 
 
@@ -81,6 +82,7 @@ def run_game(screen, slot, mode):
     event_handler = GameEventHandler(game, screen)
     game_logic = GameLogicManager(game, screen)
     frame_timer = FrameTimer(settings_path)
+    enhancement_ui = EnhancementSelectionUI(screen)
     
     # Sync initial state with event handler
     event_handler.running = running
@@ -99,12 +101,28 @@ def run_game(screen, slot, mode):
         # Get frame timing
         dt, time_accum, fps = frame_timer.tick()
         
-        # Handle all input events
-        event_handler.handle_all_events()
+        # Check for enhancement selection first
+        if game.player.has_pending_enhancement_selection() and not enhancement_ui.is_active:
+            choices = game.player.get_enhancement_choices()
+            if choices:
+                enhancement_ui.show_enhancement_selection(choices)
         
-        # Skip rest of frame if in settings menu
-        if event_handler.show_settings_menu_if_active():
+        # Handle enhancement selection events (priority over normal events)
+        if enhancement_ui.is_active:
+            for event in pygame.event.get():
+                selected_enhancement = enhancement_ui.handle_event(event)
+                if selected_enhancement:
+                    game.player.apply_enhancement_choice(selected_enhancement)
+                    enhancement_ui.close()
+                    print(f"[ENHANCEMENT] Selected: {selected_enhancement}")
+            
+            # Render enhancement UI and skip rest of frame
+            enhancement_ui.render()
+            pygame.display.flip()
             continue
+        
+        # Handle all input events (only when enhancement UI is not active)
+        event_handler.handle_all_events()
         
         # Check for pause state change to invalidate cache
         if was_paused and not event_handler.paused:

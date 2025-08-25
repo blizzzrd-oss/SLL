@@ -12,6 +12,7 @@ class SlashSkill(Skill):
 
     def __init__(self, user, cooldown=SLASH_COOLDOWN, damage=SLASH_DAMAGE, arc_deg=SLASH_ARC_DEGREES, duration=SLASH_DURATION):
         super().__init__(user, cooldown, name="Slash")
+        self.base_damage = damage
         self.damage = damage
         self.arc_deg = arc_deg
         self.duration = duration
@@ -46,6 +47,9 @@ class SlashSkill(Skill):
         if not self.can_use(now):
             return False
             
+        # Apply general enhancements
+        self._apply_general_enhancements()
+        
         # Play slash sound effect using sound manager
         SoundManager.play_skill_sound('slash')
                 
@@ -74,8 +78,13 @@ class SlashSkill(Skill):
             if entity is self.user or entity in self.hit_entities:
                 continue
             if self._in_slash_arc(entity):
-                entity.take_damage(self.damage, source=self, attacker=self.user)
+                # Apply damage with enhancements
+                damage = self._check_double_damage(self.base_damage)
+                entity.take_damage(damage, source=self, attacker=self.user)
                 self.hit_entities.add(entity)
+                
+                # Apply skill-specific enhancements
+                self._apply_slash_enhancements(entity)
 
     def draw(self, surface, last_move=(1,0), camera=None):
         if not self.active or not self.frames:
@@ -143,6 +152,54 @@ class SlashSkill(Skill):
         offset_y = int(py + dir_y * offset_dist)
         angle = math.degrees(math.atan2(dy, dx)) % 360
         draw_frame = pygame.transform.rotate(frame, -angle)
+        # Apply size enhancement to hitbox
+        frame_width = int(draw_frame.get_width() * self.size_multiplier)
+        frame_height = int(draw_frame.get_height() * self.size_multiplier)
+        if self.size_multiplier != 1.0:
+            draw_frame = pygame.transform.scale(draw_frame, (frame_width, frame_height))
         rect = draw_frame.get_rect(center=(offset_x, offset_y))
         hit = rect.colliderect(entity.rect)
         return hit
+    
+    def _apply_slash_enhancements(self, entity):
+        """Apply slash-specific enhancements to hit entity."""
+        import random
+        import math
+        from entities.status_effects import StunEffect, KnockbackEffect
+        
+        # Stun enhancement
+        stun_chance = self.user.get_enhancement_value('stun_chance', 'slash')
+        if stun_chance > 0 and random.random() < stun_chance:
+            from config_enhancements import SKILL_SPECIFIC_ENHANCEMENTS
+            stun_duration = SKILL_SPECIFIC_ENHANCEMENTS['slash']['stun_chance']['stun_duration']
+            stun_effect = StunEffect(stun_duration)
+            entity.status_manager.add_effect(stun_effect)
+            print(f"[SLASH] Stunned enemy for {stun_duration}s!")
+        
+        # Knockback enhancement
+        knockback_force = self.user.get_enhancement_value('knockback', 'slash')
+        if knockback_force > 0:
+            # Calculate knockback direction (away from player)
+            if hasattr(self.user, 'x') and hasattr(self.user, 'y'):
+                player_x, player_y = self.user.x, self.user.y
+            else:
+                player_x, player_y = self.user.rect.center
+            
+            if hasattr(entity, 'x') and hasattr(entity, 'y'):
+                entity_x, entity_y = entity.x, entity.y
+            else:
+                entity_x, entity_y = entity.rect.center
+            
+            dx = entity_x - player_x
+            dy = entity_y - player_y
+            distance = math.hypot(dx, dy)
+            
+            if distance > 0:
+                # Normalize direction
+                direction = (dx / distance, dy / distance)
+                knockback_effect = KnockbackEffect(knockback_force, direction)
+                entity.status_manager.add_effect(knockback_effect)
+                print(f"[SLASH] Knocked back enemy with force {knockback_force}!")
+        
+        # Check for cooldown reset
+        self._check_cooldown_reset()

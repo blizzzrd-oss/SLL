@@ -64,7 +64,7 @@ ENEMY_TYPE_CONFIG = {
 		'attack_range': 32,
 		'attack_damage': 5,
 		'attack_cooldown': 1.0,
-		'experience_reward': 1,  # Base XP reward for killing this enemy
+		'experience_reward': 10,  # Base XP reward for killing this enemy
 	},
 }
 

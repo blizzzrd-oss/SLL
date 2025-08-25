@@ -1,5 +1,6 @@
 # Import plant logic
 from entities.plant_logic import PlantEnemyLogic
+from entities.status_effects import EnemyStatusManager
 from config import ENEMY_TYPE_CONFIG
 from audio.sound_manager import SoundManager
 import pygame
@@ -71,12 +72,27 @@ class Enemy:
         self.facing_angle = 0
         self.skills = {name: skill for name, skill in (enemy_type.skills or [])}
         self.speed = enemy_type.speed
+        self.movement_speed = enemy_type.speed  # Separate movement speed for status effects
         self.color = enemy_type.color
         self.logic = enemy_type.logic_cls(self) if enemy_type.logic_cls else None
         self.dead = False
+        
+        # Status effects system
+        self.status_manager = EnemyStatusManager()
+        self.is_stunned = False
+        
+        # Position tracking for movement and knockback
+        self.x = float(position[0])
+        self.y = float(position[1])
         # ...other attributes...
 
     def update(self, dt, player):
+        # Update status effects
+        self.status_manager.update(dt, self)
+        
+        # Synchronize position tuple with x, y coordinates
+        self.position = (self.x, self.y)
+        
         if self.logic:
             self.logic.update(dt, player)
         # Don't automatically set dead = True here, let the logic handle it
