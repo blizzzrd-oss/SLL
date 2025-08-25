@@ -32,10 +32,33 @@ def run_game(screen, slot, mode):
     
     print("Showing loading screen...")
     
-    # Preload a large area around spawn (adjust radius as needed)
-    # radius_tiles=300 means 300 tiles in each direction = ~600x600 tile area
+    # Define loading steps
+    def load_sounds():
+        """Load game sounds."""
+        from audio.sound_manager import SoundManager
+        SoundManager.preload_all_sounds()
+    
+    def load_world():
+        """Load world map tiles."""
+        from rendering.background_render import preload_map_tiles
+        from config import WORLD_SIZE, TILE_SIZE
+        preload_map_tiles(WORLD_SIZE, TILE_SIZE, None)
+    
+    def initialize_systems():
+        """Initialize game systems."""
+        # Any additional initialization can go here
+        pass
+    
+    loading_steps = [
+        ("Sounds", load_sounds),
+        ("World Map", load_world),
+        ("Game Systems", initialize_systems)
+    ]
+    
+    # Preload with step-based loading
     loading_success = show_loading_screen(
         screen, 
+        loading_steps=loading_steps,
         preload_type="full", # area, full
         spawn_x=0,  # Spawn at world center
         spawn_y=0, 

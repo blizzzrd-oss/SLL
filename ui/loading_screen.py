@@ -8,12 +8,15 @@ from config import WORLD_SIZE, TILE_SIZE
 from audio.sound_manager import SoundManager
 
 class LoadingScreen:
-    def __init__(self, screen):
+    def __init__(self, screen, loading_steps=None):
         self.screen = screen
         self.font_large = pygame.font.Font(None, 48)
         self.font_small = pygame.font.Font(None, 32)
         self.progress = 0
         self.status_text = "Initializing..."
+        self._loading_steps = loading_steps or []
+        self._current_step_index = 0
+        self._total_steps = len(self._loading_steps)
         
     def update_progress(self, progress_percent, tiles_done, total_tiles):
         """Callback function for preload progress updates."""
@@ -93,6 +96,33 @@ class LoadingScreen:
         
         return success
     
+    def execute_loading_steps(self):
+        """Execute all loading steps with progress updates."""
+        if not self._loading_steps:
+            # Fallback to legacy behavior if no steps provided
+            return self.run_loading_sequence()
+        
+        for step_index, (step_name, step_function) in enumerate(self._loading_steps):
+            self._current_step_index = step_index
+            self.progress = (step_index / self._total_steps) * 100
+            self.status_text = f"Loading {step_name}..."
+            self.draw()
+            
+            # Execute the step
+            try:
+                step_function()
+            except Exception as e:
+                print(f"[ERROR] Failed to execute step '{step_name}': {e}")
+                return False
+        
+        # Final completion
+        self._current_step_index = self._total_steps
+        self.progress = 100
+        self.status_text = "Loading complete!"
+        self.draw()
+        time.sleep(0.5)  # Show completion briefly
+        return True
+
     def run_loading_sequence(self, preload_type="area", **kwargs):
         """Run the loading sequence with visual feedback."""
         clock = pygame.time.Clock()
@@ -125,7 +155,13 @@ class LoadingScreen:
         print(f"Loading completed in {loading_time:.2f} seconds")
         return success
 
-def show_loading_screen(screen, preload_type="area", **kwargs):
+def show_loading_screen(screen, preload_type="area", loading_steps=None, **kwargs):
     """Convenience function to show loading screen and preload map."""
-    loading_screen = LoadingScreen(screen)
-    return loading_screen.run_loading_sequence(preload_type, **kwargs)
+    loading_screen = LoadingScreen(screen, loading_steps)
+    
+    if loading_steps:
+        # Use step-based loading
+        return loading_screen.execute_loading_steps()
+    else:
+        # Fallback to legacy loading
+        return loading_screen.run_loading_sequence(preload_type, **kwargs)
