@@ -26,22 +26,22 @@ BIOME_TILES = {
         ('resources/images/Tiles/bg/tile_grass_wood3.jpg', 0.2),
     ],
     'grass_plant_yellow': [
-        ('resources/images/Tiles/bg/tile_grass2.jpg', 70),
+        ('resources/images/Tiles/bg/tile_grass2.jpg', 68),
         ('resources/images/Tiles/bg/tile_grass4.jpg', 5),
         ('resources/images/Tiles/bg/tile_plant_y_1.jpg', 10),
         ('resources/images/Tiles/bg/tile_plant_y_2.jpg', 10),
         ('resources/images/Tiles/bg/tile_plant_y_3.jpg', 5),
-        ('resources/images/Tiles/bg/grass_stone_1.jpg', 0.2),
-		('resources/images/Tiles/bg/grass_stone_2.jpg', 0.2),
+        ('resources/images/Tiles/bg/grass_stone_1.jpg', 0.1),
+		('resources/images/Tiles/bg/grass_stone_2.jpg', 1),
     ],
     'grass_plant_red': [
-        ('resources/images/Tiles/bg/tile_grass2.jpg', 70),
+        ('resources/images/Tiles/bg/tile_grass2.jpg', 66),
         ('resources/images/Tiles/bg/tile_grass4.jpg', 5),
         ('resources/images/Tiles/bg/tile_plant_r_1.jpg', 10),
         ('resources/images/Tiles/bg/tile_plant_r_2.jpg', 10),
         ('resources/images/Tiles/bg/tile_plant_r_3.jpg', 5),
-        ('resources/images/Tiles/bg/grass_stone_4.jpg', 0.2),
-        ('resources/images/Tiles/bg/grass_stone_3.jpg', 0.2),
+        ('resources/images/Tiles/bg/grass_stone_4.jpg', 1),
+        ('resources/images/Tiles/bg/grass_stone_3.jpg', 1),
     ]
 }
 
