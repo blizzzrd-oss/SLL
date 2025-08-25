@@ -29,6 +29,9 @@ class SlashSkill(Skill):
         self.start_angle = None
         self.end_angle = None
         self.center = None
+        
+        # Triple strike enhancement tracking
+        self.slash_count = 0  # Track number of slashes for triple strike enhancement
 
     def _load_frames(self):
         frames = []
@@ -50,6 +53,18 @@ class SlashSkill(Skill):
             
         # Apply general enhancements
         self._apply_general_enhancements()
+        
+        # Handle triple strike enhancement
+        triple_strike_level = self.user.get_enhancement_level('triple_strike', 'slash')
+        if triple_strike_level > 0:
+            self.slash_count += 1
+            # Every third slash gets 3x size multiplier
+            if self.slash_count % 3 == 0:
+                from config_enhancements import SKILL_SPECIFIC_ENHANCEMENTS
+                triple_strike_multiplier = SKILL_SPECIFIC_ENHANCEMENTS['slash']['triple_strike']['base_value']
+                # Apply triple strike size multiplier on top of existing size multiplier
+                self.size_multiplier *= triple_strike_multiplier
+                print(f"[SLASH] Triple Strike! Slash #{self.slash_count} is {triple_strike_multiplier}x bigger!")
         
         # Play slash sound effect using sound manager
         SoundManager.play_skill_sound('slash')

@@ -101,6 +101,13 @@ SKILL_SPECIFIC_ENHANCEMENTS = {
             'base_value': 1,  # Binary - either have it or not
             'max_level': 1,   # Can only be selected once
             'value_per_level': 0,  # No scaling
+        },
+        'triple_strike': {
+            'name': 'Triple Strike',
+            'description': 'Every third slash is 3x bigger',
+            'base_value': 3.0,  # 3x size multiplier
+            'max_level': 1,   # Can only be selected once
+            'value_per_level': 0,  # No scaling
         }
     },
     'dash': {
