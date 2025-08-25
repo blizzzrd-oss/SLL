@@ -15,7 +15,8 @@ class GameEventHandler:
     def __init__(self, game, screen):
         self.game = game
         self.screen = screen
-        self.skill_pressed = {'slash': False, 'dash': False}
+        self.skill_pressed = {'slash': False, 'dash': False}  # Legacy - may be removed later
+        self.last_skill_activation = {'slash': 0, 'dash': 0}  # Track last activation time
         
         # State flags
         self.running = True
@@ -81,19 +82,23 @@ class GameEventHandler:
 
     def _handle_manual_skill_activation(self, event, mouse_pos):
         """Handle immediate skill activation on button press."""
+        # Note: Only handle initial button press here
+        # Continuous activation (holding key) is handled in game_logic._update_player_skills
+        
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if 'slash' in self.game.player.skills:
                 # Convert screen coordinates to world coordinates for proper aiming
                 world_x, world_y = self.game.camera.screen_to_world(mouse_pos[0], mouse_pos[1])
                 world_mouse_pos = (world_x, world_y)
-                self.game.player.skills['slash'].use(target_pos=world_mouse_pos)
+                # Only trigger if skill is available to avoid double activation
+                skill = self.game.player.skills['slash']
+                now = pygame.time.get_ticks() / 1000
+                if skill.can_use(now):
+                    skill.use(target_pos=world_mouse_pos)
+                    self.mark_skill_activated('slash')
                 
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            if 'dash' in self.game.player.skills:
-                # Convert screen coordinates to world coordinates for dash targeting
-                world_x, world_y = self.game.camera.screen_to_world(mouse_pos[0], mouse_pos[1])
-                world_mouse_pos = (world_x, world_y)
-                self.game.player.skills['dash'].use(target_pos=world_mouse_pos)
+        # For dash, we'll let the continuous checking in game_logic handle it
+        # to allow proper holding space for continuous dashing
 
     def _handle_pause_menu_events(self, event, mouse_pos):
         """Handle pause menu navigation and selection."""
@@ -167,3 +172,20 @@ class GameEventHandler:
     def is_skill_pressed(self, skill_name):
         """Check if a skill button is currently pressed."""
         return self.skill_pressed.get(skill_name, False)
+    
+    def can_continuous_activate(self, skill_name):
+        """Check if enough time has passed since last activation for continuous use."""
+        now = pygame.time.get_ticks() / 1000
+        last_activation = self.last_skill_activation.get(skill_name, 0)
+        
+        # Prevent activation if enhancement was recently applied (within 0.5 seconds)
+        if hasattr(self.game.player, 'last_enhancement_time'):
+            if now - self.game.player.last_enhancement_time < 0.5:
+                return False
+            
+        # Allow continuous activation if at least 0.1 seconds have passed since last activation
+        return now - last_activation >= 0.1
+    
+    def mark_skill_activated(self, skill_name):
+        """Mark that a skill was just activated."""
+        self.last_skill_activation[skill_name] = pygame.time.get_ticks() / 1000

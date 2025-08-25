@@ -139,7 +139,7 @@ WAVE_SYSTEM_CONFIGURATION = {
 }
 
 # Core Wave Settings
-WAVE_DURATION = 30.0  # Duration of each wave in seconds (central config)
+WAVE_DURATION = 60.0  # Duration of each wave in seconds (central config)
 WAVE_SCALING_ENABLED = True  # Enable wave-based progression
 
 # Special Wave Types - ADDITIVE BONUSES
@@ -255,7 +255,7 @@ PLAYER_MAX_LEVEL = 100               # Maximum player level
 # Player Stats
 PLAYER_SIZE = 48
 PLAYER_MOVEMENT_SPEED = 2
-PLAYER_PICKUP_RANGE = 16  # Base pickup range in pixels
+PLAYER_PICKUP_RANGE = 32  # Base pickup range in pixels
 PLAYER_DAMAGE_REDUCTION = 0.0
 PLAYER_COOLDOWN = 1.0
 PLAYER_ATTACK_SPEED = 1.0

@@ -152,7 +152,16 @@ class DashSkill(Skill):
         
         # For dash skill, ALWAYS require charges - ignore cooldown reset enhancement
         # This prevents the cooldown reset from bypassing the charge system
-        return self.current_charges > 0
+        has_charges = self.current_charges > 0
+        
+        # Additional check: if enhancement was recently applied, prevent immediate use
+        # This prevents rapid-fire dashing when enhancement increases charges
+        if hasattr(self.user, 'last_enhancement_time'):
+            time_since_enhancement = now - self.user.last_enhancement_time
+            if time_since_enhancement < 0.5:  # 0.5 second buffer after enhancement
+                return False
+        
+        return has_charges
     
     def _update_charges(self, now):
         """Update charge system for double dash enhancement."""
@@ -161,11 +170,13 @@ class DashSkill(Skill):
         old_max_charges = self.max_charges
         self.max_charges = 1 + double_dash_level
         
-        # If max charges increased due to enhancement, grant full charges
+        # If max charges increased due to enhancement, only grant the additional charges
+        # Don't give full charges immediately to prevent rapid-fire dashing
         if self.max_charges > old_max_charges:
-            self.current_charges = self.max_charges  # Start with full charges
+            charges_to_add = self.max_charges - old_max_charges
+            self.current_charges = min(self.max_charges, self.current_charges + charges_to_add)
             self.last_charge_regen = now  # Reset regeneration timer
-            print(f"[DASH] Enhancement increased max charges to {self.max_charges}, granting full charges: {self.current_charges}/{self.max_charges}")
+            print(f"[DASH] Enhancement increased max charges to {self.max_charges}, added {charges_to_add} charge(s): {self.current_charges}/{self.max_charges}")
         
         # Ensure current charges don't exceed max (in case enhancement was removed)
         self.current_charges = min(self.current_charges, self.max_charges)

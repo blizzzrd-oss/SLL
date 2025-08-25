@@ -77,6 +77,7 @@ class Player:
         # Enhancement system
         self.enhancement_manager = SkillEnhancementManager(self)
         self.pending_enhancement_selection = False
+        self.last_enhancement_time = 0  # Track when enhancements were applied
 
         self.health = PLAYER_START_HEALTH
         self.max_health = PLAYER_START_HEALTH  # Add max_health attribute
@@ -271,6 +272,7 @@ class Player:
         success = self.enhancement_manager.apply_enhancement(enhancement_id)
         if success:
             self.pending_enhancement_selection = False
+            self.last_enhancement_time = pygame.time.get_ticks() / 1000  # Record enhancement time
             print(f"[PLAYER] Applied enhancement: {enhancement_id}")
         return success
     

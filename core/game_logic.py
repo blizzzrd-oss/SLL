@@ -121,16 +121,18 @@ class GameLogicManager:
         # Get player settings
         auto_attack, auto_aim = self._get_player_settings()
         
-        # Handle pressed skills
+        # Handle pressed skills (for continuous activation like holding space for dash)
         for skill_name in ['slash', 'dash']:
             if (event_handler.is_skill_pressed(skill_name) and 
-                skill_name in self.game.player.skills):
+                skill_name in self.game.player.skills and
+                event_handler.can_continuous_activate(skill_name)):
                 
                 skill = self.game.player.skills[skill_name]
                 if skill.can_use(now):
                     target = self._get_skill_target(skill, auto_aim)
                     if target is not None:
                         skill.use(target_pos=target)
+                        event_handler.mark_skill_activated(skill_name)
         
         # Handle auto-attack
         if auto_attack:
