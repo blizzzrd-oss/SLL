@@ -11,7 +11,7 @@ from audio.sound_manager import SoundManager
 from config import (
     WORLD_SIZE, PLAYER_START_HEALTH, PLAYER_START_BARRIER, PLAYER_BARRIER_DECAY_PERCENT_PER_SEC, PLAYER_BARRIER_REGEN,
     PLAYER_START_EXP, PLAYER_START_LEVEL, PLAYER_BASE_EXP_REQUIREMENT, PLAYER_EXP_REQUIREMENT_BONUS, PLAYER_MAX_LEVEL,
-    PLAYER_SIZE, PLAYER_MOVEMENT_SPEED, PLAYER_DAMAGE_REDUCTION, PLAYER_COOLDOWN, PLAYER_ATTACK_SPEED, 
+    PLAYER_SIZE, PLAYER_MOVEMENT_SPEED, PLAYER_PICKUP_RANGE, PLAYER_DAMAGE_REDUCTION, PLAYER_COOLDOWN, PLAYER_ATTACK_SPEED, 
     PLAYER_CRIT_CHANCE, PLAYER_CRIT_DAMAGE, PLAYER_START_SKILL_POINTS, PLAYER_PASSIVE_SKILLS, PLAYER_ACTIVE_SKILLS,
     PLAYER_AUTO_AIM, PLAYER_AUTO_ATTACK
 )
@@ -276,3 +276,10 @@ class Player:
     def get_enhancement_level(self, enhancement_type, skill_name=None):
         """Get current level of an enhancement."""
         return self.enhancement_manager.get_enhancement_level(enhancement_type, skill_name)
+    
+    def get_pickup_range(self):
+        """Get current pickup range including enhancements."""
+        base_range = PLAYER_PICKUP_RANGE
+        pickup_enhancement = self.enhancement_manager.get_enhancement_value('pickup_range')
+        enhanced_range = base_range * (1.0 + pickup_enhancement)
+        return enhanced_range

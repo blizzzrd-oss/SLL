@@ -60,6 +60,13 @@ GENERAL_ENHANCEMENTS = {
         'base_value': 0.02,  # 2% increase per level
         'max_level': 10,
         'value_per_level': 0.02,  # Additional 2% per level
+    },
+    'pickup_range': {
+        'name': 'Pickup Range',
+        'description': 'Increases item pickup range',
+        'base_value': 0.10,  # 10% increase per level
+        'max_level': 50,     # No max limit as requested
+        'value_per_level': 0.20,  # Additional 10% per level
     }
 }
 

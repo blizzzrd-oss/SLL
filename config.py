@@ -263,6 +263,7 @@ PLAYER_MAX_LEVEL = 100               # Maximum player level
 # Player Stats
 PLAYER_SIZE = 48
 PLAYER_MOVEMENT_SPEED = 2
+PLAYER_PICKUP_RANGE = 16  # Base pickup range in pixels
 PLAYER_DAMAGE_REDUCTION = 0.0
 PLAYER_COOLDOWN = 1.0
 PLAYER_ATTACK_SPEED = 1.0
@@ -412,7 +413,7 @@ REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 
 # General Pickable Configuration
 PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
-PICKABLE_COLLECTION_RANGE = 16  # Collection range in pixels
+PICKABLE_COLLECTION_RANGE = 16  # DEPRECATED: Now uses player's pickup range instead
 PICKABLE_FLOAT_HEIGHT = 8  # How high pickables float above ground
 PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
 

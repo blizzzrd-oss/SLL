@@ -10,8 +10,7 @@ from abc import ABC, abstractmethod
 from config import (
     REROLL_DICE_SPRITE, REROLL_DICE_FRAME_SIZE, REROLL_DICE_FRAME_COUNT,
     REROLL_DICE_ANIMATION_FPS, REROLL_DICE_REROLL_CHARGES,
-    PICKABLE_DESPAWN_TIME, PICKABLE_COLLECTION_RANGE, 
-    PICKABLE_FLOAT_HEIGHT, PICKABLE_FLOAT_SPEED
+    PICKABLE_DESPAWN_TIME, PICKABLE_FLOAT_HEIGHT, PICKABLE_FLOAT_SPEED
 )
 from utils.resource_path import resource_path
 from audio.sound_manager import SoundManager
@@ -52,7 +51,9 @@ class Pickable(ABC):
             player_center[0] - pickable_center[0],
             player_center[1] - pickable_center[1]
         )
-        return distance <= PICKABLE_COLLECTION_RANGE
+        # Use player's pickup range (includes enhancements)
+        player_pickup_range = player.get_pickup_range()
+        return distance <= player_pickup_range
         
     @abstractmethod
     def collect(self, player):
