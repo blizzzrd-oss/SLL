@@ -33,10 +33,10 @@ def render_player_deathlog(screen, player, font):
         barrier_str = f"{int(max(0, barrier))}/{int(max_barrier)}"
         if entry['type'] == 'damage':
             color = (255, 80, 80)
-            change_type = "-" + str(abs(entry['amount']))
+            change_type = "-" + str(int(abs(entry['amount'])))
         else:
             color = (80, 255, 80)
-            change_type = "+" + str(entry['amount'])
+            change_type = "+" + str(int(entry['amount']))
         src = entry['source']
         src_str = None
         if hasattr(src, 'enemy_type') and isinstance(src.enemy_type, str):
