@@ -261,7 +261,7 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
             remaining_rect = remaining_text.get_rect(topright=(width - 20, 125))
             screen.blit(remaining_text, remaining_rect)
 
-    # --- Active Events Display (Top HUD, Left) ---
+    # --- Active Events Display (Top HUD, Center) ---
     if active_events:
         event_y = 50
         for event in active_events:
@@ -282,7 +282,9 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
             }.get(event['type'], event['type'].title())
             
             event_text = font.render(f"{event_name} ({time_str})", True, event_color)
-            screen.blit(event_text, (20, event_y))
+            # Center the text horizontally
+            text_rect = event_text.get_rect(centerx=width // 2, y=event_y)
+            screen.blit(event_text, text_rect)
             event_y += 25
 
     # --- Event Notifications (Center-right, fade in/out) ---

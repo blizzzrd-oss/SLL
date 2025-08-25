@@ -2,6 +2,7 @@ from config import PLAYER_SIZE, SLASH_COOLDOWN, SLASH_DAMAGE, SLASH_ARC_DEGREES,
 import pygame
 import math
 import os
+import random
 from skills.base import Skill
 from utils.resource_path import resource_path
 from audio.sound_manager import SoundManager
@@ -280,7 +281,6 @@ class SlashSkill(Skill):
     
     def _apply_slash_enhancements(self, entity):
         """Apply slash-specific enhancements to hit entity."""
-        import random
         import math
         from entities.status_effects import StunEffect, KnockbackEffect
         
