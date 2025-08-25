@@ -62,6 +62,7 @@ class Player:
         self.health = PLAYER_START_HEALTH
         self.max_health = PLAYER_START_HEALTH  # Add max_health attribute
         self.barrier = PLAYER_START_BARRIER
+        self.max_barrier = PLAYER_START_BARRIER  # Add max_barrier attribute
         self.barrier_decay_percent_per_sec = PLAYER_BARRIER_DECAY_PERCENT_PER_SEC
         self.barrier_regen = PLAYER_BARRIER_REGEN
         
@@ -131,7 +132,9 @@ class Player:
                 # Play hit sound for barrier damage
                 SoundManager.play_hit_sound('player')
             # Log barrier reduction
-            self.received_log.add_entry(-absorbed, skill_name, 'damage', health=self.health, barrier=self.barrier)
+            self.received_log.add_entry(-absorbed, skill_name, 'damage', 
+                                        health=self.health, barrier=self.barrier,
+                                        max_health=self.max_health, max_barrier=self.max_barrier)
         if damage_to_health > 0:
             if not self.anim_lock:
                 self.anim_state = self.ANIM_HURT_HP
@@ -141,7 +144,9 @@ class Player:
                 SoundManager.play_hit_sound('player')
             self.health -= damage_to_health
             # Log health reduction
-            self.received_log.add_entry(-damage_to_health, skill_name, 'damage', health=self.health, barrier=self.barrier)
+            self.received_log.add_entry(-damage_to_health, skill_name, 'damage', 
+                                        health=self.health, barrier=self.barrier,
+                                        max_health=self.max_health, max_barrier=self.max_barrier)
         # Log outgoing damage (only if source is a Skill instance)
         if isinstance(source, Skill):
             self.damage_log.add_entry(amount, skill_name, 'Enemy')
@@ -154,7 +159,9 @@ class Player:
         else:
             skill_name = 'Unknown'
         self.health = min(self.max_health, self.health + amount)
-        self.received_log.add_entry(amount, skill_name, 'heal', health=self.health, barrier=self.barrier)
+        self.received_log.add_entry(amount, skill_name, 'heal', 
+                                    health=self.health, barrier=self.barrier,
+                                    max_health=self.max_health, max_barrier=self.max_barrier)
 
     def get_exp_to_next_level(self):
         """Calculate XP required for next level using additive bonus system."""

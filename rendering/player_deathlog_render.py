@@ -23,11 +23,12 @@ def render_player_deathlog(screen, player, font):
     header2_rect = header2.get_rect(center=(center_x, y2))
     screen.blit(header2, header2_rect)
     y2 += 30
-    max_hp = getattr(player, 'max_health', 100)
-    max_barrier = getattr(player, 'max_barrier', 100)
     for entry in recent:
         hp = entry.get('health', 0)
         barrier = entry.get('barrier', 0)
+        # Use the max health/barrier that was current when this entry was recorded
+        max_hp = entry.get('max_health', getattr(player, 'max_health', 100))
+        max_barrier = entry.get('max_barrier', getattr(player, 'max_barrier', 100))
         hp_str = f"{int(max(0, hp))}/{int(max_hp)}"
         barrier_str = f"{int(max(0, barrier))}/{int(max_barrier)}"
         if entry['type'] == 'damage':

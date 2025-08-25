@@ -9,7 +9,7 @@ class PlayerReceivedLog:
     def __init__(self):
         self.entries = deque(maxlen=PLAYER_RECEIVED_LOG_MAX_ENTRIES)
 
-    def add_entry(self, amount, source, type_, health=None, barrier=None):
+    def add_entry(self, amount, source, type_, health=None, barrier=None, max_health=None, max_barrier=None):
         time_str = datetime.now().strftime('%H:%M:%S')
         self.entries.append({
             'amount': amount,
@@ -17,7 +17,9 @@ class PlayerReceivedLog:
             'type': type_,  # 'damage' or 'heal'
             'timestamp': time_str,
             'health': health,
-            'barrier': barrier
+            'barrier': barrier,
+            'max_health': max_health,
+            'max_barrier': max_barrier
         })
 
     def get_recent(self):
