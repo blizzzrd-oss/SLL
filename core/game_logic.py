@@ -88,38 +88,22 @@ class GameLogicManager:
         for enemy in self.enemies[:]:
             enemy.update(dt, self.game.player)
             if hasattr(enemy, 'dead') and enemy.dead:
-                # Drop XP pickable instead of giving XP directly
+                # Drop a single XP pickable instead of giving XP directly
                 if hasattr(enemy.type, 'experience_reward'):
-                    exp_reward = enemy.type.experience_reward
+                    # Determine crystal type based on enemy type and drop chances
+                    crystal_type = self._determine_xp_crystal_type(enemy)
                     
-                    # Apply wave multiplier to experience if available
-                    if self.wave_manager:
-                        wave_xp_multiplier = self.wave_manager.get_current_xp_multiplier()
-                        exp_reward = int(exp_reward * wave_xp_multiplier)
+                    # Drop single XP crystal
+                    import random
+                    offset_x = random.uniform(-10, 10)
+                    offset_y = random.uniform(-10, 10)
+                    self.game.pickable_manager.create_xp_pickable(
+                        enemy.x + offset_x, 
+                        enemy.y + offset_y,
+                        crystal_type
+                    )
                     
-                    # Drop XP pickables (one pickable per XP point, up to reasonable limit)
-                    max_pickables = min(exp_reward, 10)  # Limit to 10 pickables max per enemy
-                    xp_per_pickable = max(1, exp_reward // max_pickables)  # Each pickable worth at least 1 XP
-                    
-                    for i in range(max_pickables):
-                        # Spread XP pickables around the enemy position
-                        import random
-                        offset_x = random.uniform(-20, 20)
-                        offset_y = random.uniform(-20, 20)
-                        xp_crystal = self.game.pickable_manager.create_xp_pickable(
-                            enemy.x + offset_x, 
-                            enemy.y + offset_y
-                        )
-                        # Set the XP value for this pickable
-                        xp_crystal.xp_value = xp_per_pickable
-                    
-                    # Handle any remaining XP
-                    remaining_xp = exp_reward - (max_pickables * xp_per_pickable)
-                    if remaining_xp > 0 and max_pickables > 0:
-                        # Add remaining XP to the last pickable created
-                        xp_crystal.xp_value += remaining_xp
-                    
-                    print(f"[XP] Dropped {max_pickables} XP crystals (total {exp_reward} XP) from {enemy.type.name}")
+                    print(f"[XP] Dropped {crystal_type} XP crystal from {enemy.type.name}")
                 
                 # Check for other pickable drops (reroll dice, etc.)
                 if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
@@ -184,6 +168,23 @@ class GameLogicManager:
             drop_y = enemy.position[1]
             self.game.pickable_manager.create_reroll_dice(drop_x, drop_y)
             print(f"[PICKABLES] Reroll dice dropped at ({drop_x}, {drop_y})")
+
+    def _determine_xp_crystal_type(self, enemy):
+        """Determine which type of XP crystal to drop based on enemy type."""
+        import random
+        from config import XP_PLANT_GREEN_CHANCE, XP_PLANT_YELLOW_CHANCE
+        
+        # For plants: 99% green, 1% yellow
+        if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
+            rand = random.random()
+            if rand < XP_PLANT_GREEN_CHANCE:
+                return 'green'
+            else:
+                return 'yellow'
+        
+        # For other enemy types (future expansion)
+        # For now, default to green
+        return 'green'
 
     def _get_player_settings(self):
         """Extract auto-attack and auto-aim settings from player."""

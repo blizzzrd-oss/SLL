@@ -412,12 +412,51 @@ REROLL_DICE_DROP_CHANCE = 0.5  # 0.8% chance to drop from plants
 REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 
 # XP Pickable Configuration
+# Green Crystal (Base)
 XP_GREEN_SPRITE = "resources/images/pickabels/crystal_green.png"
 XP_GREEN_FRAME_SIZE = (11, 16)  # Each frame is 11x16 pixels
 XP_GREEN_FRAME_COUNT = 6  # 6 frames in the animation
 XP_GREEN_ANIMATION_FPS = 8  # Animation speed
 XP_GREEN_XP_VALUE = 1  # Each green crystal gives 1 XP
-XP_GREEN_DROP_CHANCE = 1.0  # 100% chance to drop from all monsters
+
+# Yellow Crystal
+XP_YELLOW_SPRITE = "resources/images/pickabels/crystal_yellow.png"
+XP_YELLOW_FRAME_SIZE = (11, 16)
+XP_YELLOW_FRAME_COUNT = 6
+XP_YELLOW_ANIMATION_FPS = 8
+XP_YELLOW_XP_VALUE = 2
+
+# Light Blue Crystal
+XP_LIGHT_BLUE_SPRITE = "resources/images/pickabels/crystal_lightblue.png"
+XP_LIGHT_BLUE_FRAME_SIZE = (11, 16)
+XP_LIGHT_BLUE_FRAME_COUNT = 6
+XP_LIGHT_BLUE_ANIMATION_FPS = 8
+XP_LIGHT_BLUE_XP_VALUE = 5
+
+# Blue Crystal
+XP_BLUE_SPRITE = "resources/images/pickabels/crystal_blue.png"
+XP_BLUE_FRAME_SIZE = (11, 16)
+XP_BLUE_FRAME_COUNT = 6
+XP_BLUE_ANIMATION_FPS = 8
+XP_BLUE_XP_VALUE = 10
+
+# Red Crystal
+XP_RED_SPRITE = "resources/images/pickabels/crystal_red.png"
+XP_RED_FRAME_SIZE = (11, 16)
+XP_RED_FRAME_COUNT = 6
+XP_RED_ANIMATION_FPS = 8
+XP_RED_XP_VALUE = 25
+
+# Purple Crystal
+XP_PURPLE_SPRITE = "resources/images/pickabels/crystal_purple.png"
+XP_PURPLE_FRAME_SIZE = (11, 16)
+XP_PURPLE_FRAME_COUNT = 6
+XP_PURPLE_ANIMATION_FPS = 8
+XP_PURPLE_XP_VALUE = 50
+
+# XP Drop Chances for Plants
+XP_PLANT_GREEN_CHANCE = 0.99  # 99% chance for green
+XP_PLANT_YELLOW_CHANCE = 0.01  # 1% chance for yellow
 
 # General Pickable Configuration
 PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
