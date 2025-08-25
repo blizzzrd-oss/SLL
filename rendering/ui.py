@@ -61,18 +61,56 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
         if skill_name and skill_name in player.skills:
             skill = player.skills[skill_name]
             now = pygame.time.get_ticks() / 1000
-            cd = max(0, skill.cooldown - (now - skill.last_used)) if not getattr(skill, 'active', False) else skill.cooldown
-            cd_frac = min(cd / skill.cooldown, 1.0) if skill.cooldown > 0 else 0
+            
+            # Check if skill has charge system
+            has_charges = hasattr(skill, 'max_charges') and skill.max_charges > 1
+            
+            if has_charges:
+                # For charge-based skills, show charges and regeneration progress
+                current_charges = getattr(skill, 'current_charges', 1)
+                max_charges = getattr(skill, 'max_charges', 1)
+                
+                # Draw charge counter above cooldown bar
+                charge_text = f"{current_charges}/{max_charges}"
+                charge_font = pygame.font.SysFont(None, 20)
+                charge_surf = charge_font.render(charge_text, True, (255, 255, 255))
+                charge_rect = charge_surf.get_rect(center=(box_x + SKILL_BOX_SIZE // 2, box_y - 25))
+                screen.blit(charge_surf, charge_rect)
+                
+                # Calculate regeneration progress for cooldown bar
+                if current_charges < max_charges:
+                    # Show progress toward next charge
+                    last_charge_regen = getattr(skill, 'last_charge_regen', 0)
+                    charge_regen_time = getattr(skill, 'charge_regen_time', 2.0)
+                    time_since_regen = now - last_charge_regen
+                    regen_progress = min(time_since_regen / charge_regen_time, 1.0) if charge_regen_time > 0 else 0
+                    cd_frac = 1.0 - regen_progress  # Invert so bar empties as charge regenerates
+                else:
+                    # At max charges, no cooldown
+                    cd_frac = 0
+            else:
+                # For normal skills, use regular cooldown
+                cd = max(0, skill.cooldown - (now - skill.last_used)) if not getattr(skill, 'active', False) else skill.cooldown
+                cd_frac = min(cd / skill.cooldown, 1.0) if skill.cooldown > 0 else 0
+            
+            # Draw cooldown bar
             bar_w = SKILL_BOX_SIZE
             bar_h = 8
             bar_x = box_x
             bar_y = box_y - bar_h - 4
+            
             # Draw background
             pygame.draw.rect(screen, (60, 60, 60), (bar_x, bar_y, bar_w, bar_h), border_radius=4)
-            # Draw filled portion if on cooldown
+            
+            # Draw filled portion if on cooldown/regenerating
             if cd_frac > 0:
                 fill_w = int(bar_w * cd_frac)
-                pygame.draw.rect(screen, (120, 180, 255), (bar_x, bar_y, fill_w, bar_h), border_radius=4)
+                if has_charges:
+                    # Use different color for charge regeneration
+                    pygame.draw.rect(screen, (255, 180, 120), (bar_x, bar_y, fill_w, bar_h), border_radius=4)
+                else:
+                    # Regular cooldown color
+                    pygame.draw.rect(screen, (120, 180, 255), (bar_x, bar_y, fill_w, bar_h), border_radius=4)
         # Draw semi-transparent box
         box_surface = pygame.Surface((SKILL_BOX_SIZE, SKILL_BOX_SIZE), pygame.SRCALPHA)
         box_surface.fill((80, 80, 80, SKILL_BOX_ALPHA))

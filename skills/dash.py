@@ -73,6 +73,11 @@ class DashSkill(Skill):
         return True
 
     def update(self, dt, entities):
+        # Always update charges for proper HUD display
+        now = pygame.time.get_ticks() / 1000
+        self._update_charges(now)
+        
+        # Handle active dash movement
         if not self.active:
             return
         self.elapsed += dt
@@ -125,11 +130,6 @@ class DashSkill(Skill):
         double_dash_level = self.user.get_enhancement_level('double_dash', 'dash')
         old_max_charges = self.max_charges
         self.max_charges = 1 + double_dash_level
-        
-        # Debug: Show current enhancement state (throttled)
-        if double_dash_level > 0 and now - self.last_debug_log > 1.0:  # Log every 1 second max
-            print(f"[DASH DEBUG] Enhancement level: {double_dash_level}, max_charges: {self.max_charges}, current_charges: {self.current_charges}, regen_timer: {now - self.last_charge_regen:.1f}s")
-            self.last_debug_log = now
         
         # If max charges increased due to enhancement, grant full charges
         if self.max_charges > old_max_charges:
