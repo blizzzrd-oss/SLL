@@ -142,43 +142,31 @@ class SlashSkill(Skill):
         surface.blit(draw_frame, rect)
         
         # Calculate and draw debug hitbox visualization
-        # Get the base frame for hitbox calculation
-        frame_idx = min(int(self.animation_frame), self.total_frames - 1)
-        base_frame = self.frames[frame_idx]
-        
-        # Apply size enhancement
+        # Use the same rotated sprite calculation as the actual draw to ensure perfect alignment
+        debug_frame = pygame.transform.rotate(frame, -angle)
+        # Apply AOE enhancement to debug hitbox
         if self.size_multiplier != 1.0:
-            enhanced_width = int(base_frame.get_width() * self.size_multiplier)
-            enhanced_height = int(base_frame.get_height() * self.size_multiplier)
-            base_frame = pygame.transform.scale(base_frame, (enhanced_width, enhanced_height))
+            debug_enhanced_width = int(debug_frame.get_width() * self.size_multiplier)
+            debug_enhanced_height = int(debug_frame.get_height() * self.size_multiplier)
+            debug_frame = pygame.transform.scale(debug_frame, (debug_enhanced_width, debug_enhanced_height))
         
-        # Define hitbox dimensions - make it longer in the slash direction
-        # The sprite is naturally oriented to slash horizontally (right-facing)
-        # So width is the slash length, height is the slash width
-        hitbox_width = base_frame.get_width()  # Keep original length
-        hitbox_height = base_frame.get_height() * 1.5  # Make it wider perpendicular to slash
+        # Adjust expansion based on rotation to ensure consistent "width" expansion
+        # For left/right attacks (angles around 0°/180°), expand height
+        # For up/down attacks (angles around 90°/270°), expand width
+        angle_normalized = angle % 360
+        if 45 <= angle_normalized <= 135 or 225 <= angle_normalized <= 315:
+            # Up/down attacks - expand width
+            wider_width = int(debug_frame.get_width() * 1.5)
+            wider_frame = pygame.transform.scale(debug_frame, (wider_width, debug_frame.get_height()))
+        else:
+            # Left/right attacks - expand height
+            wider_height = int(debug_frame.get_height() * 1.5)
+            wider_frame = pygame.transform.scale(debug_frame, (debug_frame.get_width(), wider_height))
         
-        # Create the four corners of the unrotated rectangle centered at origin
-        half_w, half_h = hitbox_width / 2, hitbox_height / 2
-        corners = [
-            (-half_w, -half_h),  # top-left
-            (half_w, -half_h),   # top-right
-            (half_w, half_h),    # bottom-right
-            (-half_w, half_h)    # bottom-left
-        ]
+        debug_rect = wider_frame.get_rect(center=(offset_x, offset_y))
         
-        # Use the SAME angle calculation as the sprite rotation above
-        debug_angle = math.degrees(math.atan2(dy, dx)) % 360
-        angle_rad = math.radians(-debug_angle)  # negative because sprite rotates opposite
-        cos_a, sin_a = math.cos(angle_rad), math.sin(angle_rad)
-        rotated_corners = []
-        for x, y in corners:
-            rot_x = x * cos_a - y * sin_a + offset_x
-            rot_y = x * sin_a + y * cos_a + offset_y
-            rotated_corners.append((rot_x, rot_y))
-        
-        # Draw the yellow debug hitbox polygon
-        pygame.draw.polygon(surface, (255, 255, 0), rotated_corners, 2)
+        # Draw the yellow debug hitbox as a simple rectangle
+        pygame.draw.rect(surface, (255, 255, 0), debug_rect, 2)
 
     def _in_slash_arc(self, entity):
         # Use the same coordinate calculation as the draw method
@@ -222,61 +210,30 @@ class SlashSkill(Skill):
         offset_y = world_py + dir_y * offset_dist
         angle = math.degrees(math.atan2(dy, dx)) % 360
         
-        # Create hitbox as a rotated rectangle with consistent dimensions
-        base_frame = frame.copy()
-        # Apply size enhancement first
+        # Use simple rotated rectangle collision detection that matches the debug visualization
+        collision_frame = pygame.transform.rotate(frame, -angle)
+        # Apply size enhancement to collision frame
         if self.size_multiplier != 1.0:
-            enhanced_width = int(base_frame.get_width() * self.size_multiplier)
-            enhanced_height = int(base_frame.get_height() * self.size_multiplier)
-            base_frame = pygame.transform.scale(base_frame, (enhanced_width, enhanced_height))
+            collision_enhanced_width = int(collision_frame.get_width() * self.size_multiplier)
+            collision_enhanced_height = int(collision_frame.get_height() * self.size_multiplier)
+            collision_frame = pygame.transform.scale(collision_frame, (collision_enhanced_width, collision_enhanced_height))
         
-        # Define hitbox dimensions - make it longer in the slash direction
-        # The sprite is naturally oriented to slash horizontally (right-facing)
-        # So width is the slash length, height is the slash width
-        hitbox_width = base_frame.get_width()  # Keep original length
-        hitbox_height = base_frame.get_height() * 1.5  # Make it wider perpendicular to slash
-        
-        # Create the four corners of the unrotated rectangle centered at origin
-        half_w, half_h = hitbox_width / 2, hitbox_height / 2
-        corners = [
-            (-half_w, -half_h),  # top-left
-            (half_w, -half_h),   # top-right
-            (half_w, half_h),    # bottom-right
-            (-half_w, half_h)    # bottom-left
-        ]
-        
-        # Rotate corners and translate to final position
-        angle_rad = math.radians(-angle)  # negative because sprite rotates opposite
-        cos_a, sin_a = math.cos(angle_rad), math.sin(angle_rad)
-        rotated_corners = []
-        for x, y in corners:
-            rot_x = x * cos_a - y * sin_a + offset_x
-            rot_y = x * sin_a + y * cos_a + offset_y
-            rotated_corners.append((rot_x, rot_y))
-        
-        # Check collision using polygon collision with world coordinates
-        # Get entity position in world coordinates
-        if hasattr(entity, 'x') and hasattr(entity, 'y'):
-            entity_center = (entity.x, entity.y)
-            entity_corners = [
-                (entity.x - entity.rect.width//2, entity.y - entity.rect.height//2),  # topleft
-                (entity.x + entity.rect.width//2, entity.y - entity.rect.height//2),  # topright
-                (entity.x + entity.rect.width//2, entity.y + entity.rect.height//2),  # bottomright
-                (entity.x - entity.rect.width//2, entity.y + entity.rect.height//2)   # bottomleft
-            ]
+        # Adjust expansion based on rotation to ensure consistent "width" expansion
+        # For left/right attacks (angles around 0°/180°), expand height
+        # For up/down attacks (angles around 90°/270°), expand width
+        angle_normalized = angle % 360
+        if 45 <= angle_normalized <= 135 or 225 <= angle_normalized <= 315:
+            # Up/down attacks - expand width
+            wider_collision_width = int(collision_frame.get_width() * 1.5)
+            wider_collision_frame = pygame.transform.scale(collision_frame, (wider_collision_width, collision_frame.get_height()))
         else:
-            entity_center = entity.rect.center
-            entity_corners = [
-                entity.rect.topleft, entity.rect.topright, 
-                entity.rect.bottomright, entity.rect.bottomleft
-            ]
+            # Left/right attacks - expand height
+            wider_collision_height = int(collision_frame.get_height() * 1.5)
+            wider_collision_frame = pygame.transform.scale(collision_frame, (collision_frame.get_width(), wider_collision_height))
         
-        hit = self._point_in_rotated_rect(entity_center, rotated_corners) or \
-              any(self._point_in_rotated_rect(corner, rotated_corners) for corner in entity_corners)
+        collision_rect = wider_collision_frame.get_rect(center=(offset_x, offset_y))
         
-        # Store corners for debug visualization
-        self._debug_hitbox_corners = rotated_corners
-        
+        hit = collision_rect.colliderect(entity.rect)
         return hit
     
     def _point_in_rotated_rect(self, point, corners):
