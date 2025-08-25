@@ -111,7 +111,15 @@ def render_full_game(screen, game, last_move, time_accum, hud_visible, fps, game
             player.anim_state = 'idle'
             player.anim_timer = 0.0
     else:
-        if last_move != (0, 0):
+        # Check if dash skill is active
+        dash_active = False
+        if 'dash' in player.skills and hasattr(player.skills['dash'], 'active'):
+            dash_active = player.skills['dash'].active
+        
+        if dash_active:
+            # Use run animation when dashing
+            draw_player_run(screen, player, time_accum, camera=game.camera)
+        elif last_move != (0, 0):
             if getattr(player, 'movement_speed', 0) >= 5:
                 draw_player_run(screen, player, time_accum, camera=game.camera)
             else:
