@@ -141,6 +141,21 @@ class SlashSkill(Skill):
         rect = draw_frame.get_rect(center=(offset_x, offset_y))
         surface.blit(draw_frame, rect)
         
+        # Check for double slash enhancement
+        double_slash_level = self.user.get_enhancement_level('double_slash', 'slash')
+        if double_slash_level > 0:
+            # Draw second slash on the opposite side
+            opposite_angle = (angle + 180) % 360
+            opposite_draw_frame = pygame.transform.rotate(frame, -opposite_angle)
+            opposite_draw_frame = pygame.transform.scale(opposite_draw_frame, (scaled_width, scaled_height))
+            
+            # Calculate opposite direction
+            opposite_dir_x, opposite_dir_y = -dir_x, -dir_y
+            opposite_offset_x = int(px + opposite_dir_x * offset_dist)
+            opposite_offset_y = int(py + opposite_dir_y * offset_dist)
+            opposite_rect = opposite_draw_frame.get_rect(center=(opposite_offset_x, opposite_offset_y))
+            surface.blit(opposite_draw_frame, opposite_rect)
+        
         # Calculate and draw debug hitbox visualization
         # First, make the frame more rectangular BEFORE rotation
         # Reduce width to make it more slash-like (taller than wide) since sprite rotates
@@ -228,6 +243,23 @@ class SlashSkill(Skill):
         collision_rect = wider_collision_frame.get_rect(center=(offset_x, offset_y))
         
         hit = collision_rect.colliderect(entity.rect)
+        
+        # Check for double slash enhancement - test opposite side too
+        double_slash_level = self.user.get_enhancement_level('double_slash', 'slash')
+        if double_slash_level > 0 and not hit:
+            # Create opposite slash collision
+            opposite_angle = (angle + 180) % 360
+            opposite_dir_x, opposite_dir_y = -dir_x, -dir_y
+            opposite_offset_x = world_px + opposite_dir_x * offset_dist
+            opposite_offset_y = world_py + opposite_dir_y * offset_dist
+            
+            # Create opposite collision frame
+            opposite_collision_frame = pygame.transform.rotate(rectangular_collision_frame, -opposite_angle)
+            opposite_collision_frame = pygame.transform.scale(opposite_collision_frame, (collision_scaled_width, collision_scaled_height))
+            opposite_collision_rect = opposite_collision_frame.get_rect(center=(opposite_offset_x, opposite_offset_y))
+            
+            hit = opposite_collision_rect.colliderect(entity.rect)
+        
         return hit
     
     def _point_in_rotated_rect(self, point, corners):

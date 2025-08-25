@@ -52,6 +52,13 @@ SKILL_SPECIFIC_ENHANCEMENTS = {
             'base_value': 50.0,  # pixels per level
             'max_level': 4,
             'value_per_level': 25.0,  # Additional 25 pixels per level
+        },
+        'double_slash': {
+            'name': 'Double Slash',
+            'description': 'Creates a second slash on the opposite side',
+            'base_value': 1,  # Binary - either have it or not
+            'max_level': 1,   # Can only be selected once
+            'value_per_level': 0,  # No scaling
         }
     },
     'dash': {
