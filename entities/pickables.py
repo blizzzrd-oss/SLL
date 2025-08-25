@@ -14,6 +14,7 @@ from config import (
     PICKABLE_FLOAT_HEIGHT, PICKABLE_FLOAT_SPEED
 )
 from utils.resource_path import resource_path
+from audio.sound_manager import SoundManager
 
 
 class Pickable(ABC):
@@ -128,6 +129,13 @@ class RerollDicePickable(Pickable):
         """Grant reroll charges to the player."""
         if hasattr(player, 'enhancement_ui') and player.enhancement_ui:
             player.enhancement_ui.add_reroll_charges(REROLL_DICE_REROLL_CHARGES)
+        
+        # Play collection sound
+        try:
+            SoundManager.play_pickable_collect_sound()
+        except Exception as e:
+            print(f"[PICKABLES] Failed to play collection sound: {e}")
+            
         print(f"[PICKABLES] Player collected reroll dice! Gained {REROLL_DICE_REROLL_CHARGES} reroll charge(s)")
         self.collected = True
         
@@ -168,6 +176,13 @@ class PickableManager:
         """Create a reroll dice pickable at the specified position."""
         dice = RerollDicePickable(x, y)
         self.add_pickable(dice)
+        
+        # Play drop sound
+        try:
+            SoundManager.play_pickable_drop_sound()
+        except Exception as e:
+            print(f"[PICKABLES] Failed to play drop sound: {e}")
+            
         return dice
         
     def update(self, dt, player):

@@ -9,6 +9,7 @@ from config import (
     SKILL_DASH_SOUND_PATH, SKILL_SLASH_SOUND_PATHS,
     ENEMY_PLANT_DEATH_SOUND_PATHS, SFX_VOLUME,
     HIT_ENEMY_SOUND_PATH, HIT_PLAYER_SOUND_PATH,
+    PICKABLE_DROP_SOUND_PATH, PICKABLE_COLLECT_SOUND_PATH,
     AUDIO_FORCE_PLAY_MAX_CHANNELS_TO_STOP
 )
 
@@ -95,6 +96,27 @@ class SoundManager:
         
         if plant_death_sounds:
             cls._sounds_cache['plant_death_sounds'] = plant_death_sounds
+        
+        # Pickable sounds
+        pickable_sounds = {
+            'drop': PICKABLE_DROP_SOUND_PATH,
+            'collect': PICKABLE_COLLECT_SOUND_PATH
+        }
+        
+        for sound_type, sound_path in pickable_sounds.items():
+            total_sounds += 1
+            try:
+                full_path = resource_path(sound_path)
+                if os.path.exists(full_path):
+                    sound = pygame.mixer.Sound(full_path)
+                    sound.set_volume(SFX_VOLUME)
+                    cls._sounds_cache[f'pickable_{sound_type}'] = sound
+                    success_count += 1
+                    print(f"[SOUND] Loaded pickable sound: {sound_type}")
+                else:
+                    print(f"[WARNING] Pickable sound file not found: {full_path}")
+            except Exception as e:
+                print(f"[WARNING] Failed to load pickable sound {sound_type}: {e}")
         
         # Hit sounds
         hit_sounds = {
@@ -190,6 +212,32 @@ class SoundManager:
                 print(f"[WARNING] Failed to play hit sound {hit_type}: {e}")
         else:
             print(f"[WARNING] Hit sound {hit_type} not found in cache")
+    
+    @classmethod
+    def play_pickable_drop_sound(cls):
+        """Play the pickable drop sound."""
+        sound = cls._sounds_cache.get('pickable_drop')
+        if sound:
+            try:
+                channel = sound.play()
+                if channel is None:
+                    # Force play pickable sounds as they provide important feedback
+                    cls.force_play_sound(sound, "pickable drop sound")
+            except Exception as e:
+                print(f"[WARNING] Failed to play pickable drop sound: {e}")
+    
+    @classmethod
+    def play_pickable_collect_sound(cls):
+        """Play the pickable collect sound."""
+        sound = cls._sounds_cache.get('pickable_collect')
+        if sound:
+            try:
+                channel = sound.play()
+                if channel is None:
+                    # Force play pickable sounds as they provide important feedback
+                    cls.force_play_sound(sound, "pickable collect sound")
+            except Exception as e:
+                print(f"[WARNING] Failed to play pickable collect sound: {e}")
     
     @classmethod
     def force_play_sound(cls, sound, sound_type="unknown"):

@@ -407,7 +407,7 @@ REROLL_DICE_SPRITE = "resources/images/pickabels/reroll_dice.png"
 REROLL_DICE_FRAME_SIZE = 16  # 16x16 frames
 REROLL_DICE_FRAME_COUNT = 6  # 6 different frames
 REROLL_DICE_ANIMATION_FPS = 4  # Slow animation for visibility
-REROLL_DICE_DROP_CHANCE = 0.1  # 10% chance to drop from plants
+REROLL_DICE_DROP_CHANCE = 0.5  # 0.8% chance to drop from plants
 REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 
 # General Pickable Configuration
@@ -441,6 +441,10 @@ ENEMY_PLANT_DEATH_SOUND_PATHS = [
     "resources/sounds/death_enemy_plant02.wav", 
     "resources/sounds/death_enemy_plant03.wav"
 ]
+
+# Pickable Sound Effects
+PICKABLE_DROP_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"
+PICKABLE_COLLECT_SOUND_PATH = "resources/sounds/pickable.mp3"
 
 # =============================================================================
 # LOGGING AND DEBUGGING CONFIGURATION  
