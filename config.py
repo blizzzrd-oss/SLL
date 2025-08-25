@@ -79,10 +79,10 @@ WAVE_SYSTEM_CONFIGURATION = {
     # Spawn rate bonuses per wave (additive percentages)
     'WAVE_SPAWN_RATE_BONUSES': {
         1: 0.0,   # Wave 1: +0% spawn rate (normal)
-        2: 0.2,   # Wave 2: +20% spawn rate
-        3: 0.4,   # Wave 3: +40% spawn rate  
-        4: 0.7,   # Wave 4: +70% spawn rate
-        5: 1.0,   # Wave 5+: +100% spawn rate (continues)
+        2: 0.1,   # Wave 2: +10% spawn rate
+        3: 0.2,   # Wave 3: +20% spawn rate  
+        4: 0.3,   # Wave 4: +30% spawn rate
+        5: 0.4,   # Wave 5+: +40% spawn rate (continues)
     },
     
     # XP gain bonuses per wave (additive percentages)
@@ -231,18 +231,11 @@ PLANT_SPRITE_STANDARD_HEIGHT = 64
 SKILL_COOLDOWN = 0.5  # Default cooldown for skills (seconds)
 
 # Slash Skill Configuration
-SLASH_DEFAULT_COOLDOWN = 1.0
-SLASH_DEFAULT_DAMAGE = 10
-SLASH_DEFAULT_ARC_DEGREES = 190
-SLASH_DEFAULT_DURATION = 0.25
 SLASH_FRAME_COUNT = 5
 SLASH_SHEET_PATH = 'resources/images/player_melee/slash/player_melee_slash.png'
 
 # Dash Skill Configuration
 DASH_RANGE = 100
-DASH_COOLDOWN = 2.0
-DASH_DURATION = 0.15  # seconds
-DASH_DEFAULT_DAMAGE = 10
 
 # =============================================================================
 # PLAYER CONFIGURATION
@@ -255,8 +248,8 @@ PLAYER_BARRIER_REGEN = 0
 # Player Experience and Leveling System (Additive Scaling)
 PLAYER_START_EXP = 0
 PLAYER_START_LEVEL = 1
-PLAYER_BASE_EXP_REQUIREMENT = 50     # XP needed for level 2 (first level up)
-PLAYER_EXP_REQUIREMENT_BONUS = 0.1   # +10% XP requirement per level (additive)
+PLAYER_BASE_EXP_REQUIREMENT = 25     # XP needed for level 2 (first level up)
+PLAYER_EXP_REQUIREMENT_BONUS = 0.2   # +20% XP requirement per level (additive)
 PLAYER_MAX_LEVEL = 100               # Maximum player level
 
 # Player Stats
@@ -286,7 +279,7 @@ PLAYER_ACTIVE_SKILLS = {
 	'barrier_burst': 0,
 }
 
-# Skill System Configuration
+########### Skill System Configuration ###########
 # Dash Skill
 DASH_RANGE = 100
 DASH_COOLDOWN = 2.0

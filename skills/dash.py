@@ -20,6 +20,7 @@ class DashSkill(Skill):
         self.dash_start = None
         self.dash_end = None
         self.elapsed = 0.0
+        self.hit_entities = set()  # Track entities already hit during this dash
         
         # Double dash enhancement
         self.max_charges = 1
@@ -63,6 +64,7 @@ class DashSkill(Skill):
         self.last_used = now
         self.active = True
         self.elapsed = 0.0
+        self.hit_entities.clear()  # Clear hit entities for new dash
         
         # For dash with charges, don't use cooldown reset - use charge regeneration instead
         # Check for cooldown reset enhancement and convert it to charge restoration
@@ -120,7 +122,7 @@ class DashSkill(Skill):
     def deal_damage(self, entities):
         # Deal damage to entities collided with during dash
         for entity in entities:
-            if entity is self.user:
+            if entity is self.user or entity in self.hit_entities:
                 continue
             
             # Create enhanced hitbox for collision detection with AOE scaling
@@ -134,6 +136,7 @@ class DashSkill(Skill):
                 if hasattr(entity, 'take_damage'):
                     damage = self._check_double_damage(self.dash_damage)
                     entity.take_damage(damage, source=self, attacker=self.user)
+                    self.hit_entities.add(entity)  # Track that we hit this entity
 
     def draw(self, surface, last_move=(1,0), camera=None):
         # Yellow debug hitbox removed - no longer needed

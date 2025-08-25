@@ -55,11 +55,17 @@ class Skill(ABC):
         return False
     
     def _check_double_damage(self, base_damage):
-        """Check if damage should be doubled due to enhancement."""
+        """Check if damage should be doubled due to enhancement and apply mode multiplier."""
+        # Apply mode damage multiplier first
+        mode_multiplier = getattr(self.user, 'mode_damage_multiplier', 1.0)
+        damage = base_damage * mode_multiplier
+        
+        # Then check for double damage enhancement
         double_chance = self.user.get_enhancement_value('double_damage_chance')
         if double_chance > 0 and random.random() < double_chance:
-            return base_damage * 2
-        return base_damage
+            damage *= 2
+            
+        return damage
     
     def _apply_skill_specific_enhancements(self):
         """Apply skill-specific enhancements. Override in subclasses."""
