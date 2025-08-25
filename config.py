@@ -248,8 +248,8 @@ PLAYER_BARRIER_REGEN = 0
 # Player Experience and Leveling System (Additive Scaling)
 PLAYER_START_EXP = 0
 PLAYER_START_LEVEL = 1
-PLAYER_BASE_EXP_REQUIREMENT = 20     # XP needed for level 2 (first level up)
-PLAYER_EXP_REQUIREMENT_BONUS = 0.25   # +20% XP requirement per level (additive)
+PLAYER_BASE_EXP_REQUIREMENT = 10     # XP needed for level 2 (first level up)
+PLAYER_EXP_REQUIREMENT_BONUS = 0.10   # Base XP requirement bonus per level (increases by +1% per player level)
 PLAYER_MAX_LEVEL = 100               # Maximum player level
 
 # Player Stats

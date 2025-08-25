@@ -183,13 +183,18 @@ class Player:
                                     max_health=self.max_health, max_barrier=self.max_barrier)
 
     def get_exp_to_next_level(self):
-        """Calculate XP required for next level using additive bonus system."""
+        """Calculate XP required for next level using progressive additive bonus system."""
         if self.level >= self.max_level:
             return 0  # Max level reached
         
-        # Calculate additive bonus: each level adds 10% to the base requirement
-        level_bonus = (self.level - 1) * PLAYER_EXP_REQUIREMENT_BONUS  # -1 because level 1->2 has no bonus
-        total_requirement = PLAYER_BASE_EXP_REQUIREMENT * (1.0 + level_bonus)
+        # Progressive XP requirement: 25% base + 1% increase per level
+        # Each previous level contributes its own escalating bonus
+        total_bonus = 0.0
+        for prev_level in range(1, self.level):  # For each previous level
+            level_bonus_rate = PLAYER_EXP_REQUIREMENT_BONUS + (prev_level - 1) * 0.01
+            total_bonus += level_bonus_rate
+        
+        total_requirement = PLAYER_BASE_EXP_REQUIREMENT * (1.0 + total_bonus)
         return int(total_requirement)
     
     def add_experience(self, amount):
