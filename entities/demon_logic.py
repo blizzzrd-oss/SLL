@@ -53,9 +53,9 @@ class DemonEnemyLogic:
         # Store fixed position during hurt/death animations to prevent jitter
         self.fixed_draw_pos = None
         
-        # Hurt overlay system (instead of hurt state)
-        self.hurt_overlay_timer = 0.0
-        self.hurt_overlay_duration = 0.3  # 300ms red tint for demons
+        # Hurt animation system
+        self.hurt_timer = 0.0
+        self.hurt_duration = 0.4  # 400ms hurt animation for demons
         
         # Track XP drop timing
         self.death_timer = 0.0
@@ -69,6 +69,14 @@ class DemonEnemyLogic:
         # Direction tracking for sprite flipping
         self.facing_direction = 'left'  # 'left' or 'right'
         self.last_move_direction = (0, 0)  # Track last movement for direction
+
+    def trigger_hurt_animation(self):
+        """Trigger the hurt animation when the demon takes damage."""
+        if self.state != 'death':  # Can't interrupt death animation
+            self.state = 'hurt'
+            self.anim_frame = 0
+            self.anim_timer = 0.0
+            self.hurt_timer = 0.0
 
     def _load_sprites(self):
         """Load all sprite sheets for demon animations."""
@@ -187,9 +195,27 @@ class DemonEnemyLogic:
                     self.enemy.dead = True
             return  # Don't process any other logic during death
 
-        # Update hurt overlay timer
-        if self.hurt_overlay_timer > 0:
-            self.hurt_overlay_timer -= dt
+        # Handle hurt animation - can be interrupted by death
+        if self.state == 'hurt':
+            self.hurt_timer += dt
+            self.anim_timer += dt
+            if self.anim_timer > 0.1:  # Hurt animation speed
+                self.anim_frame += 1
+                self.anim_timer = 0.0
+                if self.anim_frame >= self.FRAME_COUNTS['hurt'] or self.hurt_timer >= self.hurt_duration:
+                    # Hurt animation complete, return to appropriate state
+                    px, py = player.rect.center if hasattr(player, 'rect') else (player.x, player.y)
+                    ex, ey = self.enemy.position
+                    distance = math.hypot(px - ex, py - ey)
+                    attack_trigger_range = getattr(self.enemy.type, 'attack_range', 200)
+                    
+                    if distance <= attack_trigger_range:
+                        self.state = 'idle'
+                    else:
+                        self.state = 'flying'
+                    self.anim_frame = 0
+                    self.anim_timer = 0.0
+            return  # Don't process movement logic during hurt animation
 
         # Normal movement and attack logic - only when not hurt or dead
         prev_state = self.state
@@ -332,8 +358,8 @@ class DemonEnemyLogic:
             return (int(self.enemy.position[0]), int(self.enemy.position[1]))
 
     def should_show_hurt_overlay(self):
-        """Check if hurt overlay should be shown."""
-        return self.hurt_overlay_timer > 0
+        """Check if hurt overlay should be shown - deprecated, now using hurt sprite animation."""
+        return False
     
     def draw(self, surface, camera=None):
         """Draw the demon with proper directional sprites."""
@@ -359,10 +385,3 @@ class DemonEnemyLogic:
         # Draw the sprite centered on the demon position
         sprite_rect = sprite.get_rect(center=(screen_x, screen_y))
         surface.blit(sprite, sprite_rect)
-        
-        # Apply hurt overlay if needed
-        if self.should_show_hurt_overlay():
-            # Create a red overlay surface
-            overlay = pygame.Surface(sprite.get_size(), pygame.SRCALPHA)
-            overlay.fill((255, 100, 100, 128))  # Semi-transparent red
-            surface.blit(overlay, sprite_rect)

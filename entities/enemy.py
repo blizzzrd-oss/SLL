@@ -62,8 +62,12 @@ class Enemy:
                 if hasattr(self.logic, 'fixed_draw_pos'):
                     self.logic.fixed_draw_pos = (int(self.position[0]), int(self.position[1]))
             else:
-                # Trigger hurt overlay without changing state
-                if hasattr(self.logic, 'hurt_overlay_timer') and hasattr(self.logic, 'hurt_overlay_duration'):
+                # Trigger hurt animation for demons, overlay for others
+                if hasattr(self.logic, 'trigger_hurt_animation'):
+                    # Demon-style hurt animation
+                    self.logic.trigger_hurt_animation()
+                elif hasattr(self.logic, 'hurt_overlay_timer') and hasattr(self.logic, 'hurt_overlay_duration'):
+                    # Plant-style hurt overlay
                     self.logic.hurt_overlay_timer = self.logic.hurt_overlay_duration
         # Don't set dead = True here, let the death animation complete first
     def __init__(self, enemy_type, position=(0, 0)):
