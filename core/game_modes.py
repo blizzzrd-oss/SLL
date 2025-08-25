@@ -17,6 +17,7 @@ GAME_MODES = {
         
         # Player Bonuses
         'player_health_multiplier': 1.2,     # Player has 120% health
+        'player_barrier_multiplier': 1.2,    # Player has 120% barrier
         'player_damage_multiplier': 1.1,     # Player deals 110% damage
         'player_speed_multiplier': 1.0,      # Normal player speed
         'experience_multiplier': 1.0,        # Normal XP gain
@@ -46,6 +47,7 @@ GAME_MODES = {
         
         # Player Stats (baseline)
         'player_health_multiplier': 1.0,
+        'player_barrier_multiplier': 1.0,
         'player_damage_multiplier': 1.0,
         'player_speed_multiplier': 1.0,
         'experience_multiplier': 1.0,
@@ -75,6 +77,7 @@ GAME_MODES = {
         
         # Player Stats
         'player_health_multiplier': 0.8,     # Player has 80% health
+        'player_barrier_multiplier': 0.8,    # Player has 80% barrier
         'player_damage_multiplier': 0.9,     # Player deals 90% damage
         'player_speed_multiplier': 1.0,      # Normal player speed
         'experience_multiplier': 1.5,        # 150% XP gain (reward for difficulty)

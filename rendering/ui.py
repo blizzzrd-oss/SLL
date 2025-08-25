@@ -110,9 +110,9 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
     BAR_HEIGHT = 32
     BAR_GAP = 12
     # Health bar (red)
-    max_health = 100
+    max_health = getattr(player, 'max_health', 100)
     health_val = max(0, int(round(player.health)))
-    health_frac = min(health_val / max_health, 1.0)
+    health_frac = min(health_val / max_health, 1.0) if max_health > 0 else 0
     pygame.draw.rect(screen, COLOR_HEALTH_BAR_BG, (BAR_X, BAR_Y, BAR_WIDTH, BAR_HEIGHT), border_radius=8)
     pygame.draw.rect(screen, COLOR_HEALTH_BAR_FILL, (BAR_X, BAR_Y, int(BAR_WIDTH * health_frac), BAR_HEIGHT), border_radius=8)
     health_text = f"{health_val}/{max_health}"
@@ -120,9 +120,9 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
     health_label_rect = health_label.get_rect(center=(BAR_X + BAR_WIDTH // 2, BAR_Y + BAR_HEIGHT // 2))
     screen.blit(health_label, health_label_rect)
     # Shield bar (blue), below health
-    max_shield = 100  # For bar scaling; actual max is 100 for full bar
+    max_shield = getattr(player, 'max_barrier', 100)  # Use player's actual max barrier
     shield_val = max(0, int(round(player.barrier)))
-    shield_frac = min(shield_val / max_shield, 1.0)
+    shield_frac = min(shield_val / max_shield, 1.0) if max_shield > 0 else 0
     shield_y = BAR_Y + BAR_HEIGHT + BAR_GAP
     pygame.draw.rect(screen, COLOR_BARRIER_BAR_BG, (BAR_X, shield_y, BAR_WIDTH, BAR_HEIGHT), border_radius=8)
     pygame.draw.rect(screen, COLOR_BARRIER_BAR_FILL, (BAR_X, shield_y, int(BAR_WIDTH * shield_frac), BAR_HEIGHT), border_radius=8)

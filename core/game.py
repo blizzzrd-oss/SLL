@@ -39,11 +39,15 @@ class Game:
         """Apply game mode modifiers to player stats"""
         # Modify player stats based on game mode
         original_health = self.player.max_health
+        original_barrier = self.player.max_barrier
         original_damage = getattr(self.player, 'base_damage', 10)  # Default if not set
         
         # Apply multipliers
         self.player.max_health = int(original_health * self.mode_config['player_health_multiplier'])
         self.player.health = self.player.max_health  # Set current health to new max
+        
+        self.player.max_barrier = int(original_barrier * self.mode_config['player_barrier_multiplier'])
+        self.player.barrier = self.player.max_barrier  # Set current barrier to new max
         
         # Store base damage if not already stored
         if not hasattr(self.player, 'base_damage'):
@@ -54,6 +58,7 @@ class Game:
         self.player.mode_speed_multiplier = self.mode_config['player_speed_multiplier']
         
         print(f"[GAME MODE] Player health: {original_health} -> {self.player.max_health}")
+        print(f"[GAME MODE] Player barrier: {original_barrier} -> {self.player.max_barrier}")
         print(f"[GAME MODE] Player damage multiplier: {self.player.mode_damage_multiplier}")
 
     def reset(self):
