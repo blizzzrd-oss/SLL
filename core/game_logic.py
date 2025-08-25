@@ -106,7 +106,9 @@ class GameLogicManager:
                 
                 # Check for other pickable drops (reroll dice, etc.)
                 if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
-                    self._check_pickable_drops(enemy)                self.enemies.remove(enemy)
+                    self._check_pickable_drops(enemy)
+                
+                self.enemies.remove(enemy)
                 # Notify wave manager of enemy death
                 self.wave_manager.on_enemy_killed()
                 
