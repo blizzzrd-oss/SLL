@@ -64,7 +64,7 @@ ENEMY_TYPE_CONFIG = {
 		'attack_range': 32,
 		'attack_damage': 5,
 		'attack_cooldown': 1.0,
-		'experience_reward': 10,  # Base XP reward for killing this enemy
+		'experience_reward': 50,  # Base XP reward for killing this enemy
 	},
 }
 
@@ -348,12 +348,20 @@ FONT_SIZE_SMALL = 32
 GAME_BG_COLOR = (20, 20, 20)
 GAME_OVERLAY_COLOR = (0, 0, 0, 180)
 PAUSE_OVERLAY_COLOR = (0, 0, 0, 140)
+ENHANCEMENT_OVERLAY_COLOR = (0, 0, 0, 140)  # Same as pause menu for consistency
 GAME_OVER_FONT_SIZE = 120
 PAUSE_FONT_SIZE = 80
 MENU_FONT_SIZE = 48
 PAUSE_MENU_HIGHLIGHT_COLOR = (255, 255, 0)
 PAUSE_MENU_TEXT_COLOR = (255, 255, 255)
 PAUSE_MENU_OPTIONS = ["Resume", "Surrender", "Settings", "Quit"]
+
+# Enhancement UI Colors
+ENHANCEMENT_PANEL_COLOR = (40, 40, 50)
+ENHANCEMENT_BORDER_COLOR = (100, 100, 120)
+ENHANCEMENT_TEXT_COLOR = (255, 255, 255)
+ENHANCEMENT_BUTTON_COLOR = (60, 60, 80)
+ENHANCEMENT_BUTTON_HOVER_COLOR = (80, 80, 100)
 
 # HUD Configuration
 HUD_TOGGLE_KEY = pygame.K_TAB

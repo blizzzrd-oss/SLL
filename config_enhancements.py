@@ -82,18 +82,11 @@ ENHANCEMENT_SELECTION = {
     'respect_max_levels': True,  # Don't show maxed enhancements
 }
 
-# UI Configuration for Enhancement Selection
+# UI Configuration for Enhancement Selection (sizing only, colors in main config.py)
 ENHANCEMENT_UI = {
-    'background_color': (20, 20, 30, 180),  # Semi-transparent dark
-    'panel_color': (40, 40, 50),
-    'border_color': (100, 100, 120),
-    'text_color': (255, 255, 255),
-    'highlight_color': (100, 150, 255),
-    'button_color': (60, 60, 80),
-    'button_hover_color': (80, 80, 100),
-    'panel_width': 600,
-    'panel_height': 400,
-    'button_width': 180,
-    'button_height': 100,
+    'panel_width': 700,
+    'panel_height': 450,
+    'button_width': 220,
+    'button_height': 130,
     'button_spacing': 20,
 }

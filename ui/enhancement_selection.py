@@ -5,6 +5,10 @@ Provides interface for selecting skill enhancements on level up.
 
 import pygame
 from config_enhancements import ENHANCEMENT_UI
+from config import (
+    ENHANCEMENT_OVERLAY_COLOR, ENHANCEMENT_PANEL_COLOR, ENHANCEMENT_BORDER_COLOR,
+    ENHANCEMENT_TEXT_COLOR, ENHANCEMENT_BUTTON_COLOR, ENHANCEMENT_BUTTON_HOVER_COLOR
+)
 
 
 class EnhancementSelectionUI:
@@ -78,10 +82,9 @@ class EnhancementSelectionUI:
         screen_width = self.screen.get_width()
         screen_height = self.screen.get_height()
         
-        # Draw semi-transparent overlay
-        overlay = pygame.Surface((screen_width, screen_height))
-        overlay.set_alpha(120)  # More transparent like ESC menu
-        overlay.fill((20, 20, 30))  # Dark background
+        # Draw semi-transparent overlay (same method as pause menu)
+        overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
+        overlay.fill(ENHANCEMENT_OVERLAY_COLOR)
         self.screen.blit(overlay, (0, 0))
         
         # Draw main panel
@@ -93,16 +96,16 @@ class EnhancementSelectionUI:
             ENHANCEMENT_UI['panel_height']
         )
         
-        pygame.draw.rect(self.screen, ENHANCEMENT_UI['panel_color'], panel_rect, border_radius=10)
-        pygame.draw.rect(self.screen, ENHANCEMENT_UI['border_color'], panel_rect, 3, border_radius=10)
+        pygame.draw.rect(self.screen, ENHANCEMENT_PANEL_COLOR, panel_rect, border_radius=10)
+        pygame.draw.rect(self.screen, ENHANCEMENT_BORDER_COLOR, panel_rect, 3, border_radius=10)
         
         # Draw title
-        title_text = self.font_large.render("Choose Enhancement", True, ENHANCEMENT_UI['text_color'])
+        title_text = self.font_large.render("Choose Enhancement", True, ENHANCEMENT_TEXT_COLOR)
         title_rect = title_text.get_rect(center=(screen_width // 2, panel_y + 40))
         self.screen.blit(title_text, title_rect)
         
         # Draw subtitle
-        subtitle_text = self.font_medium.render("Select a skill enhancement:", True, ENHANCEMENT_UI['text_color'])
+        subtitle_text = self.font_medium.render("Select a skill enhancement:", True, ENHANCEMENT_TEXT_COLOR)
         subtitle_rect = subtitle_text.get_rect(center=(screen_width // 2, panel_y + 70))
         self.screen.blit(subtitle_text, subtitle_rect)
         
@@ -114,35 +117,35 @@ class EnhancementSelectionUI:
             
             # Check if mouse is hovering
             is_hovering = button_rect.collidepoint(mouse_pos)
-            button_color = (ENHANCEMENT_UI['button_hover_color'] if is_hovering 
-                          else ENHANCEMENT_UI['button_color'])
+            button_color = (ENHANCEMENT_BUTTON_HOVER_COLOR if is_hovering 
+                          else ENHANCEMENT_BUTTON_COLOR)
             
             # Draw button
             pygame.draw.rect(self.screen, button_color, button_rect, border_radius=8)
-            pygame.draw.rect(self.screen, ENHANCEMENT_UI['border_color'], button_rect, 2, border_radius=8)
+            pygame.draw.rect(self.screen, ENHANCEMENT_BORDER_COLOR, button_rect, 2, border_radius=8)
             
             # Get enhancement display info
             display_info = enhancement.get_display_info()
             
             # Draw enhancement name
-            name_text = self.font_medium.render(display_info['name'], True, ENHANCEMENT_UI['text_color'])
+            name_text = self.font_medium.render(display_info['name'], True, ENHANCEMENT_TEXT_COLOR)
             name_rect = name_text.get_rect(center=(button_rect.centerx, button_rect.y + 20))
             self.screen.blit(name_text, name_rect)
             
             # Draw enhancement level
-            level_text = self.font_small.render(display_info['level_text'], True, ENHANCEMENT_UI['text_color'])
+            level_text = self.font_small.render(display_info['level_text'], True, ENHANCEMENT_TEXT_COLOR)
             level_rect = level_text.get_rect(center=(button_rect.centerx, button_rect.y + 40))
             self.screen.blit(level_text, level_rect)
             
             # Draw description (wrapped)
             description_lines = self._wrap_text(display_info['description'], ENHANCEMENT_UI['button_width'] - 20)
             for j, line in enumerate(description_lines):
-                line_text = self.font_small.render(line, True, ENHANCEMENT_UI['text_color'])
+                line_text = self.font_small.render(line, True, ENHANCEMENT_TEXT_COLOR)
                 line_rect = line_text.get_rect(center=(button_rect.centerx, button_rect.y + 60 + j * 16))
                 self.screen.blit(line_text, line_rect)
         
         # Draw instructions
-        instruction_text = self.font_small.render("Click on an enhancement to select it", True, ENHANCEMENT_UI['text_color'])
+        instruction_text = self.font_small.render("Click on an enhancement to select it", True, ENHANCEMENT_TEXT_COLOR)
         instruction_rect = instruction_text.get_rect(center=(screen_width // 2, panel_y + ENHANCEMENT_UI['panel_height'] - 30))
         self.screen.blit(instruction_text, instruction_rect)
     
@@ -154,7 +157,7 @@ class EnhancementSelectionUI:
         
         for word in words:
             test_line = current_line + (" " if current_line else "") + word
-            text_surface = self.font_small.render(test_line, True, (255, 255, 255))
+            text_surface = self.font_small.render(test_line, True, ENHANCEMENT_TEXT_COLOR)
             
             if text_surface.get_width() <= max_width:
                 current_line = test_line

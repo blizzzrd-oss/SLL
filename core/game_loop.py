@@ -116,7 +116,19 @@ def run_game(screen, slot, mode):
                     enhancement_ui.close()
                     print(f"[ENHANCEMENT] Selected: {selected_enhancement}")
             
-            # Render enhancement UI and skip rest of frame
+            # Render game background using pause cache system (without pause overlay)
+            from rendering.game_render import _pause_screen_cache, _pause_cache_valid, render_full_game_to_cache
+            
+            if _pause_cache_valid and _pause_screen_cache:
+                # Use cached game screen
+                screen.blit(_pause_screen_cache, (0, 0))
+            else:
+                # Cache is invalid - render full game and cache it  
+                render_full_game_to_cache(screen, game, last_move, time_accum, 
+                                        event_handler.hud_visible, fps, 
+                                        game_logic.game_time, game_logic.get_wave_info())
+            
+            # Render enhancement UI on top
             enhancement_ui.render()
             pygame.display.flip()
             continue
