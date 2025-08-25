@@ -7,6 +7,7 @@ import pygame
 import math
 import os
 from entities.projectiles import EnemyProjectile
+from utils.resource_path import resource_path
 
 
 class DemonEnemyLogic:
@@ -88,7 +89,8 @@ class DemonEnemyLogic:
         base_path = "resources/images/enemies/Deamon/"  # Note: Fixed path to match provided directory
         
         for state, filename in self.SPRITE_FILES.items():
-            full_path = os.path.join(base_path, filename)
+            relative_path = os.path.join(base_path, filename)
+            full_path = resource_path(relative_path)
             if os.path.exists(full_path):
                 try:
                     sprite_sheet = pygame.image.load(full_path).convert_alpha()
