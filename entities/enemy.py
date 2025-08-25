@@ -122,6 +122,3 @@ PlantType = EnemyType(
     attack_range=plant_cfg.get('attack_range', 32),
     attack_damage=plant_cfg.get('attack_damage', 5)
 )
-
-# Add experience reward to enemy type
-PlantType.experience_reward = plant_cfg.get('experience_reward', 1)

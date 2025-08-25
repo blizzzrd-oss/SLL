@@ -88,28 +88,25 @@ class GameLogicManager:
         for enemy in self.enemies[:]:
             enemy.update(dt, self.game.player)
             if hasattr(enemy, 'dead') and enemy.dead:
-                # Drop a single XP pickable instead of giving XP directly
-                if hasattr(enemy.type, 'experience_reward'):
-                    # Determine crystal type based on enemy type and drop chances
-                    crystal_type = self._determine_xp_crystal_type(enemy)
-                    
-                    # Drop single XP crystal
-                    import random
-                    offset_x = random.uniform(-10, 10)
-                    offset_y = random.uniform(-10, 10)
-                    self.game.pickable_manager.create_xp_pickable(
-                        enemy.x + offset_x, 
-                        enemy.y + offset_y,
-                        crystal_type
-                    )
-                    
-                    print(f"[XP] Dropped {crystal_type} XP crystal from {enemy.type.name}")
+                # Drop a single XP pickable for every enemy death
+                # Determine crystal type based on enemy type and drop chances
+                crystal_type = self._determine_xp_crystal_type(enemy)
+                
+                # Drop single XP crystal
+                import random
+                offset_x = random.uniform(-10, 10)
+                offset_y = random.uniform(-10, 10)
+                self.game.pickable_manager.create_xp_pickable(
+                    enemy.x + offset_x, 
+                    enemy.y + offset_y,
+                    crystal_type
+                )
+                
+                print(f"[XP] Dropped {crystal_type} XP crystal from {enemy.type.name}")
                 
                 # Check for other pickable drops (reroll dice, etc.)
                 if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
-                    self._check_pickable_drops(enemy)
-                
-                self.enemies.remove(enemy)
+                    self._check_pickable_drops(enemy)                self.enemies.remove(enemy)
                 # Notify wave manager of enemy death
                 self.wave_manager.on_enemy_killed()
                 

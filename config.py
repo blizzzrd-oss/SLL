@@ -59,12 +59,11 @@ ENEMY_TYPE_CONFIG = {
 	'Plant': {
 		'max_health': 25,
 		'size': 48,
-		'speed': 75,
+		'speed': 50,
 		'color': (80, 200, 80),
 		'attack_range': 32,
 		'attack_damage': 5,
 		'attack_cooldown': 1.0,
-		'experience_reward': 50,  # Base XP reward for killing this enemy
 	},
 }
 
@@ -408,7 +407,7 @@ REROLL_DICE_SPRITE = "resources/images/pickabels/reroll_dice.png"
 REROLL_DICE_FRAME_SIZE = 16  # 16x16 frames
 REROLL_DICE_FRAME_COUNT = 6  # 6 different frames
 REROLL_DICE_ANIMATION_FPS = 4  # Slow animation for visibility
-REROLL_DICE_DROP_CHANCE = 0.5  # 0.8% chance to drop from plants
+REROLL_DICE_DROP_CHANCE = 0.008  # 0.8% chance to drop from plants
 REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 
 # XP Pickable Configuration

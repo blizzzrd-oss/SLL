@@ -353,12 +353,7 @@ class PickableManager:
         xp_crystal = XpPickable(x, y, crystal_type)
         self.add_pickable(xp_crystal)
         
-        # Play drop sound
-        try:
-            SoundManager.play_pickable_drop_sound()
-        except Exception as e:
-            print(f"[PICKABLES] Failed to play drop sound: {e}")
-            
+        # XP crystals drop silently (no sound)
         return xp_crystal
         
     def update(self, dt, player):
