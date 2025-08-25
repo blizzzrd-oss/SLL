@@ -83,11 +83,17 @@ class GameEventHandler:
         """Handle immediate skill activation on button press."""
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             if 'slash' in self.game.player.skills:
-                self.game.player.skills['slash'].use(target_pos=mouse_pos)
+                # Convert screen coordinates to world coordinates for proper aiming
+                world_x, world_y = self.game.camera.screen_to_world(mouse_pos[0], mouse_pos[1])
+                world_mouse_pos = (world_x, world_y)
+                self.game.player.skills['slash'].use(target_pos=world_mouse_pos)
                 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             if 'dash' in self.game.player.skills:
-                self.game.player.skills['dash'].use(target_pos=mouse_pos)
+                # Convert screen coordinates to world coordinates for dash targeting
+                world_x, world_y = self.game.camera.screen_to_world(mouse_pos[0], mouse_pos[1])
+                world_mouse_pos = (world_x, world_y)
+                self.game.player.skills['dash'].use(target_pos=world_mouse_pos)
 
     def _handle_pause_menu_events(self, event, mouse_pos):
         """Handle pause menu navigation and selection."""

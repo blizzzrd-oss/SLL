@@ -60,7 +60,18 @@ class SlashSkill(Skill):
         self.hit_entities.clear()
         # Calculate arc center and angles
         self.center = self.user.rect.center
-        self.target_pos = target_pos if target_pos else pygame.mouse.get_pos()
+        
+        # Handle target position - convert screen to world coordinates if needed
+        if target_pos:
+            self.target_pos = target_pos
+        else:
+            # Fallback: get mouse position and convert to world coordinates
+            # Note: This should normally be handled by the event handler
+            mouse_screen = pygame.mouse.get_pos()
+            # We don't have camera access here, so this will use screen coordinates
+            # This is a fallback case and may not work perfectly
+            self.target_pos = mouse_screen
+            
         dx, dy = self.target_pos[0] - self.center[0], self.target_pos[1] - self.center[1]
         angle = math.degrees(math.atan2(dy, dx)) % 360
         self.start_angle = (angle - self.arc_deg / 2) % 360
@@ -97,14 +108,21 @@ class SlashSkill(Skill):
         # Calculate current frame index
         frame_idx = min(int(self.animation_frame), self.total_frames - 1)
         frame = self.frames[frame_idx]
-        # Always face the target_pos direction and rotate the sprite
+        # Ensure target_pos is valid - only set if it's actually None/missing
         if not hasattr(self, 'target_pos') or self.target_pos is None:
+            # This should rarely happen if the skill is used properly
+            # Convert screen to world coordinates as fallback
             mouse_screen = pygame.mouse.get_pos()
-            # Convert mouse screen position to world coordinates if camera is available
             if camera:
                 self.target_pos = camera.screen_to_world(mouse_screen[0], mouse_screen[1])
             else:
-                self.target_pos = mouse_screen
+                # Without camera, we can't convert properly, so use player's last move direction
+                # as a fallback to avoid aiming to top-left
+                move_vec = getattr(self.user, 'last_move', (1, 0))
+                player_center = self.user.rect.center
+                # Create a target position in the direction of last movement
+                self.target_pos = (player_center[0] + move_vec[0] * 100, 
+                                 player_center[1] + move_vec[1] * 100)
         if hasattr(self.user, 'x') and hasattr(self.user, 'y'):
             world_px, world_py = self.user.x, self.user.y
         else:
@@ -185,14 +203,15 @@ class SlashSkill(Skill):
         frame_idx = min(int(self.animation_frame), self.total_frames - 1)
         frame = self.frames[frame_idx]
         
-        # Always face the target_pos direction and rotate the sprite
+        # Ensure target_pos is valid - use same fallback logic as draw method
         if not hasattr(self, 'target_pos') or self.target_pos is None:
-            mouse_screen = pygame.mouse.get_pos()
-            # Convert mouse screen position to world coordinates if camera is available
-            if hasattr(self, 'camera') and self.camera:
-                self.target_pos = self.camera.screen_to_world(mouse_screen[0], mouse_screen[1])
-            else:
-                self.target_pos = mouse_screen
+            # This should rarely happen if the skill is used properly
+            # Use player's last move direction as fallback to avoid incorrect aiming
+            move_vec = getattr(self.user, 'last_move', (1, 0))
+            player_center = self.user.rect.center
+            # Create a target position in the direction of last movement
+            self.target_pos = (player_center[0] + move_vec[0] * 100, 
+                             player_center[1] + move_vec[1] * 100)
                 
         if hasattr(self.user, 'x') and hasattr(self.user, 'y'):
             world_px, world_py = self.user.x, self.user.y

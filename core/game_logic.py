@@ -201,9 +201,10 @@ class GameLogicManager:
 
     def _get_skill_target(self, skill, auto_aim):
         """Determine the target for a skill based on settings."""
-        # Movement skills always target mouse position
+        # Movement skills always target mouse position (converted to world coordinates)
         if getattr(skill, 'is_movement_skill', False):
-            return pygame.mouse.get_pos()
+            mouse_screen = pygame.mouse.get_pos()
+            return self.game.camera.screen_to_world(mouse_screen[0], mouse_screen[1])
             
         # Auto-aim targets closest enemy
         if auto_aim:
@@ -212,8 +213,9 @@ class GameLogicManager:
                 return closest.rect.center
             return None  # No target available
             
-        # Default to mouse position
-        return pygame.mouse.get_pos()
+        # Default to mouse position (converted to world coordinates)
+        mouse_screen = pygame.mouse.get_pos()
+        return self.game.camera.screen_to_world(mouse_screen[0], mouse_screen[1])
 
     def _get_closest_enemy(self):
         """Find the closest enemy to the player."""

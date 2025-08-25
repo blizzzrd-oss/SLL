@@ -57,7 +57,7 @@ BIOME_FALLBACK_COLORS = {
 # =============================================================================
 ENEMY_TYPE_CONFIG = {
 	'Plant': {
-		'max_health': 25,
+		'max_health': 20,
 		'size': 48,
 		'speed': 50,
 		'color': (80, 200, 80),
