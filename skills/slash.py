@@ -142,31 +142,27 @@ class SlashSkill(Skill):
         surface.blit(draw_frame, rect)
         
         # Calculate and draw debug hitbox visualization
-        # Use the same rotated sprite calculation as the actual draw to ensure perfect alignment
-        debug_frame = pygame.transform.rotate(frame, -angle)
-        # Apply AOE enhancement to debug hitbox
-        if self.size_multiplier != 1.0:
-            debug_enhanced_width = int(debug_frame.get_width() * self.size_multiplier)
-            debug_enhanced_height = int(debug_frame.get_height() * self.size_multiplier)
-            debug_frame = pygame.transform.scale(debug_frame, (debug_enhanced_width, debug_enhanced_height))
+        # First, make the frame more rectangular BEFORE rotation
+        # Reduce width to make it more slash-like (taller than wide) since sprite rotates
+        base_frame = frame.copy()
+        narrower_base_width = int(base_frame.get_width() * 0.7)
+        rectangular_frame = pygame.transform.scale(base_frame, (narrower_base_width, base_frame.get_height()))
         
-        # Adjust expansion based on rotation to ensure consistent "width" expansion
-        # For left/right attacks (angles around 0°/180°), expand height
-        # For up/down attacks (angles around 90°/270°), expand width
-        angle_normalized = angle % 360
-        if 45 <= angle_normalized <= 135 or 225 <= angle_normalized <= 315:
-            # Up/down attacks - expand width
-            wider_width = int(debug_frame.get_width() * 1.5)
-            wider_frame = pygame.transform.scale(debug_frame, (wider_width, debug_frame.get_height()))
-        else:
-            # Left/right attacks - expand height
-            wider_height = int(debug_frame.get_height() * 1.5)
-            wider_frame = pygame.transform.scale(debug_frame, (debug_frame.get_width(), wider_height))
+        # Now rotate the rectangular frame
+        debug_frame = pygame.transform.rotate(rectangular_frame, -angle)
+        # Apply the SAME scaling as the visual sprite: base scale + AOE enhancement
+        base_sprite_scale = 1.2  # Same base scale as visual sprite
+        total_debug_scale = base_sprite_scale * self.size_multiplier  # Same total scale as visual sprite
+        debug_scaled_width = int(debug_frame.get_width() * total_debug_scale)
+        debug_scaled_height = int(debug_frame.get_height() * total_debug_scale)
+        debug_frame = pygame.transform.scale(debug_frame, (debug_scaled_width, debug_scaled_height))
+        
+        # Use the debug frame as-is - it's already properly shaped and rotated
+        wider_frame = debug_frame
         
         debug_rect = wider_frame.get_rect(center=(offset_x, offset_y))
         
-        # Draw the yellow debug hitbox as a simple rectangle
-        pygame.draw.rect(surface, (255, 255, 0), debug_rect, 2)
+        # Yellow debug hitbox removed - no longer needed
 
     def _in_slash_arc(self, entity):
         # Use the same coordinate calculation as the draw method
@@ -210,26 +206,24 @@ class SlashSkill(Skill):
         offset_y = world_py + dir_y * offset_dist
         angle = math.degrees(math.atan2(dy, dx)) % 360
         
-        # Use simple rotated rectangle collision detection that matches the debug visualization
-        collision_frame = pygame.transform.rotate(frame, -angle)
-        # Apply size enhancement to collision frame
-        if self.size_multiplier != 1.0:
-            collision_enhanced_width = int(collision_frame.get_width() * self.size_multiplier)
-            collision_enhanced_height = int(collision_frame.get_height() * self.size_multiplier)
-            collision_frame = pygame.transform.scale(collision_frame, (collision_enhanced_width, collision_enhanced_height))
+        # Use collision detection that matches the debug visualization
+        # First, make the frame more rectangular BEFORE rotation
+        # Reduce width to make it more slash-like (taller than wide) since sprite rotates
+        base_collision_frame = frame.copy()
+        narrower_collision_base_width = int(base_collision_frame.get_width() * 0.7)
+        rectangular_collision_frame = pygame.transform.scale(base_collision_frame, (narrower_collision_base_width, base_collision_frame.get_height()))
         
-        # Adjust expansion based on rotation to ensure consistent "width" expansion
-        # For left/right attacks (angles around 0°/180°), expand height
-        # For up/down attacks (angles around 90°/270°), expand width
-        angle_normalized = angle % 360
-        if 45 <= angle_normalized <= 135 or 225 <= angle_normalized <= 315:
-            # Up/down attacks - expand width
-            wider_collision_width = int(collision_frame.get_width() * 1.5)
-            wider_collision_frame = pygame.transform.scale(collision_frame, (wider_collision_width, collision_frame.get_height()))
-        else:
-            # Left/right attacks - expand height
-            wider_collision_height = int(collision_frame.get_height() * 1.5)
-            wider_collision_frame = pygame.transform.scale(collision_frame, (collision_frame.get_width(), wider_collision_height))
+        # Now rotate the rectangular frame
+        collision_frame = pygame.transform.rotate(rectangular_collision_frame, -angle)
+        # Apply the SAME scaling as the visual sprite: base scale + AOE enhancement
+        base_sprite_scale = 1.2  # Same base scale as visual sprite
+        total_collision_scale = base_sprite_scale * self.size_multiplier  # Same total scale as visual sprite
+        collision_scaled_width = int(collision_frame.get_width() * total_collision_scale)
+        collision_scaled_height = int(collision_frame.get_height() * total_collision_scale)
+        collision_frame = pygame.transform.scale(collision_frame, (collision_scaled_width, collision_scaled_height))
+        
+        # Use the collision frame as-is - it's already properly shaped and rotated
+        wider_collision_frame = collision_frame
         
         collision_rect = wider_collision_frame.get_rect(center=(offset_x, offset_y))
         

@@ -27,6 +27,13 @@ class DashSkill(Skill):
         self.last_charge_regen = 0
         self.last_debug_log = 0  # For throttling debug output
 
+    def _apply_general_enhancements(self):
+        """Apply general enhancements with reduced base size for dash."""
+        # Update size multiplier with 50% smaller base size for dash
+        aoe_bonus = self.user.get_enhancement_value('increased_aoe')
+        # Start with 0.5 base size (50% smaller) instead of 1.0
+        self.size_multiplier = 0.5 * (1.0 + aoe_bonus)
+
     def use(self, target_pos=None):
         now = pygame.time.get_ticks() / 1000
         
@@ -99,15 +106,51 @@ class DashSkill(Skill):
         for entity in entities:
             if entity is self.user:
                 continue
-            # Simple collision: check rect overlap
-            if hasattr(entity, 'rect') and self.user.rect.colliderect(entity.rect):
+            
+            # Create enhanced hitbox for collision detection with AOE scaling
+            enhanced_width = int(self.user.rect.width * self.size_multiplier)
+            enhanced_height = int(self.user.rect.height * self.size_multiplier)
+            enhanced_rect = pygame.Rect(0, 0, enhanced_width, enhanced_height)
+            enhanced_rect.center = self.user.rect.center
+            
+            # Enhanced collision: check rect overlap with scaled hitbox
+            if hasattr(entity, 'rect') and enhanced_rect.colliderect(entity.rect):
                 if hasattr(entity, 'take_damage'):
                     damage = self._check_double_damage(self.dash_damage)
                     entity.take_damage(damage, source=self, attacker=self.user)
 
     def draw(self, surface, last_move=(1,0), camera=None):
-        # Optionally, draw a dash effect (e.g., a trail or afterimage)
-        pass
+        # Draw yellow debug hitbox when dash is active
+        if self.active and hasattr(self.user, 'rect'):
+            # Get player position
+            if camera:
+                # Convert world coordinates to screen coordinates
+                if hasattr(self.user, 'x') and hasattr(self.user, 'y'):
+                    screen_x, screen_y = camera.world_to_screen(self.user.x, self.user.y)
+                    # Create enhanced rect with AOE scaling
+                    enhanced_width = int(self.user.rect.width * self.size_multiplier)
+                    enhanced_height = int(self.user.rect.height * self.size_multiplier)
+                    debug_rect = pygame.Rect(0, 0, enhanced_width, enhanced_height)
+                    debug_rect.center = (screen_x, screen_y)
+                else:
+                    # Use rect position directly if no x/y attributes
+                    debug_rect = self.user.rect.copy()
+                    # Apply AOE enhancement scaling
+                    enhanced_width = int(debug_rect.width * self.size_multiplier)
+                    enhanced_height = int(debug_rect.height * self.size_multiplier)
+                    debug_rect.width = enhanced_width
+                    debug_rect.height = enhanced_height
+                    debug_rect.x, debug_rect.y = camera.world_to_screen(debug_rect.x, debug_rect.y)
+            else:
+                # No camera, use rect directly with AOE enhancement
+                debug_rect = self.user.rect.copy()
+                enhanced_width = int(debug_rect.width * self.size_multiplier)
+                enhanced_height = int(debug_rect.height * self.size_multiplier)
+                debug_rect.width = enhanced_width
+                debug_rect.height = enhanced_height
+            
+            # Draw yellow border to show enhanced dash hitbox
+            pygame.draw.rect(surface, (255, 255, 0), debug_rect, 2)
 
     def can_use(self, now):
         # Don't allow dashing while already dashing
