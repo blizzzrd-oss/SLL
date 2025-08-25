@@ -9,7 +9,8 @@ import random
 from entities.spawner import EnemySpawner
 from entities.enemy import PlantType, DemonType
 from core.wave_system import WaveManager
-from config import REROLL_DICE_DROP_CHANCE
+from config import (REROLL_DICE_DROP_CHANCE, SCREEN_CLEARER_DROP_CHANCE, 
+                   XP_MAGNET_DROP_CHANCE)
 
 
 class GameLogicManager:
@@ -175,13 +176,31 @@ class GameLogicManager:
         
     def _check_pickable_drops(self, enemy):
         """Check if enemy should drop pickables."""
-        # Check for reroll dice drop
-        if random.random() < REROLL_DICE_DROP_CHANCE:
-            # Drop at enemy position
+        import random
+        
+        # Check for reroll dice drop (from plants only)
+        if (hasattr(enemy.type, 'name') and enemy.type.name == 'Plant' and 
+            random.random() < REROLL_DICE_DROP_CHANCE):
             drop_x = enemy.position[0]
             drop_y = enemy.position[1]
             self.game.pickable_manager.create_reroll_dice(drop_x, drop_y)
             print(f"[PICKABLES] Reroll dice dropped at ({drop_x}, {drop_y})")
+        
+        # Check for screen clearer drop (from demons only)
+        if (hasattr(enemy.type, 'name') and enemy.type.name == 'Demon' and 
+            random.random() < SCREEN_CLEARER_DROP_CHANCE):
+            drop_x = enemy.position[0]
+            drop_y = enemy.position[1]
+            self.game.pickable_manager.create_screen_clearer(drop_x, drop_y)
+            print(f"[PICKABLES] Screen clearer dropped at ({drop_x}, {drop_y})")
+        
+        # Check for XP magnet drop (from both plants and demons)
+        if (hasattr(enemy.type, 'name') and enemy.type.name in ['Plant', 'Demon'] and 
+            random.random() < XP_MAGNET_DROP_CHANCE):
+            drop_x = enemy.position[0]
+            drop_y = enemy.position[1]
+            self.game.pickable_manager.create_xp_magnet(drop_x, drop_y)
+            print(f"[PICKABLES] XP magnet dropped at ({drop_x}, {drop_y})")
 
     def _determine_xp_crystal_type(self, enemy):
         """Determine which type of XP crystal to drop based on enemy type."""

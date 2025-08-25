@@ -82,3 +82,22 @@ PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
 # =============================================================================
 PICKABLE_DROP_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"
 PICKABLE_COLLECT_SOUND_PATH = "resources/sounds/pickable.mp3"
+
+# =============================================================================
+# SCREEN CLEARER PICKABLE CONFIGURATION (ENEMY KILLER)
+# =============================================================================
+SCREEN_CLEARER_SPRITE = "resources/images/pickabels/screen_clearer.png"
+SCREEN_CLEARER_FRAME_SIZE = 24  # 24x24 frames (larger than dice)
+SCREEN_CLEARER_FRAME_COUNT = 8  # More frames for dramatic effect
+SCREEN_CLEARER_ANIMATION_FPS = 6  # Slightly faster animation
+SCREEN_CLEARER_DROP_CHANCE = 0.903  # 0.3% chance to drop from demons (rarer than dice)
+
+# =============================================================================
+# XP MAGNET PICKABLE CONFIGURATION
+# =============================================================================
+XP_MAGNET_SPRITE = "resources/images/pickabels/xp_magnet.png"
+XP_MAGNET_FRAME_SIZE = 20  # 20x20 frames
+XP_MAGNET_FRAME_COUNT = 6  # 6 different frames
+XP_MAGNET_ANIMATION_FPS = 5  # Medium animation speed
+XP_MAGNET_DROP_CHANCE = 0.105  # 0.5% chance to drop from both plants and demons
+XP_MAGNET_PULL_RADIUS = 500  # Radius in pixels to attract XP pickables from

@@ -123,8 +123,8 @@ SKILL_SPECIFIC_ENHANCEMENTS = {
             'name': 'Dash Immunity',
             'description': 'Become immune to damage for 1 second when dashing',
             'base_value': 1.0,  # Duration in seconds
-            'max_level': 2,
-            'value_per_level': 0.5,  # Additional 0.5 seconds per level (1.0, 1.5, 2.0)
+            'max_level': 1,
+            'value_per_level': 1.0,  # Additional 1.0 seconds per level (1.0, 2.0)
         }
     }
 }

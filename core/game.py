@@ -38,6 +38,7 @@ class Game:
         
         # Initialize player with mode-specific stats
         self.player = Player()
+        self.player.game = self  # Give player reference to game for pickable system
         self._apply_mode_modifiers()
         
         self.game_over = False
@@ -72,6 +73,7 @@ class Game:
     def reset(self):
         """Reset the game state except for settings."""
         self.player = Player()
+        self.player.game = self  # Give player reference to game for pickable system
         self._apply_mode_modifiers()
         self.event_manager = GameEventManager(self.mode)
         self.game_over = False

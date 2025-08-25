@@ -23,7 +23,11 @@ from config import (
     XP_PURPLE_SPRITE, XP_PURPLE_FRAME_SIZE, XP_PURPLE_FRAME_COUNT,
     XP_PURPLE_ANIMATION_FPS, XP_PURPLE_XP_VALUE,
     XP_PLANT_GREEN_CHANCE, XP_PLANT_YELLOW_CHANCE,
-    PICKABLE_DESPAWN_TIME, PICKABLE_FLOAT_HEIGHT, PICKABLE_FLOAT_SPEED
+    PICKABLE_DESPAWN_TIME, PICKABLE_FLOAT_HEIGHT, PICKABLE_FLOAT_SPEED,
+    SCREEN_CLEARER_SPRITE, SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_COUNT,
+    SCREEN_CLEARER_ANIMATION_FPS, SCREEN_CLEARER_DROP_CHANCE,
+    XP_MAGNET_SPRITE, XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_COUNT,
+    XP_MAGNET_ANIMATION_FPS, XP_MAGNET_DROP_CHANCE, XP_MAGNET_PULL_RADIUS
 )
 from utils.resource_path import resource_path
 from audio.sound_manager import SoundManager
@@ -325,6 +329,252 @@ class XpPickable(Pickable):
         surface.blit(current_frame, rect)
 
 
+class ScreenClearerPickable(Pickable):
+    """Pickable that kills all enemies currently on screen."""
+    
+    # Class-level sprite cache
+    _frames = None
+    _loaded = False
+    
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.animation_timer = 0.0
+        self._load_sprites()
+    
+    @classmethod
+    def _load_sprites(cls):
+        """Load and cache sprite frames."""
+        if cls._loaded:
+            return
+            
+        try:
+            sprite_path = resource_path(SCREEN_CLEARER_SPRITE)
+            if os.path.exists(sprite_path):
+                sprite_sheet = pygame.image.load(sprite_path).convert_alpha()
+                cls._frames = []
+                
+                # Extract frames (assuming horizontal layout)
+                for i in range(SCREEN_CLEARER_FRAME_COUNT):
+                    frame_x = i * SCREEN_CLEARER_FRAME_SIZE
+                    frame_rect = (frame_x, 0, SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_SIZE)
+                    frame = sprite_sheet.subsurface(frame_rect)
+                    cls._frames.append(frame)
+                    
+                print(f"[PICKABLES] Loaded {len(cls._frames)} screen clearer frames")
+            else:
+                print(f"[PICKABLES] Screen clearer sprite not found: {sprite_path}")
+                # Create placeholder frames
+                cls._frames = []
+                for i in range(SCREEN_CLEARER_FRAME_COUNT):
+                    placeholder = pygame.Surface((SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_SIZE))
+                    # Use bright red/orange colors for dangerous effect
+                    red_value = 255 - (i * 20)
+                    placeholder.fill((red_value, 50 + i * 10, 0))
+                    cls._frames.append(placeholder)
+                    
+        except Exception as e:
+            print(f"[PICKABLES] Error loading screen clearer sprite: {e}")
+            # Create placeholder frames
+            cls._frames = []
+            for i in range(SCREEN_CLEARER_FRAME_COUNT):
+                placeholder = pygame.Surface((SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_SIZE))
+                red_value = 255 - (i * 20)
+                placeholder.fill((red_value, 50 + i * 10, 0))
+                cls._frames.append(placeholder)
+                
+        cls._loaded = True
+    
+    def update(self, dt):
+        """Update animation and base pickable behavior."""
+        if not super().update(dt):
+            return False
+            
+        self.animation_timer += dt
+        return True
+    
+    def collect(self, player):
+        """Kill all enemies currently on screen."""
+        # Access the game through the player's reference
+        if hasattr(player, 'game'):
+            game = player.game
+            
+            if game and hasattr(game, 'enemies'):
+                # Kill all enemies by setting their health to 0
+                enemies_killed = 0
+                for enemy in game.enemies[:]:  # Use slice to avoid modification issues
+                    if hasattr(enemy, 'health') and enemy.health > 0:
+                        enemy.health = 0
+                        # Trigger death state if the enemy has logic
+                        if hasattr(enemy, 'logic') and hasattr(enemy.logic, 'state'):
+                            enemy.logic.state = 'death'
+                            enemy.logic.anim_frame = 0
+                            enemy.logic.anim_timer = 0.0
+                        enemies_killed += 1
+                
+                print(f"[PICKABLES] Screen Clearer killed {enemies_killed} enemies!")
+            else:
+                print(f"[PICKABLES] Screen Clearer: Could not access enemies list")
+        else:
+            print(f"[PICKABLES] Screen Clearer: Could not access game instance")
+        
+        # Play collection sound
+        try:
+            SoundManager.play_pickable_collect_sound()
+        except Exception as e:
+            print(f"[PICKABLES] Failed to play collection sound: {e}")
+            
+        print(f"[PICKABLES] Player collected Screen Clearer! All enemies eliminated!")
+        self.collected = True
+    
+    def draw(self, surface, camera=None):
+        """Draw the animated screen clearer."""
+        if not self._frames:
+            return
+            
+        # Calculate current frame
+        frame_index = int(self.animation_timer * SCREEN_CLEARER_ANIMATION_FPS) % len(self._frames)
+        current_frame = self._frames[frame_index]
+        
+        # Get floating position
+        render_x, render_y = self.get_render_position()
+        
+        # Apply camera transformation
+        if camera:
+            screen_x, screen_y = camera.world_to_screen(render_x, render_y)
+        else:
+            screen_x, screen_y = int(render_x), int(render_y)
+            
+        # Center the sprite
+        rect = current_frame.get_rect(center=(screen_x, screen_y))
+        surface.blit(current_frame, rect)
+
+
+class XpMagnetPickable(Pickable):
+    """Pickable that attracts all XP pickables on the ground to the player."""
+    
+    # Class-level sprite cache
+    _frames = None
+    _loaded = False
+    
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        self.animation_timer = 0.0
+        self._load_sprites()
+    
+    @classmethod
+    def _load_sprites(cls):
+        """Load and cache sprite frames."""
+        if cls._loaded:
+            return
+            
+        try:
+            sprite_path = resource_path(XP_MAGNET_SPRITE)
+            if os.path.exists(sprite_path):
+                sprite_sheet = pygame.image.load(sprite_path).convert_alpha()
+                cls._frames = []
+                
+                # Extract frames (assuming horizontal layout)
+                for i in range(XP_MAGNET_FRAME_COUNT):
+                    frame_x = i * XP_MAGNET_FRAME_SIZE
+                    frame_rect = (frame_x, 0, XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_SIZE)
+                    frame = sprite_sheet.subsurface(frame_rect)
+                    cls._frames.append(frame)
+                    
+                print(f"[PICKABLES] Loaded {len(cls._frames)} XP magnet frames")
+            else:
+                print(f"[PICKABLES] XP magnet sprite not found: {sprite_path}")
+                # Create placeholder frames
+                cls._frames = []
+                for i in range(XP_MAGNET_FRAME_COUNT):
+                    placeholder = pygame.Surface((XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_SIZE))
+                    # Use blue/purple colors for magnetic effect
+                    blue_value = 100 + (i * 20)
+                    placeholder.fill((50, 50 + i * 10, blue_value))
+                    cls._frames.append(placeholder)
+                    
+        except Exception as e:
+            print(f"[PICKABLES] Error loading XP magnet sprite: {e}")
+            # Create placeholder frames
+            cls._frames = []
+            for i in range(XP_MAGNET_FRAME_COUNT):
+                placeholder = pygame.Surface((XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_SIZE))
+                blue_value = 100 + (i * 20)
+                placeholder.fill((50, 50 + i * 10, blue_value))
+                cls._frames.append(placeholder)
+                
+        cls._loaded = True
+    
+    def update(self, dt):
+        """Update animation and base pickable behavior."""
+        if not super().update(dt):
+            return False
+            
+        self.animation_timer += dt
+        return True
+    
+    def collect(self, player):
+        """Attract all XP pickables to the player position."""
+        # Access the game through the player's reference
+        if hasattr(player, 'game'):
+            game = player.game
+            
+            if game and hasattr(game, 'pickable_manager'):
+                pickable_manager = game.pickable_manager
+                xp_pickables_moved = 0
+                
+                # Find all XP pickables within range and move them to player
+                for pickable in pickable_manager.pickables[:]:  # Use slice to avoid modification during iteration
+                    if isinstance(pickable, XpPickable) and not pickable.collected:
+                        # Calculate distance to player
+                        dx = pickable.x - player.x
+                        dy = pickable.y - player.y
+                        distance = math.sqrt(dx * dx + dy * dy)
+                        
+                        # If within magnet range, move to player position
+                        if distance <= XP_MAGNET_PULL_RADIUS:
+                            pickable.x = player.x + (dx * 0.1)  # Small offset to avoid stacking
+                            pickable.y = player.y + (dy * 0.1)
+                            pickable.rect.center = (int(pickable.x), int(pickable.y))
+                            xp_pickables_moved += 1
+                
+                print(f"[PICKABLES] XP Magnet attracted {xp_pickables_moved} XP pickables!")
+            else:
+                print(f"[PICKABLES] XP Magnet: Could not access pickable manager")
+        else:
+            print(f"[PICKABLES] XP Magnet: Could not access game instance")
+        
+        # Play collection sound
+        try:
+            SoundManager.play_pickable_collect_sound()
+        except Exception as e:
+            print(f"[PICKABLES] Failed to play collection sound: {e}")
+            
+        print(f"[PICKABLES] Player collected XP Magnet! All nearby XP attracted!")
+        self.collected = True
+    
+    def draw(self, surface, camera=None):
+        """Draw the animated XP magnet."""
+        if not self._frames:
+            return
+            
+        # Calculate current frame
+        frame_index = int(self.animation_timer * XP_MAGNET_ANIMATION_FPS) % len(self._frames)
+        current_frame = self._frames[frame_index]
+        
+        # Get floating position
+        render_x, render_y = self.get_render_position()
+        
+        # Apply camera transformation
+        if camera:
+            screen_x, screen_y = camera.world_to_screen(render_x, render_y)
+        else:
+            screen_x, screen_y = int(render_x), int(render_y)
+            
+        # Center the sprite
+        rect = current_frame.get_rect(center=(screen_x, screen_y))
+        surface.blit(current_frame, rect)
+
+
 class PickableManager:
     """Manages all pickables in the game."""
     
@@ -355,6 +605,32 @@ class PickableManager:
         
         # XP crystals drop silently (no sound)
         return xp_crystal
+    
+    def create_screen_clearer(self, x, y):
+        """Create a screen clearer pickable at the specified position."""
+        screen_clearer = ScreenClearerPickable(x, y)
+        self.add_pickable(screen_clearer)
+        
+        # Play drop sound
+        try:
+            SoundManager.play_pickable_drop_sound()
+        except Exception as e:
+            print(f"[PICKABLES] Failed to play drop sound: {e}")
+            
+        return screen_clearer
+    
+    def create_xp_magnet(self, x, y):
+        """Create an XP magnet pickable at the specified position."""
+        xp_magnet = XpMagnetPickable(x, y)
+        self.add_pickable(xp_magnet)
+        
+        # Play drop sound
+        try:
+            SoundManager.play_pickable_drop_sound()
+        except Exception as e:
+            print(f"[PICKABLES] Failed to play drop sound: {e}")
+            
+        return xp_magnet
         
     def update(self, dt, player):
         """Update all pickables and handle collection."""
