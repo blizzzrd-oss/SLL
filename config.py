@@ -210,14 +210,20 @@ SPAWNER_ENEMY_WEIGHTS = {
 	'Demon': 0.3,  # Lower spawn weight - demons are more dangerous
 }
 
+# Minimum wave requirements for enemy types
+SPAWNER_ENEMY_MIN_WAVES = {
+	'Plant': 1,   # Plants can spawn from wave 1
+	'Demon': 2,   # Demons only start spawning from wave 2
+}
+
 # Wave-based Enemy Scaling (replaces time-based scaling)
 SPAWNER_WAVE_WEIGHT_EVENTS = [
 	('Plant', 3, 1.5),   # Starting from wave 3, increase plant spawn chance by 50%
 	('Plant', 5, 2.0),   # Starting from wave 5, double plant spawn chance
 	('Plant', 10, 3.0),  # Starting from wave 10, triple plant spawn chance
-	('Demon', 4, 0.5),   # Starting from wave 4, demons begin spawning
-	('Demon', 7, 1.0),   # Starting from wave 7, normal demon spawn rate
-	('Demon', 12, 1.5),  # Starting from wave 12, increase demon spawn rate
+	('Demon', 2, 0.5),   # Starting from wave 2, demons begin spawning
+	('Demon', 5, 1.0),   # Starting from wave 5, normal demon spawn rate
+	('Demon', 10, 1.5),  # Starting from wave 10, increase demon spawn rate
 ]
 
 # Spawn Rate Limits

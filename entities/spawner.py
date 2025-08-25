@@ -3,7 +3,7 @@
 import random
 import time
 from config import (
-    SPAWNER_DEFAULT_INTERVAL, SPAWNER_ENEMY_WEIGHTS,
+    SPAWNER_DEFAULT_INTERVAL, SPAWNER_ENEMY_WEIGHTS, SPAWNER_ENEMY_MIN_WAVES,
     WINDOW_WIDTH, WINDOW_HEIGHT, SPAWNER_RATE_INCREASE_ENABLED, 
     SPAWNER_RATE_INCREASE_INTERVAL, SPAWNER_RATE_INCREASE_FACTOR, SPAWNER_MIN_INTERVAL,
     SPAWNER_WAVE_WEIGHT_EVENTS, WAVE_SCALING_ENABLED
@@ -30,9 +30,25 @@ class EnemySpawner:
 
     def choose_enemy_type(self):
         """Choose enemy type based on wave progression or time (fallback)."""
+        # Get current wave number
+        current_wave = 1  # Default to wave 1 if no wave manager
+        if self.wave_manager:
+            current_wave = self.wave_manager.current_wave
+        
+        # Filter enemy types based on minimum wave requirements
+        available_types = []
+        for etype in self.enemy_types:
+            min_wave = SPAWNER_ENEMY_MIN_WAVES.get(etype.name, 1)
+            if current_wave >= min_wave:
+                available_types.append(etype)
+        
+        # If no enemies are available (shouldn't happen), fall back to all types
+        if not available_types:
+            available_types = self.enemy_types
+        
         weights = []
         
-        for etype in self.enemy_types:
+        for etype in available_types:
             weight = SPAWNER_ENEMY_WEIGHTS.get(etype.name, 1.0)
             
             # Use wave-based scaling if wave manager is available
@@ -50,11 +66,11 @@ class EnemySpawner:
         total = sum(weights)
         r = random.uniform(0, total)
         upto = 0
-        for etype, w in zip(self.enemy_types, weights):
+        for etype, w in zip(available_types, weights):
             if upto + w >= r:
                 return etype
             upto += w
-        return self.enemy_types[0]  # fallback
+        return available_types[0]  # fallback
 
     def get_current_spawn_interval(self):
         """Calculate the current spawn interval based on wave progression."""
