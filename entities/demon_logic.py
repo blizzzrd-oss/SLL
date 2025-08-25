@@ -50,6 +50,10 @@ class DemonEnemyLogic:
         self.attack_cooldown = getattr(self.enemy.type, 'attack_cooldown', 2.0)
         self.last_attack = -float('inf')
         
+        # Separate cooldowns for melee and ranged attacks
+        self.melee_cooldown = 1.0  # Melee attack every 1 second
+        self.last_melee_attack = -float('inf')
+        
         # Store fixed position during hurt/death animations to prevent jitter
         self.fixed_draw_pos = None
         
@@ -225,8 +229,21 @@ class DemonEnemyLogic:
         ex, ey = self.enemy.position
         distance = math.hypot(px - ex, py - ey)
 
-        # Attack logic - demons shoot projectiles at long range
-        if distance <= attack_trigger_range and now - self.last_attack >= self.attack_cooldown:
+        # Check for collision (melee range) - highest priority
+        player_collision = False
+        if hasattr(player, 'rect') and hasattr(self.enemy, 'rect'):
+            player_collision = self.enemy.rect.colliderect(player.rect)
+        
+        # Attack logic - prioritize melee when colliding, then ranged
+        if player_collision and now - self.last_melee_attack >= self.melee_cooldown:
+            # Melee attack when colliding
+            self.state = 'attack'
+            self.anim_frame = 0
+            self.anim_timer = 0.0
+            self.last_melee_attack = now
+            self._perform_melee_attack(player)
+        elif distance <= attack_trigger_range and now - self.last_attack >= self.attack_cooldown and not player_collision:
+            # Ranged attack when in range but not colliding
             self.state = 'attack'
             self.anim_frame = 0
             self.anim_timer = 0.0
@@ -331,6 +348,28 @@ class DemonEnemyLogic:
                 print(f"[DEMON] Fired projectile at player")
         except Exception as e:
             print(f"[WARNING] Failed to shoot projectile: {e}")
+
+    def _perform_melee_attack(self, player):
+        """Perform a melee attack on the player when colliding."""
+        try:
+            # Update facing direction when attacking
+            px, py = player.rect.center if hasattr(player, 'rect') else (player.x, player.y)
+            ex, ey = self.enemy.position
+            dx = px - ex
+            
+            # Set facing direction based on target
+            if dx > 0:
+                self.facing_direction = 'right'
+            else:
+                self.facing_direction = 'left'
+            
+            # Deal direct damage to player (melee attack)
+            melee_damage = getattr(self.enemy.type, 'attack_damage', 8)
+            if hasattr(player, 'take_damage'):
+                player.take_damage(melee_damage, source=self.enemy)
+                print(f"[DEMON] Melee attack hit player for {melee_damage} damage")
+        except Exception as e:
+            print(f"[WARNING] Failed to perform melee attack: {e}")
 
     def get_current_sprite(self):
         """Get the current sprite frame for rendering."""
