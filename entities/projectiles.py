@@ -30,8 +30,8 @@ class Projectile:
             self.velocity_x = 0
             self.velocity_y = 0
         
-        # Create collision rect
-        self.rect = pygame.Rect(int(self.x), int(self.y), 8, 8)  # Small collision box
+        # Create collision rect - smaller for more precise collision
+        self.rect = pygame.Rect(int(self.x), int(self.y), 4, 4)  # Very small collision box for precise hits
         
         # Load sprite if provided
         self.sprite = None

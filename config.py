@@ -268,7 +268,7 @@ PLAYER_EXP_REQUIREMENT_BONUS = 0.10   # Base XP requirement bonus per level (inc
 PLAYER_MAX_LEVEL = 100               # Maximum player level
 
 # Player Stats
-PLAYER_SIZE = 48
+PLAYER_SIZE = 32  # Smaller hitbox for more precise collision detection
 PLAYER_MOVEMENT_SPEED = 2
 PLAYER_PICKUP_RANGE = 32  # Base pickup range in pixels
 PLAYER_DAMAGE_REDUCTION = 0.0
