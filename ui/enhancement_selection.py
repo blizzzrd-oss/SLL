@@ -8,7 +8,8 @@ from audio.sound_manager import SoundManager
 from config_enhancements import ENHANCEMENT_UI
 from config import (
     ENHANCEMENT_OVERLAY_COLOR, ENHANCEMENT_PANEL_COLOR, ENHANCEMENT_BORDER_COLOR,
-    ENHANCEMENT_TEXT_COLOR, ENHANCEMENT_BUTTON_COLOR, ENHANCEMENT_BUTTON_HOVER_COLOR
+    ENHANCEMENT_SKILL_SPECIFIC_BORDER_COLOR, ENHANCEMENT_TEXT_COLOR, 
+    ENHANCEMENT_BUTTON_COLOR, ENHANCEMENT_BUTTON_HOVER_COLOR
 )
 
 
@@ -161,9 +162,14 @@ class EnhancementSelectionUI:
             button_color = (ENHANCEMENT_BUTTON_HOVER_COLOR if is_hovering 
                           else ENHANCEMENT_BUTTON_COLOR)
             
+            # Choose border color based on enhancement type
+            is_skill_specific = enhancement.enhancement_type == 'specific'
+            border_color = (ENHANCEMENT_SKILL_SPECIFIC_BORDER_COLOR if is_skill_specific 
+                           else ENHANCEMENT_BORDER_COLOR)
+            
             # Draw button
             pygame.draw.rect(self.screen, button_color, button_rect, border_radius=8)
-            pygame.draw.rect(self.screen, ENHANCEMENT_BORDER_COLOR, button_rect, 2, border_radius=8)
+            pygame.draw.rect(self.screen, border_color, button_rect, 2, border_radius=8)
             
             # Get enhancement display info
             display_info = enhancement.get_display_info()

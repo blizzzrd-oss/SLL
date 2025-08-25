@@ -248,7 +248,7 @@ PLAYER_BARRIER_REGEN = 0
 # Player Experience and Leveling System (Additive Scaling)
 PLAYER_START_EXP = 0
 PLAYER_START_LEVEL = 1
-PLAYER_BASE_EXP_REQUIREMENT = 10     # XP needed for level 2 (first level up)
+PLAYER_BASE_EXP_REQUIREMENT = 15     # XP needed for level 2 (first level up)
 PLAYER_EXP_REQUIREMENT_BONUS = 0.10   # Base XP requirement bonus per level (increases by +1% per player level)
 PLAYER_MAX_LEVEL = 100               # Maximum player level
 
@@ -352,6 +352,7 @@ PAUSE_MENU_OPTIONS = ["Resume", "Surrender", "Settings", "Quit"]
 # Enhancement UI Colors
 ENHANCEMENT_PANEL_COLOR = (40, 40, 50)
 ENHANCEMENT_BORDER_COLOR = (100, 100, 120)
+ENHANCEMENT_SKILL_SPECIFIC_BORDER_COLOR = (40, 120, 40)  # Dark green border for skill-specific enhancements
 ENHANCEMENT_TEXT_COLOR = (255, 255, 255)
 ENHANCEMENT_BUTTON_COLOR = (60, 60, 80)
 ENHANCEMENT_BUTTON_HOVER_COLOR = (80, 80, 100)
