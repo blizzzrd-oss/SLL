@@ -472,6 +472,11 @@ XP_PURPLE_XP_VALUE = 50
 XP_PLANT_GREEN_CHANCE = 0.99  # 99% chance for green
 XP_PLANT_YELLOW_CHANCE = 0.01  # 1% chance for yellow
 
+# XP Drop Chances for Demons
+XP_DEMON_GREEN_CHANCE = 0.0   # 0% chance for green
+XP_DEMON_YELLOW_CHANCE = 0.9  # 90% chance for yellow
+XP_DEMON_LIGHT_BLUE_CHANCE = 0.1  # 10% chance for light blue (higher value)
+
 # General Pickable Configuration
 PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
 PICKABLE_COLLECTION_RANGE = 16  # DEPRECATED: Now uses player's pickup range instead

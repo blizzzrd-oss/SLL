@@ -366,7 +366,7 @@ class DemonEnemyLogic:
             # Deal direct damage to player (melee attack)
             melee_damage = getattr(self.enemy.type, 'attack_damage', 8)
             if hasattr(player, 'take_damage'):
-                player.take_damage(melee_damage, source=self.enemy)
+                player.take_damage(melee_damage, source="Demon Melee")
                 print(f"[DEMON] Melee attack hit player for {melee_damage} damage")
         except Exception as e:
             print(f"[WARNING] Failed to perform melee attack: {e}")

@@ -73,8 +73,13 @@ class Projectile:
                 # Enemy-style take_damage method
                 target.take_damage(self.damage, source=self, attacker=self.owner)
             else:
-                # Player-style take_damage method
-                target.take_damage(self.damage, source=self)
+                # Player-style take_damage method - provide descriptive source
+                source_name = "Unknown Projectile"
+                if self.owner and hasattr(self.owner, 'type') and hasattr(self.owner.type, 'name'):
+                    source_name = f"{self.owner.type.name} Projectile"
+                elif isinstance(self, EnemyProjectile):
+                    source_name = "Enemy Projectile"
+                target.take_damage(self.damage, source=source_name)
         self.active = False
     
     def draw(self, surface, camera=None):

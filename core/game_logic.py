@@ -186,22 +186,25 @@ class GameLogicManager:
     def _determine_xp_crystal_type(self, enemy):
         """Determine which type of XP crystal to drop based on enemy type."""
         import random
-        from config import XP_PLANT_GREEN_CHANCE, XP_PLANT_YELLOW_CHANCE
+        from config import (XP_PLANT_GREEN_CHANCE, XP_PLANT_YELLOW_CHANCE,
+                           XP_DEMON_GREEN_CHANCE, XP_DEMON_YELLOW_CHANCE, XP_DEMON_LIGHT_BLUE_CHANCE)
         
-        # For plants: 99% green, 1% yellow
+        # For plants: Use config values
         if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
             rand = random.random()
             if rand < XP_PLANT_GREEN_CHANCE:
                 return 'green'
             else:
                 return 'yellow'
-        # For demons: 80% green, 20% yellow (higher chance for better crystals)
+        # For demons: Use config values with 3 crystal types
         elif hasattr(enemy.type, 'name') and enemy.type.name == 'Demon':
             rand = random.random()
-            if rand < 0.8:
+            if rand < XP_DEMON_GREEN_CHANCE:
                 return 'green'
-            else:
+            elif rand < XP_DEMON_GREEN_CHANCE + XP_DEMON_YELLOW_CHANCE:
                 return 'yellow'
+            else:
+                return 'light_blue'
         
         # For other enemy types (future expansion)
         # For now, default to green
