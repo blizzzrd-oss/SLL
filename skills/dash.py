@@ -1,6 +1,7 @@
 import pygame
 import math
 import os
+import random
 from skills.base import Skill
 from config import DASH_RANGE, DASH_COOLDOWN, DASH_DURATION, DASH_DAMAGE
 from audio.sound_manager import SoundManager
@@ -62,6 +63,16 @@ class DashSkill(Skill):
         self.last_used = now
         self.active = True
         self.elapsed = 0.0
+        
+        # For dash with charges, don't use cooldown reset - use charge regeneration instead
+        # Check for cooldown reset enhancement and convert it to charge restoration
+        reset_chance = self.user.get_enhancement_value('cooldown_reset_chance')
+        if reset_chance > 0 and random.random() < reset_chance:
+            # Instead of resetting cooldown, restore a charge
+            if self.current_charges < self.max_charges:
+                self.current_charges = min(self.max_charges, self.current_charges + 1)
+                print(f"[DASH] Cooldown reset triggered - restored charge: {self.current_charges}/{self.max_charges}")
+        
         # Use WASD movement direction for dash
         move_vec = getattr(self.user, 'last_move', (1, 0))
         dx, dy = move_vec
@@ -74,8 +85,13 @@ class DashSkill(Skill):
         self.dash_start = (self.user.x, self.user.y)
         self.dash_end = (self.user.x + norm_dx * effective_range, self.user.y + norm_dy * effective_range)
         
-        # Check for cooldown reset
-        self._check_cooldown_reset()
+        # Check for cooldown reset - for dash, this means restoring a charge instead
+        reset_chance = self.user.get_enhancement_value('cooldown_reset_chance')
+        if reset_chance > 0 and random.random() < reset_chance:
+            # Instead of resetting cooldown, restore a charge (up to max)
+            if self.current_charges < self.max_charges:
+                self.current_charges += 1
+                print(f"[DASH] Cooldown reset triggered - restored charge: {self.current_charges}/{self.max_charges}")
         
         return True
 
@@ -131,12 +147,9 @@ class DashSkill(Skill):
         # Update charges first
         self._update_charges(now)
         
-        # Check if we have charges available
-        if self.current_charges > 0:
-            return True
-        
-        # If no charges, check normal cooldown
-        return super().can_use(now)
+        # For dash skill, ALWAYS require charges - ignore cooldown reset enhancement
+        # This prevents the cooldown reset from bypassing the charge system
+        return self.current_charges > 0
     
     def _update_charges(self, now):
         """Update charge system for double dash enhancement."""
@@ -154,27 +167,31 @@ class DashSkill(Skill):
         # Ensure current charges don't exceed max (in case enhancement was removed)
         self.current_charges = min(self.current_charges, self.max_charges)
         
+        # Set charge regeneration time based on enhancement or use default cooldown
         if double_dash_level > 0:
             from config_enhancements import SKILL_SPECIFIC_ENHANCEMENTS
             self.charge_regen_time = SKILL_SPECIFIC_ENHANCEMENTS['dash']['double_dash']['charge_regen_time']
+        else:
+            # Use the skill's cooldown as charge regeneration time for base dash
+            self.charge_regen_time = self.cooldown
+        
+        # Initialize last_charge_regen if not set
+        if self.last_charge_regen == 0:
+            self.last_charge_regen = now
+        
+        # Regenerate charges over time if we're below max
+        if self.current_charges < self.max_charges:
+            # Calculate how many charges we should have regenerated
+            time_since_last_regen = now - self.last_charge_regen
+            charges_to_regen = int(time_since_last_regen / self.charge_regen_time)
             
-            # Initialize last_charge_regen if not set
-            if self.last_charge_regen == 0:
-                self.last_charge_regen = now
-            
-            # Regenerate charges over time if we're below max
-            if self.current_charges < self.max_charges:
-                # Calculate how many charges we should have regenerated
-                time_since_last_regen = now - self.last_charge_regen
-                charges_to_regen = int(time_since_last_regen / self.charge_regen_time)
-                
-                if charges_to_regen > 0:
-                    # Add the charges and advance the timer
-                    charges_added = min(charges_to_regen, self.max_charges - self.current_charges)
-                    self.current_charges += charges_added
-                    # Advance the timer by the time for the charges we actually added
-                    self.last_charge_regen += charges_added * self.charge_regen_time
-                    print(f"[DASH] Regenerated {charges_added} charge(s): {self.current_charges}/{self.max_charges}")
-            else:
-                # If at max charges, reset the timer so we start tracking when we use a charge
-                self.last_charge_regen = now
+            if charges_to_regen > 0:
+                # Add the charges and advance the timer
+                charges_added = min(charges_to_regen, self.max_charges - self.current_charges)
+                self.current_charges += charges_added
+                # Advance the timer by the time for the charges we actually added
+                self.last_charge_regen += charges_added * self.charge_regen_time
+                print(f"[DASH] Regenerated {charges_added} charge(s): {self.current_charges}/{self.max_charges}")
+        else:
+            # If at max charges, reset the timer so we start tracking when we use a charge
+            self.last_charge_regen = now
