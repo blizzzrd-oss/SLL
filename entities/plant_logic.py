@@ -46,6 +46,10 @@ class PlantEnemyLogic:
         # Hurt overlay system (instead of hurt state)
         self.hurt_overlay_timer = 0.0
         self.hurt_overlay_duration = 0.5  # 500ms red tint
+        
+        # Track XP drop timing
+        self.death_timer = 0.0
+        self.xp_dropped = False
 
     def _load_sprites(self):
         sprites = {}
@@ -147,11 +151,13 @@ class PlantEnemyLogic:
             self.state = 'death'
             self.anim_frame = 0
             self.anim_timer = 0.0
+            self.death_timer = 0.0  # Start death timer for XP drop
             # Fix position for death animation to prevent jitter
             self.fixed_draw_pos = (int(self.enemy.position[0]), int(self.enemy.position[1]))
 
         # Handle death animation - cannot be interrupted
         if self.state == 'death':
+            self.death_timer += dt  # Track time since death started
             self.anim_timer += dt
             if self.anim_timer > 0.1:
                 self.anim_frame += 1

@@ -87,29 +87,39 @@ class GameLogicManager:
         # Update existing enemies
         for enemy in self.enemies[:]:
             enemy.update(dt, self.game.player)
+            
+            # Check for early XP drop using timer-based approach (0.3 seconds after health reaches 0)
+            if (hasattr(enemy, 'logic') and hasattr(enemy.logic, 'state') and 
+                enemy.logic.state == 'death' and not enemy.logic.xp_dropped):
+                
+                # Check if 0.3 seconds have passed since death started
+                if enemy.logic.death_timer >= 0.3:
+                    # Drop XP pickable early
+                    crystal_type = self._determine_xp_crystal_type(enemy)
+                    
+                    import random
+                    offset_x = random.uniform(-10, 10)
+                    offset_y = random.uniform(-10, 10)
+                    self.game.pickable_manager.create_xp_pickable(
+                        enemy.x + offset_x, 
+                        enemy.y + offset_y,
+                        crystal_type
+                    )
+                    
+                    print(f"[XP] Dropped {crystal_type} XP crystal from {enemy.type.name} (early drop)")
+                    
+                    # Check for other pickable drops (reroll dice, etc.)
+                    if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
+                        self._check_pickable_drops(enemy)
+                    
+                    # Mark as dropped to avoid dropping again
+                    enemy.logic.xp_dropped = True
+            
+            # Handle final enemy removal when death animation completes
             if hasattr(enemy, 'dead') and enemy.dead:
-                # Drop a single XP pickable for every enemy death
-                # Determine crystal type based on enemy type and drop chances
-                crystal_type = self._determine_xp_crystal_type(enemy)
-                
-                # Drop single XP crystal
-                import random
-                offset_x = random.uniform(-10, 10)
-                offset_y = random.uniform(-10, 10)
-                self.game.pickable_manager.create_xp_pickable(
-                    enemy.x + offset_x, 
-                    enemy.y + offset_y,
-                    crystal_type
-                )
-                
-                print(f"[XP] Dropped {crystal_type} XP crystal from {enemy.type.name}")
-                
-                # Check for other pickable drops (reroll dice, etc.)
-                if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
-                    self._check_pickable_drops(enemy)
-                
                 self.enemies.remove(enemy)
                 # Notify wave manager of enemy death
+                self.wave_manager.on_enemy_killed()
                 self.wave_manager.on_enemy_killed()
                 
         self.game.enemies = self.enemies
