@@ -210,28 +210,25 @@ class GameLogicManager:
     def _determine_xp_crystal_type(self, enemy):
         """Determine which type of XP crystal to drop based on enemy type."""
         import random
-        from config import (XP_PLANT_GREEN_CHANCE, XP_PLANT_YELLOW_CHANCE,
-                           XP_DEMON_GREEN_CHANCE, XP_DEMON_YELLOW_CHANCE, XP_DEMON_LIGHT_BLUE_CHANCE)
+        from config_pickables import XP_DROP_CONFIG
         
-        # For plants: Use config values
-        if hasattr(enemy.type, 'name') and enemy.type.name == 'Plant':
-            rand = random.random()
-            if rand < XP_PLANT_GREEN_CHANCE:
-                return 'green'
-            else:
-                return 'yellow'
-        # For demons: Use config values with 3 crystal types
-        elif hasattr(enemy.type, 'name') and enemy.type.name == 'Demon':
-            rand = random.random()
-            if rand < XP_DEMON_GREEN_CHANCE:
-                return 'green'
-            elif rand < XP_DEMON_GREEN_CHANCE + XP_DEMON_YELLOW_CHANCE:
-                return 'yellow'
-            else:
-                return 'light_blue'
+        # Get enemy type name
+        enemy_name = enemy.type.name if hasattr(enemy.type, 'name') else 'Plant'
         
-        # For other enemy types (future expansion)
-        # For now, default to green
+        # Get drop config for this enemy type, default to Plant if not found
+        drop_config = XP_DROP_CONFIG.get(enemy_name, XP_DROP_CONFIG['Plant'])
+        
+        # Generate random number for drop selection
+        rand = random.random()
+        cumulative_chance = 0.0
+        
+        # Check each crystal type in order
+        for crystal_type, chance in drop_config.items():
+            cumulative_chance += chance
+            if rand < cumulative_chance:
+                return crystal_type
+        
+        # Fallback to green if something goes wrong
         return 'green'
 
     def _get_player_settings(self):

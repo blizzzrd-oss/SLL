@@ -32,7 +32,7 @@ ENEMY_TYPE_CONFIG = {
 		'size': (32, 32),  # Width x Height - reduced hitbox for small sprite
 		'speed': 45,  # Moderate speed - between plants and demons
 		'color': (200, 100, 100),
-		'attack_range': 40,  # Melee range
+		'attack_range': 20,  # Melee range
 		'attack_damage': 12,
 		'attack_cooldown': 1.5,
 		'block_chance': 0.3,  # 30% chance to block attacks

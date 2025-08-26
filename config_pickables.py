@@ -54,14 +54,32 @@ XP_PURPLE_XP_VALUE = 50
 # =============================================================================
 # XP DROP CHANCES BY ENEMY TYPE
 # =============================================================================
-# XP Drop Chances for Plants
-XP_PLANT_GREEN_CHANCE = 0.98  # 98% chance for green
-XP_PLANT_YELLOW_CHANCE = 0.02  # 2% chance for yellow
-
-# XP Drop Chances for Demons
-XP_DEMON_GREEN_CHANCE = 0.0   # 0% chance for green
-XP_DEMON_YELLOW_CHANCE = 0.9  # 90% chance for yellow
-XP_DEMON_LIGHT_BLUE_CHANCE = 0.1  # 10% chance for light blue (higher value)
+XP_DROP_CONFIG = {
+    'Plant': {
+        'green': 0.98,   # 98% chance for green (low value)
+        'yellow': 0.02,  # 2% chance for yellow
+        'light_blue': 0.0,
+        'blue': 0.0,
+        'red': 0.0,
+        'purple': 0.0
+    },
+    'Demon': {
+        'green': 0.0,    # 0% chance for green
+        'yellow': 0.9,   # 90% chance for yellow
+        'light_blue': 0.1,  # 10% chance for light blue (higher value)
+        'blue': 0.0,
+        'red': 0.0,
+        'purple': 0.0
+    },
+    'Hero': {
+        'green': 0.25,   # 25% chance for green
+        'yellow': 0.70,  # 70% chance for yellow
+        'light_blue': 0.05,  # 5% chance for light blue
+        'blue': 0.0,
+        'red': 0.0,
+        'purple': 0.0
+    }
+}
 
 # =============================================================================
 # GENERAL PICKABLE CONFIGURATION
