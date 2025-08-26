@@ -356,32 +356,47 @@ class ScreenClearerPickable(Pickable):
                 cls._frames = []
                 
                 # Extract frames (assuming horizontal layout)
-                for i in range(SCREEN_CLEARER_FRAME_COUNT):
-                    frame_x = i * SCREEN_CLEARER_FRAME_SIZE
-                    frame_rect = (frame_x, 0, SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_SIZE)
-                    frame = sprite_sheet.subsurface(frame_rect)
-                    cls._frames.append(frame)
-                    
+                if SCREEN_CLEARER_FRAME_COUNT and SCREEN_CLEARER_FRAME_COUNT > 0:
+                    for i in range(SCREEN_CLEARER_FRAME_COUNT):
+                        frame_x = i * SCREEN_CLEARER_FRAME_SIZE
+                        frame_rect = (frame_x, 0, SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_SIZE)
+                        frame = sprite_sheet.subsurface(frame_rect)
+                        cls._frames.append(frame)
+                else:
+                    # Treat a zero frame count as a single-frame image (full PNG)
+                    cls._frames.append(sprite_sheet.copy())
+
                 print(f"[PICKABLES] Loaded {len(cls._frames)} screen clearer frames")
             else:
                 print(f"[PICKABLES] Screen clearer sprite not found: {sprite_path}")
                 # Create placeholder frames
                 cls._frames = []
-                for i in range(SCREEN_CLEARER_FRAME_COUNT):
+                if SCREEN_CLEARER_FRAME_COUNT and SCREEN_CLEARER_FRAME_COUNT > 0:
+                    for i in range(SCREEN_CLEARER_FRAME_COUNT):
+                        placeholder = pygame.Surface((SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_SIZE))
+                        # Use bright red/orange colors for dangerous effect
+                        red_value = 255 - (i * 20)
+                        placeholder.fill((red_value, 50 + i * 10, 0))
+                        cls._frames.append(placeholder)
+                else:
+                    # Single placeholder frame
                     placeholder = pygame.Surface((SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_SIZE))
-                    # Use bright red/orange colors for dangerous effect
-                    red_value = 255 - (i * 20)
-                    placeholder.fill((red_value, 50 + i * 10, 0))
+                    placeholder.fill((255, 100, 0))
                     cls._frames.append(placeholder)
                     
         except Exception as e:
             print(f"[PICKABLES] Error loading screen clearer sprite: {e}")
-            # Create placeholder frames
+            # Create placeholder frames on error
             cls._frames = []
-            for i in range(SCREEN_CLEARER_FRAME_COUNT):
+            if SCREEN_CLEARER_FRAME_COUNT and SCREEN_CLEARER_FRAME_COUNT > 0:
+                for i in range(SCREEN_CLEARER_FRAME_COUNT):
+                    placeholder = pygame.Surface((SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_SIZE))
+                    red_value = 255 - (i * 20)
+                    placeholder.fill((red_value, 50 + i * 10, 0))
+                    cls._frames.append(placeholder)
+            else:
                 placeholder = pygame.Surface((SCREEN_CLEARER_FRAME_SIZE, SCREEN_CLEARER_FRAME_SIZE))
-                red_value = 255 - (i * 20)
-                placeholder.fill((red_value, 50 + i * 10, 0))
+                placeholder.fill((255, 100, 0))
                 cls._frames.append(placeholder)
                 
         cls._loaded = True
@@ -489,34 +504,49 @@ class XpMagnetPickable(Pickable):
             if os.path.exists(sprite_path):
                 sprite_sheet = pygame.image.load(sprite_path).convert_alpha()
                 cls._frames = []
-                
-                # Extract frames (assuming horizontal layout)
-                for i in range(XP_MAGNET_FRAME_COUNT):
-                    frame_x = i * XP_MAGNET_FRAME_SIZE
-                    frame_rect = (frame_x, 0, XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_SIZE)
-                    frame = sprite_sheet.subsurface(frame_rect)
-                    cls._frames.append(frame)
-                    
+                # Extract frames (assuming horizontal layout). If FRAME_COUNT is 0,
+                # treat the provided PNG as a single-frame image (full PNG).
+                if XP_MAGNET_FRAME_COUNT and XP_MAGNET_FRAME_COUNT > 0:
+                    for i in range(XP_MAGNET_FRAME_COUNT):
+                        frame_x = i * XP_MAGNET_FRAME_SIZE
+                        frame_rect = (frame_x, 0, XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_SIZE)
+                        frame = sprite_sheet.subsurface(frame_rect)
+                        cls._frames.append(frame)
+                else:
+                    # Single-frame sprite (use the whole image)
+                    cls._frames.append(sprite_sheet.copy())
+
                 print(f"[PICKABLES] Loaded {len(cls._frames)} XP magnet frames")
             else:
                 print(f"[PICKABLES] XP magnet sprite not found: {sprite_path}")
                 # Create placeholder frames
                 cls._frames = []
-                for i in range(XP_MAGNET_FRAME_COUNT):
+                if XP_MAGNET_FRAME_COUNT and XP_MAGNET_FRAME_COUNT > 0:
+                    for i in range(XP_MAGNET_FRAME_COUNT):
+                        placeholder = pygame.Surface((XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_SIZE))
+                        # Use blue/purple colors for magnetic effect
+                        blue_value = 100 + (i * 20)
+                        placeholder.fill((50, 50 + i * 10, blue_value))
+                        cls._frames.append(placeholder)
+                else:
+                    # Single placeholder frame
                     placeholder = pygame.Surface((XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_SIZE))
-                    # Use blue/purple colors for magnetic effect
-                    blue_value = 100 + (i * 20)
-                    placeholder.fill((50, 50 + i * 10, blue_value))
+                    placeholder.fill((50, 100, 180))
                     cls._frames.append(placeholder)
                     
         except Exception as e:
             print(f"[PICKABLES] Error loading XP magnet sprite: {e}")
             # Create placeholder frames
             cls._frames = []
-            for i in range(XP_MAGNET_FRAME_COUNT):
+            if XP_MAGNET_FRAME_COUNT and XP_MAGNET_FRAME_COUNT > 0:
+                for i in range(XP_MAGNET_FRAME_COUNT):
+                    placeholder = pygame.Surface((XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_SIZE))
+                    blue_value = 100 + (i * 20)
+                    placeholder.fill((50, 50 + i * 10, blue_value))
+                    cls._frames.append(placeholder)
+            else:
                 placeholder = pygame.Surface((XP_MAGNET_FRAME_SIZE, XP_MAGNET_FRAME_SIZE))
-                blue_value = 100 + (i * 20)
-                placeholder.fill((50, 50 + i * 10, blue_value))
+                placeholder.fill((50, 100, 180))
                 cls._frames.append(placeholder)
                 
         cls._loaded = True

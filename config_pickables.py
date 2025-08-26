@@ -19,13 +19,13 @@ REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 XP_GREEN_FRAME_SIZE = (11, 16)  # Each frame is 11x16 pixels
 XP_GREEN_FRAME_COUNT = 6  # 6 frames in the animation
 XP_GREEN_ANIMATION_FPS = 8  # Animation speed
-XP_GREEN_XP_VALUE = 15  # Each green crystal gives 1 XP
+XP_GREEN_XP_VALUE = 1 # Each green crystal gives 1 XP
 
 # Yellow Crystal
 XP_YELLOW_FRAME_SIZE = (11, 16)
 XP_YELLOW_FRAME_COUNT = 6
 XP_YELLOW_ANIMATION_FPS = 8
-XP_YELLOW_XP_VALUE = 20
+XP_YELLOW_XP_VALUE = 2
 
 # Light Blue Crystal
 XP_LIGHT_BLUE_FRAME_SIZE = (11, 16)
@@ -94,10 +94,9 @@ ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge
 # =============================================================================
 # SCREEN CLEARER PICKABLE CONFIGURATION (ENEMY KILLER)
 # =============================================================================
-SCREEN_CLEARER_FRAME_SIZE = 24  # 24x24 frames (larger than dice)
-SCREEN_CLEARER_FRAME_COUNT = 8  # More frames for dramatic effect
-SCREEN_CLEARER_ANIMATION_FPS = 6  # Slightly faster animation
-SCREEN_CLEARER_DROP_CHANCE = 0.005  # 0.5% chance to drop from demons (rarer than dice)
+# Animation/frame constants removed from here to avoid duplication with config_images.py
+# (Keep drop chance here; visual/animation constants live in config_images.py)
+SCREEN_CLEARER_DROP_CHANCE = 0.505  # 0.5% chance to drop from demons (rarer than dice)
 
 # =============================================================================
 # XP MAGNET PICKABLE CONFIGURATION
@@ -105,5 +104,5 @@ SCREEN_CLEARER_DROP_CHANCE = 0.005  # 0.5% chance to drop from demons (rarer tha
 XP_MAGNET_FRAME_SIZE = 20  # 20x20 frames
 XP_MAGNET_FRAME_COUNT = 6  # 6 different frames
 XP_MAGNET_ANIMATION_FPS = 5  # Medium animation speed
-XP_MAGNET_DROP_CHANCE = 0.01  # 1% chance to drop from both plants and demons
+XP_MAGNET_DROP_CHANCE = 0.5  # 1% chance to drop from both plants and demons
 XP_MAGNET_PULL_RADIUS = 10000  # Radius in pixels to attract XP pickables from

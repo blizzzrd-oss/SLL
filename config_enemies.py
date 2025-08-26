@@ -8,7 +8,7 @@ All enemy-related settings including types, spawning, and AI behavior.
 # =============================================================================
 ENEMY_TYPE_CONFIG = {
 	'Plant': {
-		'max_health': 20,
+		'max_health': 10,
 		'size': 48,
 		'speed': 50,
 		'color': (80, 200, 80),
@@ -17,7 +17,7 @@ ENEMY_TYPE_CONFIG = {
 		'attack_cooldown': 1.0,
 	},
 	'Demon': {
-		'max_health': 35,
+		'max_health': 30,
 		'size': (81, 70),  # Width x Height
 		'speed': 35,  # Slower than plants
 		'color': (150, 50, 50),
@@ -53,8 +53,8 @@ SPAWNER_ENEMY_WEIGHTS = {
 # Minimum wave requirements for enemy types
 SPAWNER_ENEMY_MIN_WAVES = {
 	'Plant': 1,   # Plants can spawn from wave 1
-	'Demon': 2,   # Demons only start spawning from wave 2
-	'Hero': 1,    # Heroes can spawn from wave 1
+	'Demon': 3,   # Demons only start spawning from wave 2
+	'Hero': 2,    # Heroes can spawn from wave 1
 }
 
 # Wave-based Enemy Scaling (replaces time-based scaling)
@@ -65,7 +65,7 @@ SPAWNER_WAVE_WEIGHT_EVENTS = [
 	('Demon', 2, 0.5),   # Starting from wave 2, demons begin spawning
 	('Demon', 5, 1.0),   # Starting from wave 5, normal demon spawn rate
 	('Demon', 10, 1.5),  # Starting from wave 10, increase demon spawn rate
-	('Hero', 1, 0.8),    # Heroes start spawning from wave 1
+	('Hero', 2, 0.8),    # Heroes start spawning from wave 2
 	('Hero', 3, 1.2),    # Starting from wave 3, increase hero spawn rate
 	('Hero', 7, 1.8),    # Starting from wave 7, increase hero spawn rate more
 ]
@@ -85,6 +85,6 @@ SPAWNER_RATE_INCREASE_FACTOR = 0.9    # Multiply interval by 0.9 (10% faster spa
 # Plant Enemy Configuration
 PLANT_ATTACK_TRIGGER_RANGE = 40
 PLANT_ATTACK_DAMAGE_RANGE = 25
-# Visual/sprite-related plant settings moved to config_images.py
+
 
 
