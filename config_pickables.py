@@ -102,7 +102,7 @@ ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge
 # =============================================================================
 # Animation/frame constants removed from here to avoid duplication with config_images.py
 # (Keep drop chance here; visual/animation constants live in config_images.py)
-SCREEN_CLEARER_DROP_CHANCE = 0.505  # 0.5% chance to drop from demons (rarer than dice)
+SCREEN_CLEARER_DROP_CHANCE = 0.01  # 1% chance to drop from demons (rarer than dice)
 
 # =============================================================================
 # XP MAGNET PICKABLE CONFIGURATION
@@ -110,5 +110,5 @@ SCREEN_CLEARER_DROP_CHANCE = 0.505  # 0.5% chance to drop from demons (rarer tha
 XP_MAGNET_FRAME_SIZE = 20  # 20x20 frames
 XP_MAGNET_FRAME_COUNT = 6  # 6 different frames
 XP_MAGNET_ANIMATION_FPS = 5  # Medium animation speed
-XP_MAGNET_DROP_CHANCE = 0.5  # 1% chance to drop from both plants and demons
+XP_MAGNET_DROP_CHANCE = 0.01  # 1% chance to drop from both plants and demons
 XP_MAGNET_PULL_RADIUS = 10000  # Radius in pixels to attract XP pickables from
