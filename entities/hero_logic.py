@@ -59,7 +59,18 @@ class HeroEnemyLogic:
 
     def trigger_hurt_animation(self):
         """Trigger the hurt animation when the hero takes damage."""
-        # Check if blocking - 30% chance to block damage
+        # Cannot block while attacking
+        if self.state == 'attack':
+            # Cannot block during attack animation - take damage normally
+            if self.state != 'death':
+                self.state = 'hurt'
+                self.anim_frame = 0
+                self.anim_timer = 0.0
+                self.hurt_timer = 0.0
+                self.blocking = False
+            return False  # Damage was not blocked
+        
+        # Check if blocking - 30% chance to block damage (only when not attacking)
         if not self.blocking and random.random() < self.block_chance:
             self.blocking = True
             self.state = 'block'
@@ -164,7 +175,7 @@ class HeroEnemyLogic:
         if self.state == 'death':
             self.death_timer += dt  # Track time since death started
             self.anim_timer += dt
-            if self.anim_timer > 0.15:  # Death animation speed
+            if self.anim_timer > 0.1:  # 100ms animation speed
                 self.anim_frame += 1
                 self.anim_timer = 0.0
                 if self.anim_frame >= HERO_FRAME_COUNTS['death']:
@@ -176,7 +187,7 @@ class HeroEnemyLogic:
         if self.state == 'block':
             self.block_timer += dt
             self.anim_timer += dt
-            if self.anim_timer > 0.1:  # Block animation speed
+            if self.anim_timer > 0.1:  # 100ms animation speed
                 self.anim_frame += 1
                 self.anim_timer = 0.0
                 if self.anim_frame >= HERO_FRAME_COUNTS['block'] or self.block_timer >= self.block_duration:
@@ -198,7 +209,7 @@ class HeroEnemyLogic:
         if self.state == 'hurt':
             self.hurt_timer += dt
             self.anim_timer += dt
-            if self.anim_timer > 0.1:  # Hurt animation speed
+            if self.anim_timer > 0.1:  # 100ms animation speed
                 self.anim_frame += 1
                 self.anim_timer = 0.0
                 if self.anim_frame >= HERO_FRAME_COUNTS['hurt'] or self.hurt_timer >= self.hurt_duration:
@@ -215,7 +226,27 @@ class HeroEnemyLogic:
                     self.anim_timer = 0.0
             return  # Don't process movement logic during hurt animation
 
-        # Normal movement and attack logic - only when not hurt, blocking, or dead
+        # Handle attack animation - cannot be interrupted by blocking
+        if self.state == 'attack':
+            self.anim_timer += dt
+            if self.anim_timer > 0.1:  # 100ms animation speed
+                self.anim_frame += 1
+                self.anim_timer = 0.0
+                if self.anim_frame >= HERO_FRAME_COUNTS['attack']:
+                    # Attack animation complete, return to appropriate state
+                    px, py = player.rect.center if hasattr(player, 'rect') else (player.x, player.y)
+                    ex, ey = self.enemy.position
+                    distance = math.hypot(px - ex, py - ey)
+                    
+                    if distance <= self.attack_range:
+                        self.state = 'idle'
+                    else:
+                        self.state = 'walk'
+                    self.anim_frame = 0
+                    self.anim_timer = 0.0
+            return  # Don't process movement or blocking logic during attack animation
+
+        # Normal movement and attack logic - only when not in special states
         prev_state = self.state
         
         # Calculate distance to player
@@ -223,37 +254,35 @@ class HeroEnemyLogic:
         ex, ey = self.enemy.position
         distance = math.hypot(px - ex, py - ey)
 
-        # Attack logic - melee attack when in range
-        if distance <= self.attack_range and now - self.last_attack >= self.attack_cooldown:
-            # Melee attack when in range
+        # Attack logic - melee attack when in range (but not when blocking)
+        if (distance <= self.attack_range and 
+            now - self.last_attack >= self.attack_cooldown and 
+            not self.blocking and 
+            self.state != 'block'):
+            # Melee attack when in range and not blocking
             self.state = 'attack'
             self.anim_frame = 0
             self.anim_timer = 0.0
             self.last_attack = now
             self._perform_melee_attack(player)
-        elif distance > self.attack_range:
-            # Move toward player when out of attack range
+        elif distance > self.attack_range and not self.blocking:
+            # Move toward player when out of attack range and not blocking
             self.state = 'walk'
             self._move_toward_player(player, dt)
-        else:
-            # In range but on cooldown - stay idle
+        elif not self.blocking:
+            # In range but on cooldown or other reason - stay idle (but not blocking)
             self.state = 'idle'
 
-        # Update animation frame
-        self.anim_timer += dt
-        if self.anim_timer > 0.12:  # Animation speed
-            self.anim_frame += 1
-            self.anim_timer = 0.0
-            if self.state in HERO_FRAME_COUNTS:
-                frame_count = HERO_FRAME_COUNTS[self.state]
-                if self.anim_frame >= frame_count:
-                    if self.state == 'attack':
-                        # Return to appropriate state after attack
-                        if distance <= self.attack_range:
-                            self.state = 'idle'
-                        else:
-                            self.state = 'walk'
-                    self.anim_frame = 0
+        # Update animation frame for idle and walk states
+        if self.state in ['idle', 'walk']:
+            self.anim_timer += dt
+            if self.anim_timer > 0.1:  # 100ms animation speed
+                self.anim_frame += 1
+                self.anim_timer = 0.0
+                if self.state in HERO_FRAME_COUNTS:
+                    frame_count = HERO_FRAME_COUNTS[self.state]
+                    if self.anim_frame >= frame_count:
+                        self.anim_frame = 0
 
     def _move_toward_player(self, player, dt):
         """Move hero toward player with ground movement."""
