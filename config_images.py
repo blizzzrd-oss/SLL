@@ -140,7 +140,7 @@ DEMON_SPRITE_FILES = {
 }
 
 # Demon sprite base path
-DEMON_SPRITES_BASE_PATH = "resources/images/enemies/Deamon/"
+DEMON_SPRITES_BASE_PATH = "resources/images/enemies/Demon/"
 
 # Demon frame counts (tied to sprite files above)
 DEMON_FRAME_COUNTS = {
