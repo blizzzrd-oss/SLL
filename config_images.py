@@ -63,6 +63,10 @@ PLAYER_HURT_BARRIER_SPRITE = 'resources/images/player/Hurt/Slime1_Hurt_full_barr
 # Player Animation Configuration
 PLAYER_SPRITE_FRAME_WIDTH = 64
 PLAYER_SPRITE_FRAME_HEIGHT = 64
+PLAYER_IDLE_ANIMATION_FPS = 6
+PLAYER_WALK_ANIMATION_FPS = 10
+PLAYER_RUN_ANIMATION_FPS = 14
+PLAYER_HURT_ANIMATION_FPS = 12
 
 # =============================================================================
 # SKILL SPRITES AND EFFECTS
@@ -70,24 +74,58 @@ PLAYER_SPRITE_FRAME_HEIGHT = 64
 # Slash Skill Configuration
 SLASH_SHEET_PATH = 'resources/images/player_melee/slash/player_melee_slash.png'
 SLASH_SHEET_PATH_ALT = os.path.join('resources', 'images', 'player_melee', 'slash', 'player_melee_slash.png')
+SLASH_FRAME_COUNT = 5
 
 # =============================================================================
 # PICKABLE SPRITES
 # =============================================================================
 # Reroll Dice Pickable
 REROLL_DICE_SPRITE = "resources/images/pickabels/reroll_dice.png"
+REROLL_DICE_FRAME_SIZE = 16
+REROLL_DICE_FRAME_COUNT = 6
+REROLL_DICE_ANIMATION_FPS = 4
 
 # XP Crystal Sprites
 XP_GREEN_SPRITE = "resources/images/pickabels/crystal_green.png"
+XP_GREEN_FRAME_SIZE = (11, 16)
+XP_GREEN_FRAME_COUNT = 6
+XP_GREEN_ANIMATION_FPS = 8
+
 XP_YELLOW_SPRITE = "resources/images/pickabels/crystal_yellow.png"
+XP_YELLOW_FRAME_SIZE = (11, 16)
+XP_YELLOW_FRAME_COUNT = 6
+XP_YELLOW_ANIMATION_FPS = 8
+
 XP_LIGHT_BLUE_SPRITE = "resources/images/pickabels/crystal_lightblue.png"
+XP_LIGHT_BLUE_FRAME_SIZE = (11, 16)
+XP_LIGHT_BLUE_FRAME_COUNT = 6
+XP_LIGHT_BLUE_ANIMATION_FPS = 8
+
 XP_BLUE_SPRITE = "resources/images/pickabels/crystal_blue.png"
+XP_BLUE_FRAME_SIZE = (11, 16)
+XP_BLUE_FRAME_COUNT = 6
+XP_BLUE_ANIMATION_FPS = 8
+
 XP_RED_SPRITE = "resources/images/pickabels/crystal_red.png"
+XP_RED_FRAME_SIZE = (11, 16)
+XP_RED_FRAME_COUNT = 6
+XP_RED_ANIMATION_FPS = 8
+
 XP_PURPLE_SPRITE = "resources/images/pickabels/crystal_purple.png"
+XP_PURPLE_FRAME_SIZE = (11, 16)
+XP_PURPLE_FRAME_COUNT = 6
+XP_PURPLE_ANIMATION_FPS = 8
 
 # Other Pickable Sprites
 SCREEN_CLEARER_SPRITE = "resources/images/pickabels/screen_clearer.png"
+SCREEN_CLEARER_FRAME_SIZE = 24
+SCREEN_CLEARER_FRAME_COUNT = 8
+SCREEN_CLEARER_ANIMATION_FPS = 6
+
 XP_MAGNET_SPRITE = "resources/images/pickabels/xp_magnet.png"
+XP_MAGNET_FRAME_SIZE = 20
+XP_MAGNET_FRAME_COUNT = 6
+XP_MAGNET_ANIMATION_FPS = 5
 
 # =============================================================================
 # ENEMY SPRITES
@@ -104,6 +142,21 @@ DEMON_SPRITE_FILES = {
 # Demon sprite base path
 DEMON_SPRITES_BASE_PATH = "resources/images/enemies/Deamon/"
 
+# Demon frame counts (tied to sprite files above)
+DEMON_FRAME_COUNTS = {
+    'idle': 4,
+    'flying': 4,
+    'attack': 8,
+    'hurt': 4,
+    'death': 6,
+}
+
+# Demon frame dimensions
+DEMON_FRAME_WIDTH = 81
+DEMON_FRAME_HEIGHT = 71
+DEMON_DEATH_FRAME_WIDTH = 67  # Special dimensions for death animation
+DEMON_DEATH_FRAME_HEIGHT = 66
+
 # Plant Enemy Sprites
 PLANT_SPRITE_FILES = {
     'idle': 'Plant_Idle_full.png',
@@ -115,6 +168,15 @@ PLANT_SPRITE_FILES = {
 
 # Plant sprite base path
 PLANT_SPRITES_BASE_PATH = "resources/images/enemies/Plant"
+
+# Plant frame counts (tied to sprite files above)
+PLANT_FRAME_COUNTS = {
+    'idle': 8,
+    'walk': 6,
+    'run': 8,
+    'death': 10,
+    'attack': 7,
+}
 
 # =============================================================================
 # UI AND MENU IMAGES

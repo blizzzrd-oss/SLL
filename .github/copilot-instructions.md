@@ -7,7 +7,7 @@ applyTo: "**"
 - never use global variables
 - never use local imports
 - avoid circular imports by refactoring
-- don't use hard coded values, use variables in config.py
+- don't use hard coded values, use variables in matching config files
 - make it modular if possible
 
 ## Naming Conventions

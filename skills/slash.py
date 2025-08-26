@@ -1,5 +1,5 @@
-from config import PLAYER_SIZE, SLASH_COOLDOWN, SLASH_DAMAGE, SLASH_ARC_DEGREES, SLASH_DURATION, SLASH_FRAME_COUNT
-from config_images import SLASH_SHEET_PATH
+from config import PLAYER_SIZE, SLASH_COOLDOWN, SLASH_DAMAGE, SLASH_ARC_DEGREES, SLASH_DURATION
+from config_images import SLASH_SHEET_PATH, SLASH_FRAME_COUNT
 import pygame
 import math
 import os

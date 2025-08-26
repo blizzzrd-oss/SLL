@@ -4,7 +4,6 @@ import os
 # Import configuration modules
 from config_enemies import *
 from config_waves import *
-from config_pickables import *
 from config_sounds import *
 from config_images import *
 
@@ -24,9 +23,6 @@ CAMERA_DEADZONE = 50  # Pixel deadzone around center before camera moves
 # SKILL CONFIGURATION
 # =============================================================================
 SKILL_COOLDOWN = 0.5  # Default cooldown for skills (seconds)
-
-# Slash Skill Configuration
-SLASH_FRAME_COUNT = 5
 
 # Dash Skill Configuration
 DASH_RANGE = 100
@@ -85,13 +81,6 @@ SLASH_COOLDOWN = 1.0
 SLASH_DAMAGE = 10
 SLASH_ARC_DEGREES = 190
 SLASH_DURATION = 0.25
-SLASH_FRAME_COUNT = 5
-
-# Player Animation Configuration
-PLAYER_IDLE_ANIMATION_FPS = 6
-PLAYER_WALK_ANIMATION_FPS = 10
-PLAYER_RUN_ANIMATION_FPS = 14
-PLAYER_HURT_ANIMATION_FPS = 12
 
 # =============================================================================
 # UI AND RENDERING CONFIGURATION
@@ -174,47 +163,26 @@ RECEIVED_LOG_MAX_ENTRIES = 50
 # PICKABLE SYSTEM CONFIGURATION
 # =============================================================================
 # Reroll Dice Pickable
-REROLL_DICE_FRAME_SIZE = 16  # 16x16 frames
-REROLL_DICE_FRAME_COUNT = 6  # 6 different frames
-REROLL_DICE_ANIMATION_FPS = 4  # Slow animation for visibility
 REROLL_DICE_DROP_CHANCE = 0.008  # 0.8% chance to drop from plants
 REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 
 # XP Pickable Configuration
 # Green Crystal (Base)
-XP_GREEN_FRAME_SIZE = (11, 16)  # Each frame is 11x16 pixels
-XP_GREEN_FRAME_COUNT = 6  # 6 frames in the animation
-XP_GREEN_ANIMATION_FPS = 8  # Animation speed
 XP_GREEN_XP_VALUE = 1  # Each green crystal gives 1 XP
 
 # Yellow Crystal
-XP_YELLOW_FRAME_SIZE = (11, 16)
-XP_YELLOW_FRAME_COUNT = 6
-XP_YELLOW_ANIMATION_FPS = 8
 XP_YELLOW_XP_VALUE = 2
 
 # Light Blue Crystal
-XP_LIGHT_BLUE_FRAME_SIZE = (11, 16)
-XP_LIGHT_BLUE_FRAME_COUNT = 6
-XP_LIGHT_BLUE_ANIMATION_FPS = 8
 XP_LIGHT_BLUE_XP_VALUE = 5
 
 # Blue Crystal
-XP_BLUE_FRAME_SIZE = (11, 16)
-XP_BLUE_FRAME_COUNT = 6
-XP_BLUE_ANIMATION_FPS = 8
 XP_BLUE_XP_VALUE = 10
 
 # Red Crystal
-XP_RED_FRAME_SIZE = (11, 16)
-XP_RED_FRAME_COUNT = 6
-XP_RED_ANIMATION_FPS = 8
 XP_RED_XP_VALUE = 25
 
 # Purple Crystal
-XP_PURPLE_FRAME_SIZE = (11, 16)
-XP_PURPLE_FRAME_COUNT = 6
-XP_PURPLE_ANIMATION_FPS = 8
 XP_PURPLE_XP_VALUE = 50
 
 # XP Drop Chances for Plants
@@ -230,6 +198,13 @@ XP_DEMON_LIGHT_BLUE_CHANCE = 0.1  # 10% chance for light blue (higher value)
 PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
 PICKABLE_FLOAT_HEIGHT = 8  # How high pickables float above ground
 PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
+
+# Screen Clearer Configuration
+SCREEN_CLEARER_DROP_CHANCE = 0.003  # 0.3% chance to drop from demons (rarer than dice)
+
+# XP Magnet Configuration
+XP_MAGNET_DROP_CHANCE = 0.005  # 0.5% chance to drop from both plants and demons
+XP_MAGNET_PULL_RADIUS = 500  # Radius in pixels to attract XP pickables from
 
 # Enhancement System Configuration
 ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge

@@ -63,6 +63,44 @@ class SoundManager:
     def get_ui_volume(cls):
         """Get current UI volume (0.0-1.0)."""
         return cls._ui_volume
+
+    @classmethod
+    def _load_single_sound(cls, path, name):
+        """Helper method to load a single sound file."""
+        try:
+            full_path = resource_path(path)
+            if os.path.exists(full_path):
+                sound = pygame.mixer.Sound(full_path)
+                print(f"[SOUND] Loaded {name}")
+                return sound
+            else:
+                print(f"[WARNING] Sound file not found: {full_path}")
+                return None
+        except Exception as e:
+            print(f"[WARNING] Failed to load {name}: {e}")
+            return None
+
+    @classmethod
+    def _load_sound_list(cls, paths, name_prefix):
+        """Helper method to load a list of sound files."""
+        sounds = []
+        for i, path in enumerate(paths):
+            sound = cls._load_single_sound(path, f"{name_prefix} {i+1}")
+            if sound:
+                sounds.append(sound)
+        return sounds
+
+    @classmethod
+    def _load_sound_dict(cls, sound_dict, cache_prefix=""):
+        """Helper method to load sounds from a dictionary."""
+        loaded_count = 0
+        for sound_type, sound_path in sound_dict.items():
+            sound = cls._load_single_sound(sound_path, f"{cache_prefix}{sound_type}")
+            if sound:
+                cache_key = f"{cache_prefix}{sound_type}" if cache_prefix else sound_type
+                cls._sounds_cache[cache_key] = sound
+                loaded_count += 1
+        return loaded_count
     
     @classmethod
     def preload_all_sounds(cls):
@@ -72,67 +110,22 @@ class SoundManager:
             
         print("[SOUND] Preloading game sounds...")
         success_count = 0
-        total_sounds = 0
         
         # Single skill sounds
-        single_skill_sounds = {
-            'dash': SKILL_DASH_SOUND_PATH
-        }
+        skill_sounds = {'dash': SKILL_DASH_SOUND_PATH}
+        success_count += cls._load_sound_dict(skill_sounds, "skill_")
         
-        for skill_name, sound_path in single_skill_sounds.items():
-            total_sounds += 1
-            try:
-                full_path = resource_path(sound_path)
-                if os.path.exists(full_path):
-                    sound = pygame.mixer.Sound(full_path)
-                    # Volume will be set dynamically when played
-                    cls._sounds_cache[f'skill_{skill_name}'] = sound
-                    success_count += 1
-                    print(f"[SOUND] Loaded skill sound: {skill_name}")
-                else:
-                    print(f"[WARNING] Skill sound file not found: {full_path}")
-            except Exception as e:
-                print(f"[WARNING] Failed to load skill sound {skill_name}: {e}")
-        
-        # Multiple slash sounds
-        slash_sounds = []
-        for i, sound_path in enumerate(SKILL_SLASH_SOUND_PATHS):
-            total_sounds += 1
-            try:
-                full_path = resource_path(sound_path)
-                if os.path.exists(full_path):
-                    sound = pygame.mixer.Sound(full_path)
-                    # Volume will be set dynamically when played
-                    slash_sounds.append(sound)
-                    success_count += 1
-                    print(f"[SOUND] Loaded slash sound {i+1}")
-                else:
-                    print(f"[WARNING] Slash sound file not found: {full_path}")
-            except Exception as e:
-                print(f"[WARNING] Failed to load slash sound {i+1}: {e}")
-        
+        # Multiple slash sounds (special handling)
+        slash_sounds = cls._load_sound_list(SKILL_SLASH_SOUND_PATHS, "slash sound")
         if slash_sounds:
             cls._sounds_cache['slash_sounds'] = slash_sounds
+            success_count += len(slash_sounds)
         
-        # Enemy death sounds
-        plant_death_sounds = []
-        for i, sound_path in enumerate(ENEMY_PLANT_DEATH_SOUND_PATHS):
-            total_sounds += 1
-            try:
-                full_path = resource_path(sound_path)
-                if os.path.exists(full_path):
-                    sound = pygame.mixer.Sound(full_path)
-                    # Volume will be set dynamically when played
-                    plant_death_sounds.append(sound)
-                    success_count += 1
-                    print(f"[SOUND] Loaded plant death sound {i+1}")
-                else:
-                    print(f"[WARNING] Plant death sound file not found: {full_path}")
-            except Exception as e:
-                print(f"[WARNING] Failed to load plant death sound {i+1}: {e}")
-        
+        # Enemy death sounds (special handling) 
+        plant_death_sounds = cls._load_sound_list(ENEMY_PLANT_DEATH_SOUND_PATHS, "plant death sound")
         if plant_death_sounds:
             cls._sounds_cache['plant_death_sounds'] = plant_death_sounds
+            success_count += len(plant_death_sounds)
         
         # Pickable sounds
         pickable_sounds = {
@@ -140,92 +133,54 @@ class SoundManager:
             'dice_drop': PICKABLE_DICE_DROP_SOUND_PATH,
             'collect': PICKABLE_COLLECT_SOUND_PATH
         }
-        
-        for sound_type, sound_path in pickable_sounds.items():
-            total_sounds += 1
-            try:
-                full_path = resource_path(sound_path)
-                if os.path.exists(full_path):
-                    sound = pygame.mixer.Sound(full_path)
-                    # Volume will be set dynamically when played (pickable category)
-                    cls._sounds_cache[f'pickable_{sound_type}'] = sound
-                    success_count += 1
-                    print(f"[SOUND] Loaded pickable sound: {sound_type}")
-                else:
-                    print(f"[WARNING] Pickable sound file not found: {full_path}")
-            except Exception as e:
-                print(f"[WARNING] Failed to load pickable sound {sound_type}: {e}")
-        
-        # Player sounds
-        player_sounds = {
-            'level_up': PLAYER_LEVEL_UP_SOUND_PATH,
-            'new_wave': NEW_WAVE_SOUND_PATH,
-            'enhancement_select': ENHANCEMENT_SELECT_SOUND_PATH,
-            'enhancement_reroll': ENHANCEMENT_REROLL_SOUND_PATH
-        }
-        
-        for sound_type, sound_path in player_sounds.items():
-            total_sounds += 1
-            try:
-                full_path = resource_path(sound_path)
-                if os.path.exists(full_path):
-                    sound = pygame.mixer.Sound(full_path)
-                    # Volume will be set dynamically when played (SFX category)
-                    cls._sounds_cache[f'player_{sound_type}'] = sound
-                    success_count += 1
-                    print(f"[SOUND] Loaded player sound: {sound_type}")
-                else:
-                    print(f"[WARNING] Player sound file not found: {full_path}")
-            except Exception as e:
-                print(f"[WARNING] Failed to load player sound {sound_type}: {e}")
+        success_count += cls._load_sound_dict(pickable_sounds, "pickable_")
         
         # Hit sounds
         hit_sounds = {
             'enemy': HIT_ENEMY_SOUND_PATH,
             'player': HIT_PLAYER_SOUND_PATH
         }
+        success_count += cls._load_sound_dict(hit_sounds, "hit_")
         
-        for hit_type, sound_path in hit_sounds.items():
-            total_sounds += 1
-            try:
-                full_path = resource_path(sound_path)
-                if os.path.exists(full_path):
-                    sound = pygame.mixer.Sound(full_path)
-                    # Volume will be set dynamically when played (SFX category)
-                    cls._sounds_cache[f'hit_{hit_type}'] = sound
-                    success_count += 1
-                    print(f"[SOUND] Loaded hit sound: {hit_type}")
-                else:
-                    print(f"[WARNING] Hit sound file not found: {full_path}")
-            except Exception as e:
-                print(f"[WARNING] Failed to load hit sound {hit_type}: {e}")
+        # Player/SFX sounds
+        sfx_sounds = {
+            'level_up': PLAYER_LEVEL_UP_SOUND_PATH
+        }
+        success_count += cls._load_sound_dict(sfx_sounds, "sfx_")
         
-        # UI sounds (wave, enhancement selection, etc.)
+        # UI sounds
         ui_sounds = {
             'wave': NEW_WAVE_SOUND_PATH,
             'enhancement_select': ENHANCEMENT_SELECT_SOUND_PATH,
             'enhancement_reroll': ENHANCEMENT_REROLL_SOUND_PATH
         }
-        
-        for sound_type, sound_path in ui_sounds.items():
-            total_sounds += 1
-            try:
-                full_path = resource_path(sound_path)
-                if os.path.exists(full_path):
-                    sound = pygame.mixer.Sound(full_path)
-                    # Volume will be set dynamically when played (UI category)
-                    cls._sounds_cache[f'ui_{sound_type}'] = sound
-                    success_count += 1
-                    print(f"[SOUND] Loaded UI sound: {sound_type}")
-                else:
-                    print(f"[WARNING] UI sound file not found: {full_path}")
-            except Exception as e:
-                print(f"[WARNING] Failed to load UI sound {sound_type}: {e}")
+        success_count += cls._load_sound_dict(ui_sounds, "ui_")
         
         cls._initialized = True
-        print(f"[SOUND] Preloading complete: {success_count}/{total_sounds} sounds loaded")
+        print(f"[SOUND] Preloading complete: {success_count} sounds loaded")
         return success_count > 0
     
+    @classmethod
+    def _play_sound_with_volume(cls, sound, volume, sound_name, force_play=False):
+        """Helper method to play a sound with specific volume."""
+        if not sound:
+            print(f"[WARNING] {sound_name} not found in cache")
+            return False
+            
+        try:
+            sound.set_volume(volume)
+            channel = sound.play()
+            
+            if channel is None and force_play:
+                cls.force_play_sound(sound, sound_name)
+            elif channel is None:
+                print(f"[WARNING] Could not play {sound_name}: No available channels")
+                return False
+            return True
+        except Exception as e:
+            print(f"[WARNING] Failed to play {sound_name}: {e}")
+            return False
+
     @classmethod
     def get_skill_sound(cls, skill_name):
         """Get a preloaded skill sound."""
@@ -253,159 +208,68 @@ class SoundManager:
     def play_skill_sound(cls, skill_name):
         """Play a skill sound if available."""
         if skill_name == 'slash':
-            # Special handling for slash sounds (rotating)
             sound = cls.get_next_slash_sound()
         else:
-            # Normal skill sounds
             sound = cls.get_skill_sound(skill_name)
         
-        if sound:
-            try:
-                # Set volume for SFX category
-                sound.set_volume(cls._sfx_volume)
-                
-                # Try to play the sound, and if no channels are available, find a free one
-                channel = sound.play()
-                if channel is None:
-                    # No free channels, try to stop the oldest channel and play again
-                    pygame.mixer.stop()  # Stop all sounds briefly to free channels
-                    channel = sound.play()
-                    if channel is None:
-                        print(f"[WARNING] Could not play skill sound {skill_name}: No available channels")
-            except Exception as e:
-                print(f"[WARNING] Failed to play skill sound {skill_name}: {e}")
+        cls._play_sound_with_volume(sound, cls._sfx_volume, f"skill {skill_name}")
     
     @classmethod
     def play_random_plant_death_sound(cls):
         """Play a random plant death sound if available."""
         sound = cls.get_random_plant_death_sound()
-        if sound:
-            # Set volume for SFX category
-            sound.set_volume(cls._sfx_volume)
-            # Death sounds are important for player feedback, so force-play them
-            cls.force_play_sound(sound, "plant death sound")
+        cls._play_sound_with_volume(sound, cls._sfx_volume, "plant death sound", force_play=True)
     
     @classmethod
     def play_hit_sound(cls, hit_type):
         """Play a hit sound (enemy or player)."""
         sound = cls._sounds_cache.get(f'hit_{hit_type}')
-        if sound:
-            try:
-                # Set volume for SFX category
-                sound.set_volume(cls._sfx_volume)
-                
-                # Hit sounds should play reliably for feedback
-                channel = sound.play()
-                if channel is None:
-                    # Hit sounds are important for feedback, force play them
-                    cls.force_play_sound(sound, f"hit sound {hit_type}")
-            except Exception as e:
-                print(f"[WARNING] Failed to play hit sound {hit_type}: {e}")
-        else:
-            print(f"[WARNING] Hit sound {hit_type} not found in cache")
+        cls._play_sound_with_volume(sound, cls._sfx_volume, f"hit sound {hit_type}", force_play=True)
     
+    # Pickable sounds
     @classmethod
     def play_pickable_drop_sound(cls):
         """Play the pickable drop sound."""
         sound = cls._sounds_cache.get('pickable_drop')
-        if sound:
-            try:
-                # Set volume for Pickable category
-                sound.set_volume(cls._pickable_volume)
-                
-                channel = sound.play()
-                if channel is None:
-                    # Force play pickable sounds as they provide important feedback
-                    cls.force_play_sound(sound, "pickable drop sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play pickable drop sound: {e}")
+        cls._play_sound_with_volume(sound, cls._pickable_volume, "pickable drop sound", force_play=True)
     
     @classmethod
     def play_pickable_dice_drop_sound(cls):
         """Play the pickable dice drop sound."""
         sound = cls._sounds_cache.get('pickable_dice_drop')
-        if sound:
-            try:
-                # Set volume for Pickable category
-                sound.set_volume(cls._pickable_volume)
-                
-                channel = sound.play()
-                if channel is None:
-                    # Force play pickable sounds as they provide important feedback
-                    cls.force_play_sound(sound, "pickable dice drop sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play pickable dice drop sound: {e}")
+        cls._play_sound_with_volume(sound, cls._pickable_volume, "pickable dice drop sound", force_play=True)
     
     @classmethod
     def play_pickable_collect_sound(cls):
         """Play the pickable collect sound."""
         sound = cls._sounds_cache.get('pickable_collect')
-        if sound:
-            try:
-                # Set volume for Pickable category
-                sound.set_volume(cls._pickable_volume)
-                
-                channel = sound.play()
-                if channel is None:
-                    # Force play pickable sounds as they provide important feedback
-                    cls.force_play_sound(sound, "pickable collect sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play pickable collect sound: {e}")
+        cls._play_sound_with_volume(sound, cls._pickable_volume, "pickable collect sound", force_play=True)
     
+    # SFX sounds
     @classmethod
     def play_player_level_up_sound(cls):
         """Play the player level up sound."""
-        sound = cls._sounds_cache.get('player_level_up')
-        if sound:
-            try:
-                # Set volume for SFX category
-                sound.set_volume(cls._sfx_volume)
-                
-                channel = sound.play()
-                if channel is None:
-                    # Force play level up sound as it's important player feedback
-                    cls.force_play_sound(sound, "player level up sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play player level up sound: {e}")
+        sound = cls._sounds_cache.get('sfx_level_up')
+        cls._play_sound_with_volume(sound, cls._sfx_volume, "player level up sound", force_play=True)
     
+    # UI sounds
     @classmethod
-    def play_new_wave_sound(cls):
+    def play_wave_sound(cls):
         """Play the new wave sound."""
-        sound = cls._sounds_cache.get('player_new_wave')
-        if sound:
-            try:
-                channel = sound.play()
-                if channel is None:
-                    # Force play new wave sound as it's important game feedback
-                    cls.force_play_sound(sound, "new wave sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play new wave sound: {e}")
+        sound = cls._sounds_cache.get('ui_wave')
+        cls._play_sound_with_volume(sound, cls._ui_volume, "wave sound", force_play=True)
     
     @classmethod
     def play_enhancement_select_sound(cls):
         """Play the enhancement selection sound."""
-        sound = cls._sounds_cache.get('player_enhancement_select')
-        if sound:
-            try:
-                channel = sound.play()
-                if channel is None:
-                    # Force play enhancement sound as it's important UI feedback
-                    cls.force_play_sound(sound, "enhancement select sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play enhancement select sound: {e}")
+        sound = cls._sounds_cache.get('ui_enhancement_select')
+        cls._play_sound_with_volume(sound, cls._ui_volume, "enhancement select sound", force_play=True)
     
     @classmethod
     def play_enhancement_reroll_sound(cls):
         """Play the enhancement reroll sound."""
-        sound = cls._sounds_cache.get('player_enhancement_reroll')
-        if sound:
-            try:
-                channel = sound.play()
-                if channel is None:
-                    # Force play reroll sound as it's important UI feedback
-                    cls.force_play_sound(sound, "enhancement reroll sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play enhancement reroll sound: {e}")
+        sound = cls._sounds_cache.get('ui_enhancement_reroll')
+        cls._play_sound_with_volume(sound, cls._ui_volume, "enhancement reroll sound", force_play=True)
     
     @classmethod
     def force_play_sound(cls, sound, sound_type="unknown"):
@@ -479,54 +343,6 @@ class SoundManager:
         
         if cleaned > 0:
             print(f"[SOUND] Cleaned up {cleaned} potentially stuck channels")
-    
-    @classmethod
-    def play_wave_sound(cls):
-        """Play the new wave sound."""
-        sound = cls._sounds_cache.get('ui_wave')
-        if sound:
-            try:
-                # Set volume for UI category
-                sound.set_volume(cls._ui_volume)
-                
-                channel = sound.play()
-                if channel is None:
-                    # Force play wave sound as it's important UI feedback
-                    cls.force_play_sound(sound, "wave sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play wave sound: {e}")
-    
-    @classmethod
-    def play_enhancement_select_sound(cls):
-        """Play the enhancement selection sound."""
-        sound = cls._sounds_cache.get('ui_enhancement_select')
-        if sound:
-            try:
-                # Set volume for UI category
-                sound.set_volume(cls._ui_volume)
-                
-                channel = sound.play()
-                if channel is None:
-                    # Force play enhancement sound as it's important UI feedback
-                    cls.force_play_sound(sound, "enhancement select sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play enhancement select sound: {e}")
-    
-    @classmethod
-    def play_enhancement_reroll_sound(cls):
-        """Play the enhancement reroll sound."""
-        sound = cls._sounds_cache.get('ui_enhancement_reroll')
-        if sound:
-            try:
-                # Set volume for UI category
-                sound.set_volume(cls._ui_volume)
-                
-                channel = sound.play()
-                if channel is None:
-                    # Force play enhancement reroll sound as it's important UI feedback
-                    cls.force_play_sound(sound, "enhancement reroll sound")
-            except Exception as e:
-                print(f"[WARNING] Failed to play enhancement reroll sound: {e}")
     
     @classmethod
     def debug_sound_system(cls):
