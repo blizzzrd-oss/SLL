@@ -15,7 +15,8 @@ from config import (
     XP_PLANT_GREEN_CHANCE, XP_PLANT_YELLOW_CHANCE,
     PICKABLE_DESPAWN_TIME, PICKABLE_FLOAT_HEIGHT, PICKABLE_FLOAT_SPEED,
     SCREEN_CLEARER_DROP_CHANCE,
-    XP_MAGNET_DROP_CHANCE, XP_MAGNET_PULL_RADIUS
+    XP_MAGNET_DROP_CHANCE, XP_MAGNET_PULL_RADIUS,
+    WINDOW_WIDTH, WINDOW_HEIGHT
 )
 from config_images import (
     REROLL_DICE_SPRITE, REROLL_DICE_FRAME_SIZE, REROLL_DICE_FRAME_COUNT, REROLL_DICE_ANIMATION_FPS,
@@ -395,27 +396,42 @@ class ScreenClearerPickable(Pickable):
         return True
     
     def collect(self, player):
-        """Kill all enemies currently on screen."""
+        """Kill all enemies currently visible on screen."""
         # Access the game through the player's reference
         if hasattr(player, 'game'):
             game = player.game
             
-            if game and hasattr(game, 'enemies'):
-                # Kill all enemies by setting their health to 0
+            if game and hasattr(game, 'enemies') and hasattr(game, 'camera'):
+                camera = game.camera
+                
+                # Calculate visible area bounds
+                visible_left = camera.x
+                visible_right = camera.x + WINDOW_WIDTH
+                visible_top = camera.y
+                visible_bottom = camera.y + WINDOW_HEIGHT
+                
+                # Kill only enemies within the visible screen area
                 enemies_killed = 0
                 for enemy in game.enemies[:]:  # Use slice to avoid modification issues
                     if hasattr(enemy, 'health') and enemy.health > 0:
-                        enemy.health = 0
-                        # Trigger death state if the enemy has logic
-                        if hasattr(enemy, 'logic') and hasattr(enemy.logic, 'state'):
-                            enemy.logic.state = 'death'
-                            enemy.logic.anim_frame = 0
-                            enemy.logic.anim_timer = 0.0
-                        enemies_killed += 1
+                        # Check if enemy is within visible bounds
+                        enemy_x = getattr(enemy, 'x', 0)
+                        enemy_y = getattr(enemy, 'y', 0)
+                        
+                        if (visible_left <= enemy_x <= visible_right and 
+                            visible_top <= enemy_y <= visible_bottom):
+                            
+                            enemy.health = 0
+                            # Trigger death state if the enemy has logic
+                            if hasattr(enemy, 'logic') and hasattr(enemy.logic, 'state'):
+                                enemy.logic.state = 'death'
+                                enemy.logic.anim_frame = 0
+                                enemy.logic.anim_timer = 0.0
+                            enemies_killed += 1
                 
-                print(f"[PICKABLES] Screen Clearer killed {enemies_killed} enemies!")
+                print(f"[PICKABLES] Screen Clearer killed {enemies_killed} visible enemies!")
             else:
-                print(f"[PICKABLES] Screen Clearer: Could not access enemies list")
+                print(f"[PICKABLES] Screen Clearer: Could not access enemies list or camera")
         else:
             print(f"[PICKABLES] Screen Clearer: Could not access game instance")
         
@@ -425,7 +441,7 @@ class ScreenClearerPickable(Pickable):
         except Exception as e:
             print(f"[PICKABLES] Failed to play collection sound: {e}")
             
-        print(f"[PICKABLES] Player collected Screen Clearer! All enemies eliminated!")
+        print(f"[PICKABLES] Player collected Screen Clearer! All visible enemies eliminated!")
         self.collected = True
     
     def draw(self, surface, camera=None):

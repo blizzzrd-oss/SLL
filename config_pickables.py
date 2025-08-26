@@ -70,12 +70,8 @@ PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
 PICKABLE_FLOAT_HEIGHT = 8  # How high pickables float above ground
 PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
 
-# =============================================================================
-# PICKABLE SOUND EFFECTS
-# =============================================================================
-PICKABLE_DROP_SOUND_PATH = "resources/sounds/pickable_drop.mp3"  # General pickable drop sound (placeholder)
-PICKABLE_DICE_DROP_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"  # Specific to dice drops
-PICKABLE_COLLECT_SOUND_PATH = "resources/sounds/pickable.mp3"
+# Enhancement System Configuration
+ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge
 
 # =============================================================================
 # SCREEN CLEARER PICKABLE CONFIGURATION (ENEMY KILLER)
@@ -92,4 +88,4 @@ XP_MAGNET_FRAME_SIZE = 20  # 20x20 frames
 XP_MAGNET_FRAME_COUNT = 6  # 6 different frames
 XP_MAGNET_ANIMATION_FPS = 5  # Medium animation speed
 XP_MAGNET_DROP_CHANCE = 0.105  # 0.5% chance to drop from both plants and demons
-XP_MAGNET_PULL_RADIUS = 500  # Radius in pixels to attract XP pickables from
+XP_MAGNET_PULL_RADIUS = 10000  # Radius in pixels to attract XP pickables from

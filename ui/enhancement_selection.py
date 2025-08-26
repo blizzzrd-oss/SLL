@@ -9,7 +9,8 @@ from config_enhancements import ENHANCEMENT_UI
 from config import (
     ENHANCEMENT_OVERLAY_COLOR, ENHANCEMENT_PANEL_COLOR, ENHANCEMENT_BORDER_COLOR,
     ENHANCEMENT_SKILL_SPECIFIC_BORDER_COLOR, ENHANCEMENT_TEXT_COLOR, 
-    ENHANCEMENT_BUTTON_COLOR, ENHANCEMENT_BUTTON_HOVER_COLOR
+    ENHANCEMENT_BUTTON_COLOR, ENHANCEMENT_BUTTON_HOVER_COLOR,
+    ENHANCEMENT_BASE_REROLL_CHARGES
 )
 
 
@@ -26,7 +27,7 @@ class EnhancementSelectionUI:
         self.button_rects = []
         self.reroll_button_rect = None
         self.is_active = False
-        self.reroll_charges = 0  # Start with 0 reroll charges (must find pickables)
+        self.reroll_charges = ENHANCEMENT_BASE_REROLL_CHARGES  # Start with base reroll charges from config
         self.on_reroll_callback = None  # Callback function for reroll
         
     def show_enhancement_selection(self, enhancement_choices, reroll_callback=None):
@@ -248,5 +249,5 @@ class EnhancementSelectionUI:
         return self.reroll_charges
     
     def reset_reroll_charges(self):
-        """Reset reroll charges to base amount (0)."""
-        self.reroll_charges = 0
+        """Reset reroll charges to base amount from config."""
+        self.reroll_charges = ENHANCEMENT_BASE_REROLL_CHARGES

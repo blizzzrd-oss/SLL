@@ -4,6 +4,7 @@ import os
 # Import configuration modules
 from config_enemies import *
 from config_waves import *
+from config_pickables import *
 from config_sounds import *
 from config_images import *
 
@@ -158,56 +159,6 @@ GAME_DEFAULT_FPS = 120
 # =============================================================================
 DAMAGE_LOG_MAX_ENTRIES = 10
 RECEIVED_LOG_MAX_ENTRIES = 50
-
-# =============================================================================
-# PICKABLE SYSTEM CONFIGURATION
-# =============================================================================
-# Reroll Dice Pickable
-REROLL_DICE_DROP_CHANCE = 0.008  # 0.8% chance to drop from plants
-REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
-
-# XP Pickable Configuration
-# Green Crystal (Base)
-XP_GREEN_XP_VALUE = 1  # Each green crystal gives 1 XP
-
-# Yellow Crystal
-XP_YELLOW_XP_VALUE = 2
-
-# Light Blue Crystal
-XP_LIGHT_BLUE_XP_VALUE = 5
-
-# Blue Crystal
-XP_BLUE_XP_VALUE = 10
-
-# Red Crystal
-XP_RED_XP_VALUE = 25
-
-# Purple Crystal
-XP_PURPLE_XP_VALUE = 50
-
-# XP Drop Chances for Plants
-XP_PLANT_GREEN_CHANCE = 0.99  # 99% chance for green
-XP_PLANT_YELLOW_CHANCE = 0.01  # 1% chance for yellow
-
-# XP Drop Chances for Demons
-XP_DEMON_GREEN_CHANCE = 0.0   # 0% chance for green
-XP_DEMON_YELLOW_CHANCE = 0.9  # 90% chance for yellow
-XP_DEMON_LIGHT_BLUE_CHANCE = 0.1  # 10% chance for light blue (higher value)
-
-# General Pickable Configuration
-PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
-PICKABLE_FLOAT_HEIGHT = 8  # How high pickables float above ground
-PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
-
-# Screen Clearer Configuration
-SCREEN_CLEARER_DROP_CHANCE = 0.003  # 0.3% chance to drop from demons (rarer than dice)
-
-# XP Magnet Configuration
-XP_MAGNET_DROP_CHANCE = 0.005  # 0.5% chance to drop from both plants and demons
-XP_MAGNET_PULL_RADIUS = 500  # Radius in pixels to attract XP pickables from
-
-# Enhancement System Configuration
-ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge
 
 # =============================================================================
 # LOGGING AND DEBUGGING CONFIGURATION  
