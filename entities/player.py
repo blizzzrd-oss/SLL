@@ -164,7 +164,15 @@ class Player:
 
     def take_damage(self, amount, source=None, barrier_damage=False):
         # Check immunity first
+        # Debug: log incoming damage attempts for troubleshooting
+        try:
+            src_name = source.name if (source and hasattr(source, 'name')) else str(source)
+        except Exception:
+            src_name = str(source)
+        print(f"[PLAYER DAMAGE DEBUG] Incoming {amount} from {src_name}; is_immune={self.is_immune}, immunity_timer={getattr(self, 'immunity_timer', 0):.2f}, barrier={getattr(self, 'barrier', 0)}")
+
         if self.is_immune:
+            print(f"[PLAYER DAMAGE DEBUG] Damage blocked by immunity: {amount} from {src_name}")
             return  # Immune to all damage
             
         # Barrier absorbs damage first unless barrier_damage is True

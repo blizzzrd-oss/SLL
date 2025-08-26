@@ -44,6 +44,34 @@ class StunEffect(StatusEffect):
             
         enemy.movement_speed = 0
         enemy.is_stunned = True
+        # If the enemy has a logic object with an ongoing attack, cancel it so
+        # the stun immediately prevents any pending damage from completing.
+        # This covers cases where an enemy was mid-attack when stunned.
+        if hasattr(enemy, 'logic') and enemy.logic:
+            logic = enemy.logic
+            # Safely reset animation/attack state if present
+            if hasattr(logic, 'state'):
+                try:
+                    # Move enemy back to a non-attacking movement state
+                    logic.state = 'run' if getattr(enemy, 'movement_speed', 0) > 4 else 'walk'
+                except Exception:
+                    pass
+            if hasattr(logic, 'anim_frame'):
+                try:
+                    logic.anim_frame = 0
+                except Exception:
+                    pass
+            if hasattr(logic, 'anim_timer'):
+                try:
+                    logic.anim_timer = 0.0
+                except Exception:
+                    pass
+            # Clear any damage-dealt flag used to prevent double-hits
+            if hasattr(logic, '_damage_dealt'):
+                try:
+                    logic._damage_dealt = False
+                except Exception:
+                    pass
     
     def remove(self, enemy):
         """Remove stun from enemy."""

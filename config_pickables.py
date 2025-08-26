@@ -19,13 +19,13 @@ REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 XP_GREEN_FRAME_SIZE = (11, 16)  # Each frame is 11x16 pixels
 XP_GREEN_FRAME_COUNT = 6  # 6 frames in the animation
 XP_GREEN_ANIMATION_FPS = 8  # Animation speed
-XP_GREEN_XP_VALUE = 10  # Each green crystal gives 1 XP
+XP_GREEN_XP_VALUE = 15  # Each green crystal gives 1 XP
 
 # Yellow Crystal
 XP_YELLOW_FRAME_SIZE = (11, 16)
 XP_YELLOW_FRAME_COUNT = 6
 XP_YELLOW_ANIMATION_FPS = 8
-XP_YELLOW_XP_VALUE = 2
+XP_YELLOW_XP_VALUE = 20
 
 # Light Blue Crystal
 XP_LIGHT_BLUE_FRAME_SIZE = (11, 16)

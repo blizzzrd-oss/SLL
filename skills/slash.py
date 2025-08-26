@@ -102,15 +102,17 @@ class SlashSkill(Skill):
             self.active = False
             return
         # Hit detection
-        for entity in entities:
-            if entity is self.user or entity in self.hit_entities:
+        # Defensive: ensure the user isn't accidentally included in the entity list
+        filtered_entities = [e for e in entities if e is not self.user]
+        for entity in filtered_entities:
+            if entity in self.hit_entities:
                 continue
             if self._in_slash_arc(entity):
                 # Apply damage with enhancements
                 damage = self._check_double_damage(self.base_damage)
                 entity.take_damage(damage, source=self, attacker=self.user)
                 self.hit_entities.add(entity)
-                
+
                 # Apply skill-specific enhancements
                 self._apply_slash_enhancements(entity)
 
@@ -293,7 +295,6 @@ class SlashSkill(Skill):
             opposite_collision_frame = pygame.transform.rotate(rectangular_collision_frame, -opposite_angle)
             opposite_collision_frame = pygame.transform.scale(opposite_collision_frame, (collision_scaled_width, collision_scaled_height))
             opposite_collision_rect = opposite_collision_frame.get_rect(center=(opposite_offset_x, opposite_offset_y))
-            
             hit = opposite_collision_rect.colliderect(entity.rect)
         
         return hit
