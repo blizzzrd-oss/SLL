@@ -29,7 +29,7 @@ ENEMY_TYPE_CONFIG = {
 	},
 	'Hero': {
 		'max_health': 40,
-		'size': (32, 32),  # Width x Height - reduced hitbox for small sprite
+		'size': (48, 48),  # Width x Height - reduced hitbox for small sprite
 		'speed': 45,  # Moderate speed - between plants and demons
 		'color': (200, 100, 100),
 		'attack_range': 20,  # Melee range
