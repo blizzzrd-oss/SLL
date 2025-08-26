@@ -97,7 +97,7 @@ ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge
 SCREEN_CLEARER_FRAME_SIZE = 24  # 24x24 frames (larger than dice)
 SCREEN_CLEARER_FRAME_COUNT = 8  # More frames for dramatic effect
 SCREEN_CLEARER_ANIMATION_FPS = 6  # Slightly faster animation
-SCREEN_CLEARER_DROP_CHANCE = 0.903  # 0.3% chance to drop from demons (rarer than dice)
+SCREEN_CLEARER_DROP_CHANCE = 0.005  # 0.5% chance to drop from demons (rarer than dice)
 
 # =============================================================================
 # XP MAGNET PICKABLE CONFIGURATION
@@ -105,5 +105,5 @@ SCREEN_CLEARER_DROP_CHANCE = 0.903  # 0.3% chance to drop from demons (rarer tha
 XP_MAGNET_FRAME_SIZE = 20  # 20x20 frames
 XP_MAGNET_FRAME_COUNT = 6  # 6 different frames
 XP_MAGNET_ANIMATION_FPS = 5  # Medium animation speed
-XP_MAGNET_DROP_CHANCE = 0.105  # 0.5% chance to drop from both plants and demons
+XP_MAGNET_DROP_CHANCE = 0.01  # 1% chance to drop from both plants and demons
 XP_MAGNET_PULL_RADIUS = 10000  # Radius in pixels to attract XP pickables from

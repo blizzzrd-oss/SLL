@@ -47,7 +47,7 @@ SPAWNER_SPAWN_BUFFER = 100  # Distance outside camera view to spawn enemies
 SPAWNER_ENEMY_WEIGHTS = {
 	'Plant': 1.0,
 	'Demon': 0.3,  # Lower spawn weight - demons are more dangerous
-	'Hero': 0.8,   # Moderate spawn weight - Heroes are tankier than plants
+	'Hero': 0.5,   # Moderate spawn weight - Heroes are tankier than plants
 }
 
 # Minimum wave requirements for enemy types
