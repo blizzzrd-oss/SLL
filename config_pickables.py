@@ -80,7 +80,8 @@ PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
 # =============================================================================
 # PICKABLE SOUND EFFECTS
 # =============================================================================
-PICKABLE_DROP_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"
+PICKABLE_DROP_SOUND_PATH = "resources/sounds/pickable_drop.mp3"  # General pickable drop sound (placeholder)
+PICKABLE_DICE_DROP_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"  # Specific to dice drops
 PICKABLE_COLLECT_SOUND_PATH = "resources/sounds/pickable.mp3"
 
 # =============================================================================

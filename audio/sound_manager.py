@@ -9,7 +9,7 @@ from config import (
     SKILL_DASH_SOUND_PATH, SKILL_SLASH_SOUND_PATHS,
     ENEMY_PLANT_DEATH_SOUND_PATHS, SFX_VOLUME,
     HIT_ENEMY_SOUND_PATH, HIT_PLAYER_SOUND_PATH,
-    PICKABLE_DROP_SOUND_PATH, PICKABLE_COLLECT_SOUND_PATH,
+    PICKABLE_DROP_SOUND_PATH, PICKABLE_DICE_DROP_SOUND_PATH, PICKABLE_COLLECT_SOUND_PATH,
     PLAYER_LEVEL_UP_SOUND_PATH, NEW_WAVE_SOUND_PATH,
     ENHANCEMENT_SELECT_SOUND_PATH, ENHANCEMENT_REROLL_SOUND_PATH,
     AUDIO_FORCE_PLAY_MAX_CHANNELS_TO_STOP
@@ -102,6 +102,7 @@ class SoundManager:
         # Pickable sounds
         pickable_sounds = {
             'drop': PICKABLE_DROP_SOUND_PATH,
+            'dice_drop': PICKABLE_DICE_DROP_SOUND_PATH,
             'collect': PICKABLE_COLLECT_SOUND_PATH
         }
         
@@ -250,6 +251,19 @@ class SoundManager:
                     cls.force_play_sound(sound, "pickable drop sound")
             except Exception as e:
                 print(f"[WARNING] Failed to play pickable drop sound: {e}")
+    
+    @classmethod
+    def play_pickable_dice_drop_sound(cls):
+        """Play the pickable dice drop sound."""
+        sound = cls._sounds_cache.get('pickable_dice_drop')
+        if sound:
+            try:
+                channel = sound.play()
+                if channel is None:
+                    # Force play pickable sounds as they provide important feedback
+                    cls.force_play_sound(sound, "pickable dice drop sound")
+            except Exception as e:
+                print(f"[WARNING] Failed to play pickable dice drop sound: {e}")
     
     @classmethod
     def play_pickable_collect_sound(cls):

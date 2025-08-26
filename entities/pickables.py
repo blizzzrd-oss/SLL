@@ -285,11 +285,14 @@ class XpPickable(Pickable):
             self._frames.append(frame)
     
     def update(self, dt):
-        """Update animation and base pickable behavior."""
-        if not super().update(dt):
-            return False
-            
+        """Update animation without despawn timer (XP pickables never despawn)."""
+        # Update floating animation timer (from base class)
+        self.float_timer += dt
+        
+        # Update XP crystal animation timer
         self.animation_timer += dt
+        
+        # XP pickables never despawn, so always return True
         return True
     
     def collect(self, player):
@@ -590,11 +593,11 @@ class PickableManager:
         dice = RerollDicePickable(x, y)
         self.add_pickable(dice)
         
-        # Play drop sound
+        # Play dice drop sound
         try:
-            SoundManager.play_pickable_drop_sound()
+            SoundManager.play_pickable_dice_drop_sound()
         except Exception as e:
-            print(f"[PICKABLES] Failed to play drop sound: {e}")
+            print(f"[PICKABLES] Failed to play dice drop sound: {e}")
             
         return dice
         

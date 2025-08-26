@@ -320,7 +320,8 @@ ENEMY_PLANT_DEATH_SOUND_PATHS = [
 ]
 
 # Pickable Sound Effects
-PICKABLE_DROP_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"
+PICKABLE_DROP_SOUND_PATH = "resources/sounds/pickable_drop.mp3"  # General pickable drop sound (placeholder)
+PICKABLE_DICE_DROP_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"  # Specific to dice drops
 PICKABLE_COLLECT_SOUND_PATH = "resources/sounds/pickable.mp3"
 
 # Player Sound Effects
