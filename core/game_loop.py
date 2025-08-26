@@ -121,6 +121,8 @@ def run_game(screen, slot, mode):
                 if selected_enhancement and selected_enhancement != "reroll":
                     game.player.apply_enhancement_choice(selected_enhancement)
                     enhancement_ui.close()
+                    # Clear stuck key states when enhancement UI closes
+                    event_handler.clear_all_key_states()
                     print(f"[ENHANCEMENT] Selected: {selected_enhancement}")
                 elif selected_enhancement == "reroll":
                     print(f"[ENHANCEMENT] Rerolled choices")

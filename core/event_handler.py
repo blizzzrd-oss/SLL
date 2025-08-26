@@ -189,3 +189,8 @@ class GameEventHandler:
     def mark_skill_activated(self, skill_name):
         """Mark that a skill was just activated."""
         self.last_skill_activation[skill_name] = pygame.time.get_ticks() / 1000
+    
+    def clear_all_key_states(self):
+        """Clear all skill key pressed states to prevent stuck keys."""
+        self.skill_pressed = {'slash': False, 'dash': False}
+        print("[EVENT_HANDLER] Cleared all skill key states")
