@@ -21,6 +21,8 @@ class DashSkill(Skill):
         self.dash_end = None
         self.elapsed = 0.0
         self.hit_entities = set()  # Track entities already hit during this dash
+        self.last_dash_time = -float('inf')  # Track when last dash finished for delay
+        self.dash_delay = 0.5  # 0.5 second delay after each dash
         
         # Double dash enhancement
         self.max_charges = 1
@@ -124,6 +126,7 @@ class DashSkill(Skill):
         self.deal_damage(entities)
         if t >= 1.0:
             self.active = False
+            self.last_dash_time = now  # Record when dash finished for delay
 
     def deal_damage(self, entities):
         # Deal damage to entities collided with during dash
@@ -151,6 +154,10 @@ class DashSkill(Skill):
     def can_use(self, now):
         # Don't allow dashing while already dashing
         if self.active:
+            return False
+            
+        # Check dash delay - prevent rapid consecutive dashes
+        if now - self.last_dash_time < self.dash_delay:
             return False
             
         # Update charges first
