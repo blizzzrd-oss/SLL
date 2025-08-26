@@ -3,7 +3,7 @@ import math
 import os
 import random
 from skills.base import Skill
-from config import DASH_RANGE, DASH_COOLDOWN, DASH_DURATION, DASH_DAMAGE
+from config import DASH_RANGE, DASH_COOLDOWN, DASH_DURATION, DASH_DAMAGE, DASH_DELAY
 from audio.sound_manager import SoundManager
 
 class DashSkill(Skill):
@@ -22,7 +22,7 @@ class DashSkill(Skill):
         self.elapsed = 0.0
         self.hit_entities = set()  # Track entities already hit during this dash
         self.last_dash_time = -float('inf')  # Track when last dash finished for delay
-        self.dash_delay = 0.5  # 0.5 second delay after each dash
+        self.dash_delay = DASH_DELAY  # Delay after each dash from config
         
         # Double dash enhancement
         self.max_charges = 1

@@ -55,6 +55,25 @@ class Player:
                 to_sub = int(self._barrier_decay_accum)
                 self.barrier = max(0, self.barrier - to_sub)
                 self._barrier_decay_accum -= to_sub
+        
+        # Handle delayed enhancement selection
+        if (self.enhancement_delay_time > 0 and not self.pending_enhancement_selection):
+            import pygame
+            current_time = pygame.time.get_ticks() / 1000
+            if current_time - self.enhancement_delay_time >= self.enhancement_delay_duration:
+                # Check if movement skills are still active
+                movement_skills_active = any(
+                    getattr(skill, 'active', False) for skill in self.skills.values()
+                    if getattr(skill, 'is_movement_skill', False)
+                )
+                
+                if not movement_skills_active:
+                    # Safe to show enhancement selection now
+                    self.pending_enhancement_selection = True
+                    self.enhancement_delay_time = 0  # Clear the delay
+                else:
+                    # Extend delay until movement skills finish
+                    self.enhancement_delay_time = current_time
     # Animation states
     ANIM_IDLE = 'idle'
     ANIM_WALK = 'walk'
@@ -85,6 +104,8 @@ class Player:
         self.enhancement_manager = SkillEnhancementManager(self)
         self.pending_enhancement_selection = False
         self.last_enhancement_time = 0  # Track when enhancements were applied
+        self.enhancement_delay_time = 0  # Time when enhancement was requested
+        self.enhancement_delay_duration = 0.5  # Wait 0.5 seconds before showing enhancement
 
         self.health = PLAYER_START_HEALTH
         self.max_health = PLAYER_START_HEALTH  # Add max_health attribute
@@ -250,8 +271,9 @@ class Player:
             # Optional: Add level up bonuses (health, damage, etc.)
             self._apply_level_up_bonuses()
             
-            # Trigger enhancement selection
-            self.pending_enhancement_selection = True
+            # Schedule enhancement selection with delay
+            import pygame
+            self.enhancement_delay_time = pygame.time.get_ticks() / 1000
         
         return leveled_up
     

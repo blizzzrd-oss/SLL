@@ -105,7 +105,7 @@ def run_game(screen, slot, mode):
         dt, time_accum, fps = frame_timer.tick()
         
         # Check for enhancement selection first
-        if game.player.has_pending_enhancement_selection() and not enhancement_ui.is_active:
+        if (game.player.has_pending_enhancement_selection() and not enhancement_ui.is_active):
             choices = game.player.get_enhancement_choices()
             if choices:
                 # Don't reset reroll charges - they persist and come from pickables

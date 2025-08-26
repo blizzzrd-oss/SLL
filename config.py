@@ -27,6 +27,7 @@ SKILL_COOLDOWN = 0.5  # Default cooldown for skills (seconds)
 
 # Dash Skill Configuration
 DASH_RANGE = 100
+DASH_DELAY = 0.5  # Delay after each dash before next dash can be used
 
 # =============================================================================
 # PLAYER CONFIGURATION
