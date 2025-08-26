@@ -300,17 +300,21 @@ class GameLogicManager:
                     self._separate_enemies(enemy1, enemy2)
     
     def _get_half_size_rect(self, enemy):
-        """Get a collision rect that's half the size of the enemy's normal rect."""
+        """Get a collision rect used for enemy separation.
+
+        Use a larger footprint than 50% to reduce stacking (75% of normal size).
+        """
         normal_rect = enemy.rect
-        half_width = normal_rect.width // 2
-        half_height = normal_rect.height // 2
-        
-        # Create centered rect with half dimensions
+        # Use 75% of the normal size for collision checks (less forgiving)
+        width = max(2, int(normal_rect.width * 0.75))
+        height = max(2, int(normal_rect.height * 0.75))
+
+        # Create centered rect with adjusted dimensions
         half_rect = pygame.Rect(
-            normal_rect.centerx - half_width // 2,
-            normal_rect.centery - half_height // 2,
-            half_width,
-            half_height
+            normal_rect.centerx - width // 2,
+            normal_rect.centery - height // 2,
+            width,
+            height
         )
         return half_rect
     
@@ -323,10 +327,10 @@ class GameLogicManager:
         # Avoid division by zero
         distance = math.hypot(dx, dy)
         if distance < 0.1:  # Very close or identical positions
-            # Use a small random offset to break ties
+            # Use a slightly larger random offset to break ties robustly
             import random
-            dx = random.uniform(-1, 1)
-            dy = random.uniform(-1, 1)
+            dx = random.uniform(-2, 2)
+            dy = random.uniform(-2, 2)
             distance = math.hypot(dx, dy)
         
         # Normalize direction vector
@@ -337,13 +341,18 @@ class GameLogicManager:
         # Calculate minimum separation distance (sum of half-sizes)
         half_size1 = self._get_enemy_half_size(enemy1)
         half_size2 = self._get_enemy_half_size(enemy2)
-        min_distance = half_size1 + half_size2 + 2  # Add small buffer
-        
+        # Increase buffer to avoid near-touching stacking
+        min_distance = half_size1 + half_size2 + 6  # larger buffer
+
         # Calculate how much to push each enemy
         overlap = min_distance - distance
         if overlap > 0:
-            push_distance = overlap * 0.5  # Each enemy moves half the overlap
-            
+            # Push a bit more aggressively to resolve stacking
+            push_distance = overlap * 0.6  # Each enemy moves a portion of the overlap
+            # Cap the push to avoid teleporting enemies
+            max_push = 20.0
+            push_distance = min(push_distance, max_push)
+
             # Push enemies apart
             enemy1.x -= dx * push_distance
             enemy1.y -= dy * push_distance
@@ -358,7 +367,8 @@ class GameLogicManager:
     
     def _get_enemy_half_size(self, enemy):
         """Get the half-size radius of an enemy for collision calculations."""
+        # Use a slightly larger radius for separation math (1/3 of larger dim)
         if isinstance(enemy.size, tuple):
-            return max(enemy.size) // 4  # Quarter of the larger dimension
+            return max(enemy.size) // 3
         else:
-            return enemy.size // 4  # Quarter of the size
+            return max(1, enemy.size // 3)
