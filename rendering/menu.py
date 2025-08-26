@@ -8,7 +8,7 @@ import json
 from rendering.game_render import _game_render_cache
 from utils.resource_path import resource_path
 from config import (
-    MUSIC_VOLUME, SFX_VOLUME, BG_MUSIC_PATH,
+    MUSIC_VOLUME, SFX_VOLUME, PICKABLE_VOLUME, UI_VOLUME, BG_MUSIC_PATH,
     COLOR_BG, COLOR_TEXT, COLOR_HIGHLIGHT, COLOR_SLIDER_MUSIC, COLOR_SLIDER_SFX, COLOR_BACK,
     GAME_FPS_OPTIONS, GAME_DEFAULT_FPS,
     COLOR_BLACK, COLOR_GRAY,
@@ -68,9 +68,13 @@ class Menu:
         self.settings_back_button = Button((back_x, back_y, back_w, back_h), 'Back', back_font, COLOR_BG, COLOR_HIGHLIGHT, back_img)
         self.dragging_music = False
         self.dragging_sfx = False
+        self.dragging_pickable = False
+        self.dragging_ui = False
         self.slider_label_x = 100
         self.music_label_y = 110
         self.sfx_label_y = 170
+        self.pickable_label_y = 230  # Will be recalculated in draw_settings_menu
+        self.ui_label_y = 290        # Will be recalculated in draw_settings_menu
         self.slider_x = 380
         self.slider_width = 200
         self.slider_height = 20
@@ -82,6 +86,13 @@ class Menu:
         self.fps_options = GAME_FPS_OPTIONS
         self.fps = GAME_DEFAULT_FPS
         self.load_settings()
+        
+        # Initialize SoundManager volumes based on loaded settings
+        from audio.sound_manager import SoundManager
+        SoundManager.set_sfx_volume(self.sfx_volume)
+        SoundManager.set_pickable_volume(self.pickable_volume)
+        SoundManager.set_ui_volume(self.ui_volume)
+        
         # Ensure music volume matches loaded setting
         try:
             pygame.mixer.music.set_volume(self.music_volume / 100)
@@ -140,10 +151,14 @@ class Menu:
         self.settings_back_button = Button((back_x, back_y, back_w, back_h), 'Back', back_font, COLOR_BG, COLOR_HIGHLIGHT, back_img)
         self.dragging_music = False
         self.dragging_sfx = False
+        self.dragging_pickable = False
+        self.dragging_ui = False
         # Slider positions and sizes
         self.slider_label_x = 100
         self.music_label_y = 110
         self.sfx_label_y = 170
+        self.pickable_label_y = 230  # Will be recalculated in draw_settings_menu
+        self.ui_label_y = 290        # Will be recalculated in draw_settings_menu
         self.slider_x = 380
         self.slider_width = 200
         self.slider_height = 20
@@ -169,10 +184,18 @@ class Menu:
             # Always treat as percent int (0-100), round to nearest 5
             mv = data.get('music_volume', MUSIC_VOLUME * 100)
             sv = data.get('sfx_volume', SFX_VOLUME * 100)
+            pv = data.get('pickable_volume', PICKABLE_VOLUME * 100)
+            uv = data.get('ui_volume', UI_VOLUME * 100)
+            
             self.music_volume = int(round(float(mv)))
             self.music_volume = min(100, max(0, (self.music_volume // 5) * 5))
             self.sfx_volume = int(round(float(sv)))
             self.sfx_volume = min(100, max(0, (self.sfx_volume // 5) * 5))
+            self.pickable_volume = int(round(float(pv)))
+            self.pickable_volume = min(100, max(0, (self.pickable_volume // 5) * 5))
+            self.ui_volume = int(round(float(uv)))
+            self.ui_volume = min(100, max(0, (self.ui_volume // 5) * 5))
+            
             self.fps = int(data.get('fps', GAME_DEFAULT_FPS))
             self.checkbox_options = [
                 {"label": "Auto Aim", "checked": bool(data.get('auto_aim', PLAYER_AUTO_AIM))},
@@ -181,6 +204,8 @@ class Menu:
         except Exception:
             self.music_volume = int(MUSIC_VOLUME * 100)
             self.sfx_volume = int(SFX_VOLUME * 100)
+            self.pickable_volume = int(PICKABLE_VOLUME * 100)
+            self.ui_volume = int(UI_VOLUME * 100)
             self.fps = GAME_DEFAULT_FPS
             self.checkbox_options = [
                 {"label": "Auto Aim", "checked": PLAYER_AUTO_AIM},
@@ -191,6 +216,8 @@ class Menu:
         data = {
             'music_volume': int(self.music_volume),
             'sfx_volume': int(self.sfx_volume),
+            'pickable_volume': int(self.pickable_volume),
+            'ui_volume': int(self.ui_volume),
             'fps': int(self.fps),
             'auto_aim': self.checkbox_options[0]["checked"],
             'auto_attack': self.checkbox_options[1]["checked"]
@@ -200,6 +227,12 @@ class Menu:
                 json.dump(data, f, indent=4)
         except Exception as e:
             pass
+        
+        # Update sound manager volumes when settings are saved
+        from audio.sound_manager import SoundManager
+        SoundManager.set_sfx_volume(self.sfx_volume)
+        SoundManager.set_pickable_volume(self.pickable_volume)
+        SoundManager.set_ui_volume(self.ui_volume)
         # Update current player instance if provided
         if player is not None and hasattr(player, 'checkbox_options'):
             player.checkbox_options[0]["checked"] = self.checkbox_options[0]["checked"]
@@ -283,21 +316,36 @@ class Menu:
             label_rect = label.get_rect(center=rect.center)
             self.screen.blit(label, label_rect)
             self.fps_rects.append(rect)
-        # Music/SFX sliders and labels (move down)
+        # Music/SFX/Pickable/UI sliders and labels (move down)
         self.music_label_y = top_y + spacing_y
         self.sfx_label_y = self.music_label_y + spacing_y
+        self.pickable_label_y = self.sfx_label_y + spacing_y
+        self.ui_label_y = self.pickable_label_y + spacing_y
+        
         music_label = self.small_font.render(f'Music Volume: {int(self.music_volume)}%', True, COLOR_TEXT)
         sfx_label = self.small_font.render(f'SFX Volume: {int(self.sfx_volume)}%', True, COLOR_TEXT)
+        pickable_label = self.small_font.render(f'Pickable Volume: {int(self.pickable_volume)}%', True, COLOR_TEXT)
+        ui_label = self.small_font.render(f'UI Volume: {int(self.ui_volume)}%', True, COLOR_TEXT)
+        
         self.screen.blit(music_label, (self.slider_label_x, self.music_label_y))
         self.screen.blit(sfx_label, (self.slider_label_x, self.sfx_label_y))
+        self.screen.blit(pickable_label, (self.slider_label_x, self.pickable_label_y))
+        self.screen.blit(ui_label, (self.slider_label_x, self.ui_label_y))
+        
         # Draw sliders (simple rectangles, no color)
         pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.music_label_y, int((self.music_volume/100)*self.slider_width), self.slider_height))
         pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.sfx_label_y, int((self.sfx_volume/100)*self.slider_width), self.slider_height))
+        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.pickable_label_y, int((self.pickable_volume/100)*self.slider_width), self.slider_height))
+        pygame.draw.rect(self.screen, COLOR_TEXT, (self.slider_x, self.ui_label_y, int((self.ui_volume/100)*self.slider_width), self.slider_height))
+        
         # Draw slider backgrounds for clarity
         pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.music_label_y, self.slider_width, self.slider_height), 2)
         pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.sfx_label_y, self.slider_width, self.slider_height), 2)
-        # Draw checkboxes (move down)
-        self.checkbox_y_start = self.sfx_label_y + slider_offset
+        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.pickable_label_y, self.slider_width, self.slider_height), 2)
+        pygame.draw.rect(self.screen, COLOR_GRAY, (self.slider_x, self.ui_label_y, self.slider_width, self.slider_height), 2)
+        
+        # Draw checkboxes (move down further)
+        self.checkbox_y_start = self.ui_label_y + slider_offset
         for i, opt in enumerate(self.checkbox_options):
             box_y = self.checkbox_y_start + i * self.checkbox_spacing
             # Draw box
@@ -442,6 +490,20 @@ class Menu:
                     self.sfx_volume = min(100, max(0, percent))
                     self.dragging_sfx = True
                     self.save_settings()
+                # Check if user clicked on the pickable volume slider
+                elif self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width and self.pickable_label_y <= mouse_pos[1] <= self.pickable_label_y + self.slider_height:
+                    rel_x = mouse_pos[0] - self.slider_x
+                    percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                    self.pickable_volume = min(100, max(0, percent))
+                    self.dragging_pickable = True
+                    self.save_settings()
+                # Check if user clicked on the UI volume slider
+                elif self.slider_x <= mouse_pos[0] <= self.slider_x + self.slider_width and self.ui_label_y <= mouse_pos[1] <= self.ui_label_y + self.slider_height:
+                    rel_x = mouse_pos[0] - self.slider_x
+                    percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                    self.ui_volume = min(100, max(0, percent))
+                    self.dragging_ui = True
+                    self.save_settings()
                 # FPS buttons
                 elif hasattr(self, 'fps_rects') and any(r.collidepoint(mouse_pos) for r in self.fps_rects):
                     for i, rect in enumerate(self.fps_rects):
@@ -476,6 +538,8 @@ class Menu:
             elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 self.dragging_music = False
                 self.dragging_sfx = False
+                self.dragging_pickable = False
+                self.dragging_ui = False
             elif event.type == pygame.MOUSEMOTION:
                 mouse_pos = event.pos
                 if self.dragging_music:
@@ -491,6 +555,16 @@ class Menu:
                     rel_x = mouse_pos[0] - self.slider_x
                     percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
                     self.sfx_volume = min(100, max(0, percent))
+                    self.save_settings()
+                if self.dragging_pickable:
+                    rel_x = mouse_pos[0] - self.slider_x
+                    percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                    self.pickable_volume = min(100, max(0, percent))
+                    self.save_settings()
+                if self.dragging_ui:
+                    rel_x = mouse_pos[0] - self.slider_x
+                    percent = int(round((rel_x / self.slider_width) * 100 / 5) * 5)
+                    self.ui_volume = min(100, max(0, percent))
                     self.save_settings()
             return False
 

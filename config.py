@@ -221,8 +221,10 @@ RECEIVED_LOG_MAX_ENTRIES = 50
 # =============================================================================
 # AUDIO CONFIGURATION
 # =============================================================================
-MUSIC_VOLUME = 0.02  # 2%
-SFX_VOLUME = 0.1    # 10%
+MUSIC_VOLUME = 0.1    # 10% default
+SFX_VOLUME = 0.1      # 10% default - Skills, Attacks, Hurt, Death, Walk, Idle, level up
+PICKABLE_VOLUME = 0.1 # 10% default - All pickable-related sounds
+UI_VOLUME = 0.1       # 10% default - Wave, enhancement selection, UI sounds
 BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"
 
 # =============================================================================
