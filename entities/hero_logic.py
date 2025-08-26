@@ -34,7 +34,7 @@ class HeroEnemyLogic:
         # Combat properties
         self.attack_cooldown = 1.5  # Melee attack every 1.5 seconds
         self.last_attack = -float('inf')
-        self.attack_range = 40  # Close melee range
+        self.attack_range = getattr(self.enemy.type, 'attack_range', 40)  # Use config value
         
         # Blocking system
         self.block_chance = getattr(self.enemy.type, 'block_chance', 0.3)  # 30% block chance

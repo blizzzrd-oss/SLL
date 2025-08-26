@@ -22,7 +22,7 @@ ENEMY_TYPE_CONFIG = {
 		'speed': 35,  # Slower than plants
 		'color': (150, 50, 50),
 		'attack_range': 200,  # Long range for projectiles
-		'attack_damage': 8,
+		'attack_damage': 10,
 		'attack_cooldown': 2.0,
 		'projectile_speed': 150,
 		'projectile_damage': 8,
@@ -33,7 +33,7 @@ ENEMY_TYPE_CONFIG = {
 		'speed': 45,  # Moderate speed - between plants and demons
 		'color': (200, 100, 100),
 		'attack_range': 20,  # Melee range
-		'attack_damage': 12,
+		'attack_damage': 18,
 		'attack_cooldown': 1.5,
 		'block_chance': 0.3,  # 30% chance to block attacks
 	},
