@@ -105,17 +105,19 @@ class GameLogicManager:
                     import random
                     offset_x = random.uniform(-10, 10)
                     offset_y = random.uniform(-10, 10)
+
+                    # First, check for other pickable drops so they don't spawn on top of the XP
+                    if hasattr(enemy.type, 'name') and enemy.type.name in ['Plant', 'Demon']:
+                        self._check_pickable_drops(enemy)
+
+                    # Then create the XP pickable (it will try to avoid overlapping existing pickables)
                     self.game.pickable_manager.create_xp_pickable(
                         enemy.x + offset_x, 
                         enemy.y + offset_y,
                         crystal_type
                     )
-                    
+
                     print(f"[XP] Dropped {crystal_type} XP crystal from {enemy.type.name} (early drop)")
-                    
-                    # Check for other pickable drops (reroll dice, etc.)
-                    if hasattr(enemy.type, 'name') and enemy.type.name in ['Plant', 'Demon']:
-                        self._check_pickable_drops(enemy)
                     
                     # Mark as dropped to avoid dropping again
                     enemy.logic.xp_dropped = True
@@ -182,7 +184,10 @@ class GameLogicManager:
     def _check_pickable_drops(self, enemy):
         """Check if enemy should drop pickables."""
         import random
-        
+        # Only one non-XP pickable should be dropped per enemy death.
+        # Evaluate possible drops in priority order and return after the first success.
+        # Priority: Reroll Dice (plants) -> Screen Clearer (demons) -> XP Magnet (both)
+
         # Check for reroll dice drop (from plants only)
         if (hasattr(enemy.type, 'name') and enemy.type.name == 'Plant' and 
             random.random() < REROLL_DICE_DROP_CHANCE):
@@ -190,7 +195,8 @@ class GameLogicManager:
             drop_y = enemy.position[1]
             self.game.pickable_manager.create_reroll_dice(drop_x, drop_y)
             print(f"[PICKABLES] Reroll dice dropped at ({drop_x}, {drop_y})")
-        
+            return
+
         # Check for screen clearer drop (from demons only)
         if (hasattr(enemy.type, 'name') and enemy.type.name == 'Demon' and 
             random.random() < SCREEN_CLEARER_DROP_CHANCE):
@@ -198,7 +204,8 @@ class GameLogicManager:
             drop_y = enemy.position[1]
             self.game.pickable_manager.create_screen_clearer(drop_x, drop_y)
             print(f"[PICKABLES] Screen clearer dropped at ({drop_x}, {drop_y})")
-        
+            return
+
         # Check for XP magnet drop (from both plants and demons)
         if (hasattr(enemy.type, 'name') and enemy.type.name in ['Plant', 'Demon'] and 
             random.random() < XP_MAGNET_DROP_CHANCE):
@@ -206,6 +213,7 @@ class GameLogicManager:
             drop_y = enemy.position[1]
             self.game.pickable_manager.create_xp_magnet(drop_x, drop_y)
             print(f"[PICKABLES] XP magnet dropped at ({drop_x}, {drop_y})")
+            return
 
     def _determine_xp_crystal_type(self, enemy):
         """Determine which type of XP crystal to drop based on enemy type."""

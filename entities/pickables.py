@@ -648,8 +648,33 @@ class PickableManager:
     def create_xp_pickable(self, x, y, crystal_type='green'):
         """Create an XP crystal pickable at the specified position."""
         xp_crystal = XpPickable(x, y, crystal_type)
+
+        # Prevent XP from spawning directly on top of existing pickables.
+        # Try a number of nearby offsets and pick the first free spot.
+        import random
+        # Use configurable values from config_pickables
+        from config_pickables import PICKABLE_SPAWN_OFFSET_ATTEMPTS, PICKABLE_SPAWN_OFFSET_MAX_RADIUS
+        max_attempts = PICKABLE_SPAWN_OFFSET_ATTEMPTS
+        max_radius = PICKABLE_SPAWN_OFFSET_MAX_RADIUS
+
+        for attempt in range(max_attempts):
+            # Check collision with existing pickables
+            collision = any(p.rect.colliderect(xp_crystal.rect) for p in self.pickables)
+            if not collision:
+                break
+
+            # Try a new random offset around the original drop point
+            angle = random.random() * 2 * math.pi
+            radius = random.uniform(12, max_radius)
+            new_x = x + math.cos(angle) * radius
+            new_y = y + math.sin(angle) * radius
+            xp_crystal.x = new_x
+            xp_crystal.y = new_y
+            xp_crystal.rect.center = (int(new_x), int(new_y))
+
+        # Add the pickable (either at original position or first free spot found)
         self.add_pickable(xp_crystal)
-        
+
         # XP crystals drop silently (no sound)
         return xp_crystal
     

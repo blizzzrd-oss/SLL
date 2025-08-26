@@ -88,6 +88,12 @@ PICKABLE_DESPAWN_TIME = 30.0  # Pickables despawn after 30 seconds
 PICKABLE_FLOAT_HEIGHT = 8  # How high pickables float above ground
 PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
 
+# When XP pickables are spawned, try nearby offsets to avoid overlapping existing
+# pickables. These control how many attempts to try and how far from the original
+# drop point to search (in pixels).
+PICKABLE_SPAWN_OFFSET_ATTEMPTS = 20  # How many random placement attempts to try
+PICKABLE_SPAWN_OFFSET_MAX_RADIUS = 50  # Maximum radius (pixels) to search for free spot
+
 # Enhancement System Configuration
 ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge
 
