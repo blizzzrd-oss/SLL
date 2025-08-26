@@ -38,6 +38,21 @@ SKILL_SLASH_SOUND_PATHS = [
 HIT_ENEMY_SOUND_PATH = "resources/sounds/hit_enemy.mp3"
 HIT_PLAYER_SOUND_PATH = "resources/sounds/hit_player.wav"
 
+# Per-enemy-type hit sound paths (optional, fall back to HIT_ENEMY_SOUND_PATH)
+ENEMY_HIT_SOUND_PATHS = {
+    'Plant': [
+        "resources/sounds/hit_enemy_plant01.wav",
+        "resources/sounds/hit_enemy_plant02.wav",
+    ],
+    'Demon': [
+        "resources/sounds/hit_enemy_demon01.wav",
+        "resources/sounds/hit_enemy_demon02.wav",
+    ],
+    'Hero': [
+        "resources/sounds/hit_enemy_hero01.wav",
+    ],
+}
+
 # =============================================================================
 # ENEMY SOUND EFFECTS
 # =============================================================================
@@ -46,6 +61,13 @@ ENEMY_PLANT_DEATH_SOUND_PATHS = [
     "resources/sounds/death_enemy_plant02.wav", 
     "resources/sounds/death_enemy_plant03.wav"
 ]
+
+# Per-enemy death sounds mapping. For now reuse plant death sounds for other types.
+ENEMY_DEATH_SOUND_PATHS = {
+    'Plant': ENEMY_PLANT_DEATH_SOUND_PATHS,
+    'Demon': ENEMY_PLANT_DEATH_SOUND_PATHS,
+    'Hero': ENEMY_PLANT_DEATH_SOUND_PATHS,
+}
 
 # =============================================================================
 # PICKABLE SOUND EFFECTS

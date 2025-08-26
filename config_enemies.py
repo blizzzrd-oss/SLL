@@ -53,8 +53,8 @@ SPAWNER_ENEMY_WEIGHTS = {
 # Minimum wave requirements for enemy types
 SPAWNER_ENEMY_MIN_WAVES = {
 	'Plant': 1,   # Plants can spawn from wave 1
-	'Demon': 3,   # Demons only start spawning from wave 2
-	'Hero': 2,    # Heroes can spawn from wave 1
+	'Demon': 1,   # Demons only start spawning from wave 2
+	'Hero': 1,    # Heroes can spawn from wave 1
 }
 
 # Wave-based Enemy Scaling (replaces time-based scaling)

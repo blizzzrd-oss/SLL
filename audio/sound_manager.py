@@ -126,6 +126,16 @@ class SoundManager:
         if plant_death_sounds:
             cls._sounds_cache['plant_death_sounds'] = plant_death_sounds
             success_count += len(plant_death_sounds)
+        # Per-enemy death sounds mapping (optional)
+        try:
+            from config_sounds import ENEMY_DEATH_SOUND_PATHS
+            for etype, paths in ENEMY_DEATH_SOUND_PATHS.items():
+                sounds = cls._load_sound_list(paths, f"{etype} death sound")
+                if sounds:
+                    cls._sounds_cache[f'death_{etype}'] = sounds
+                    success_count += len(sounds)
+        except Exception:
+            pass
         
         # Pickable sounds
         pickable_sounds = {
@@ -135,12 +145,25 @@ class SoundManager:
         }
         success_count += cls._load_sound_dict(pickable_sounds, "pickable_")
         
-        # Hit sounds
+        # Hit sounds (global) and per-enemy-type hit sounds
         hit_sounds = {
             'enemy': HIT_ENEMY_SOUND_PATH,
             'player': HIT_PLAYER_SOUND_PATH
         }
         success_count += cls._load_sound_dict(hit_sounds, "hit_")
+
+        # Per-enemy hit sounds (optional)
+        try:
+            from config_sounds import ENEMY_HIT_SOUND_PATHS
+            # Load each list into cache with key 'hit_<EnemyName>_<i>' and a list entry
+            for etype, paths in ENEMY_HIT_SOUND_PATHS.items():
+                sounds = cls._load_sound_list(paths, f"{etype} hit sound")
+                if sounds:
+                    cls._sounds_cache[f'hit_{etype}'] = sounds
+                    success_count += len(sounds)
+        except Exception:
+            # ENEMY_HIT_SOUND_PATHS optional
+            pass
         
         # Player/SFX sounds
         sfx_sounds = {
@@ -193,6 +216,24 @@ class SoundManager:
         if sounds and len(sounds) > 0:
             return random.choice(sounds)
         return None
+
+    @classmethod
+    def get_random_death_sound_for_type(cls, enemy_type_name: str):
+        sounds = cls._sounds_cache.get(f'death_{enemy_type_name}')
+        if sounds and len(sounds) > 0:
+            return random.choice(sounds)
+        # Fallback to plant death
+        return cls.get_random_plant_death_sound()
+
+    @classmethod
+    def get_random_enemy_hit_sound_for_type(cls, enemy_type_name: str):
+        """Get a random hit sound for a specific enemy type, falling back to global enemy hit."""
+        import random
+        sounds = cls._sounds_cache.get(f'hit_{enemy_type_name}')
+        if sounds and len(sounds) > 0:
+            return random.choice(sounds)
+        # Fallback to global enemy hit
+        return cls._sounds_cache.get('hit_enemy')
     
     @classmethod
     def get_next_slash_sound(cls):

@@ -46,7 +46,13 @@ class Enemy:
 
         # Play hit sound when enemy takes damage (but not fatal damage)
         if self.health > 0:
-            SoundManager.play_hit_sound('enemy')
+            # Prefer per-type hit sounds if available
+            try:
+                sound = SoundManager.get_random_enemy_hit_sound_for_type(self.type.name)
+                SoundManager._play_sound_with_volume(sound, SoundManager._sfx_volume, f"hit_{self.type.name}", force_play=True)
+            except Exception:
+                # Fallback to generic enemy hit
+                SoundManager.play_hit_sound('enemy')
 
         # Log outgoing damage for player stats if attacker is a Player
         if attacker and hasattr(attacker, 'damage_log'):
@@ -64,8 +70,14 @@ class Enemy:
                 # Play death sound if state changed to death (only once)
                 if prev_state != 'death':
                     # Check if this is a plant enemy and play random plant death sound
-                    if isinstance(self.logic, PlantEnemyLogic):
-                        SoundManager.play_random_plant_death_sound()
+                    # Play per-type death sound when available
+                    try:
+                        sound = SoundManager.get_random_death_sound_for_type(self.type.name)
+                        SoundManager._play_sound_with_volume(sound, SoundManager._sfx_volume, f"death_{self.type.name}", force_play=True)
+                    except Exception:
+                        # Fallback to plant death sound
+                        if isinstance(self.logic, PlantEnemyLogic):
+                            SoundManager.play_random_plant_death_sound()
                 
                 # Fix position for death animation to prevent jitter
                 if hasattr(self.logic, 'fixed_draw_pos'):
