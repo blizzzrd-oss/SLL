@@ -178,6 +178,12 @@ PLANT_FRAME_COUNTS = {
     'attack': 7,
 }
 
+# Plant visual/hurt configuration (moved from config_enemies.py)
+PLANT_ATTACK_IMPACT_FRAME_RATIO = 0.5  # Impact happens at half animation
+PLANT_HURT_OVERLAY_DURATION = 0.5  # 500ms red tint
+PLANT_SPRITE_STANDARD_WIDTH = 64
+PLANT_SPRITE_STANDARD_HEIGHT = 64
+
 # Hero Enemy Sprites
 HERO_SPRITE_FILES = {
     'idle': 'Hero_red_idle_6frames.png',

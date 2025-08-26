@@ -33,7 +33,7 @@ ENEMY_TYPE_CONFIG = {
 		'speed': 45,  # Moderate speed - between plants and demons
 		'color': (200, 100, 100),
 		'attack_range': 20,  # Melee range
-		'attack_damage': 18,
+		'attack_damage': 8,
 		'attack_cooldown': 1.5,
 		'block_chance': 0.3,  # 30% chance to block attacks
 	},
@@ -85,14 +85,6 @@ SPAWNER_RATE_INCREASE_FACTOR = 0.9    # Multiply interval by 0.9 (10% faster spa
 # Plant Enemy Configuration
 PLANT_ATTACK_TRIGGER_RANGE = 40
 PLANT_ATTACK_DAMAGE_RANGE = 25
-PLANT_ATTACK_IMPACT_FRAME_RATIO = 0.5  # Impact happens at half animation
-PLANT_HURT_OVERLAY_DURATION = 0.5  # 500ms red tint
-PLANT_SPRITE_STANDARD_WIDTH = 64
-PLANT_SPRITE_STANDARD_HEIGHT = 64
+# Visual/sprite-related plant settings moved to config_images.py
 
-# Enemy Sound Effects
-ENEMY_PLANT_DEATH_SOUND_PATHS = [
-    "resources/sounds/death_enemy_plant01.wav",
-    "resources/sounds/death_enemy_plant02.wav", 
-    "resources/sounds/death_enemy_plant03.wav"
-]
+
