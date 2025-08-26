@@ -1,6 +1,7 @@
 import pygame
 import os
-from config import BG_MUSIC_PATH, MUSIC_VOLUME, WINDOW_WIDTH, WINDOW_HEIGHT, PAUSE_MENU_OPTIONS, AUDIO_CHANNELS
+from config import WINDOW_WIDTH, WINDOW_HEIGHT, PAUSE_MENU_OPTIONS
+from config_sounds import BG_MUSIC_PATH, MUSIC_VOLUME, AUDIO_CHANNELS
 from utils.resource_path import resource_path
 from rendering.menu import Menu
 from core.game import Game

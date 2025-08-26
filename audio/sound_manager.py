@@ -5,7 +5,7 @@ import pygame
 import os
 import random
 from utils.resource_path import resource_path
-from config import (
+from config_sounds import (
     SKILL_DASH_SOUND_PATH, SKILL_SLASH_SOUND_PATHS,
     ENEMY_PLANT_DEATH_SOUND_PATHS, SFX_VOLUME, PICKABLE_VOLUME, UI_VOLUME,
     HIT_ENEMY_SOUND_PATH, HIT_PLAYER_SOUND_PATH,

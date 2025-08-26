@@ -5,6 +5,7 @@ import os
 from config_enemies import *
 from config_waves import *
 from config_pickables import *
+from config_sounds import *
 
 # =============================================================================
 # CAMERA AND WORLD CONFIGURATION
@@ -219,15 +220,6 @@ DAMAGE_LOG_MAX_ENTRIES = 10
 RECEIVED_LOG_MAX_ENTRIES = 50
 
 # =============================================================================
-# AUDIO CONFIGURATION
-# =============================================================================
-MUSIC_VOLUME = 0.1    # 10% default
-SFX_VOLUME = 0.1      # 10% default - Skills, Attacks, Hurt, Death, Walk, Idle, level up
-PICKABLE_VOLUME = 0.1 # 10% default - All pickable-related sounds
-UI_VOLUME = 0.1       # 10% default - Wave, enhancement selection, UI sounds
-BG_MUSIC_PATH = "resources/sounds/bg_music01.mp3"
-
-# =============================================================================
 # PICKABLE SYSTEM CONFIGURATION
 # =============================================================================
 # Reroll Dice Pickable
@@ -297,44 +289,6 @@ PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
 
 # Enhancement System Configuration
 ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge
-
-# Audio Performance Settings
-AUDIO_CHANNELS = 64  # Number of audio channels (increased for better performance)
-AUDIO_FORCE_PLAY_MAX_CHANNELS_TO_STOP = 3  # Max channels to stop when force-playing important sounds
-
-# Skill Sound Effects
-SKILL_DASH_SOUND_PATH = "resources/sounds/skill_dash.mp3"
-SKILL_SLASH_SOUND_PATHS = [
-    "resources/sounds/skill_slash01.wav",
-    "resources/sounds/skill_slash02.wav",
-    "resources/sounds/skill_slash03.mp3"
-]
-
-# Hit Sound Effects
-HIT_ENEMY_SOUND_PATH = "resources/sounds/hit_enemy.mp3"
-HIT_PLAYER_SOUND_PATH = "resources/sounds/hit_player.wav"
-
-# Enemy Sound Effects
-ENEMY_PLANT_DEATH_SOUND_PATHS = [
-    "resources/sounds/death_enemy_plant01.wav",
-    "resources/sounds/death_enemy_plant02.wav", 
-    "resources/sounds/death_enemy_plant03.wav"
-]
-
-# Pickable Sound Effects
-PICKABLE_DROP_SOUND_PATH = "resources/sounds/pickable_drop.mp3"  # General pickable drop sound (placeholder)
-PICKABLE_DICE_DROP_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"  # Specific to dice drops
-PICKABLE_COLLECT_SOUND_PATH = "resources/sounds/pickable.mp3"
-
-# Player Sound Effects
-PLAYER_LEVEL_UP_SOUND_PATH = "resources/sounds/player_level_up.mp3"
-
-# Wave Sound Effects
-NEW_WAVE_SOUND_PATH = "resources/sounds/new_wave.mp3"
-
-# Enhancement UI Sound Effects  
-ENHANCEMENT_SELECT_SOUND_PATH = "resources/sounds/pickable.mp3"
-ENHANCEMENT_REROLL_SOUND_PATH = "resources/sounds/pickable_dice_roll.mp3"
 
 # =============================================================================
 # LOGGING AND DEBUGGING CONFIGURATION  

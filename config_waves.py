@@ -126,6 +126,3 @@ WAVE_EVENT_CHANCES = {
         }
     }
 }
-
-# Wave Sound Effects
-NEW_WAVE_SOUND_PATH = "resources/sounds/new_wave.mp3"

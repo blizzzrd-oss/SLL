@@ -8,13 +8,13 @@ import json
 from rendering.game_render import _game_render_cache
 from utils.resource_path import resource_path
 from config import (
-    MUSIC_VOLUME, SFX_VOLUME, PICKABLE_VOLUME, UI_VOLUME, BG_MUSIC_PATH,
     COLOR_BG, COLOR_TEXT, COLOR_HIGHLIGHT, COLOR_SLIDER_MUSIC, COLOR_SLIDER_SFX, COLOR_BACK,
     GAME_FPS_OPTIONS, GAME_DEFAULT_FPS,
     COLOR_BLACK, COLOR_GRAY,
     FONT_SIZE_LARGE, FONT_SIZE_SMALL, WINDOW_WIDTH, WINDOW_HEIGHT,
     PLAYER_AUTO_AIM, PLAYER_AUTO_ATTACK
 )
+from config_sounds import MUSIC_VOLUME, SFX_VOLUME, PICKABLE_VOLUME, UI_VOLUME, BG_MUSIC_PATH
 
 # Helper for resource paths
 
