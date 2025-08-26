@@ -45,9 +45,9 @@ class HeroEnemyLogic:
         # Store fixed position during hurt/death animations to prevent jitter
         self.fixed_draw_pos = None
         
-        # Hurt animation system
-        self.hurt_timer = 0.0
-        self.hurt_duration = 0.4  # 400ms hurt animation
+        # Hurt overlay system (like Plant)
+        self.hurt_overlay_timer = 0.0
+        self.hurt_overlay_duration = 0.5  # 500ms red tint
         
         # Track XP drop timing
         self.death_timer = 0.0
@@ -58,16 +58,11 @@ class HeroEnemyLogic:
         self.last_move_direction = (0, 0)  # Track last movement for direction
 
     def trigger_hurt_animation(self):
-        """Trigger the hurt animation when the hero takes damage."""
+        """Trigger the hurt overlay when the hero takes damage."""
         # Cannot block while attacking
         if self.state == 'attack':
-            # Cannot block during attack animation - take damage normally
-            if self.state != 'death':
-                self.state = 'hurt'
-                self.anim_frame = 0
-                self.anim_timer = 0.0
-                self.hurt_timer = 0.0
-                self.blocking = False
+            # Cannot block during attack animation - take damage with overlay
+            self.hurt_overlay_timer = self.hurt_overlay_duration
             return False  # Damage was not blocked
         
         # Check if blocking - 30% chance to block damage (only when not attacking)
@@ -79,12 +74,9 @@ class HeroEnemyLogic:
             self.block_timer = 0.0
             print(f"[HERO] Blocked attack!")
             return True  # Indicate damage was blocked
-        elif self.state != 'death':  # Can't interrupt death animation
-            self.state = 'hurt'
-            self.anim_frame = 0
-            self.anim_timer = 0.0
-            self.hurt_timer = 0.0
-            self.blocking = False
+        else:
+            # Take damage with red overlay effect (like Plant)
+            self.hurt_overlay_timer = self.hurt_overlay_duration
             return False  # Damage was not blocked
 
     def _load_sprites(self):
@@ -205,26 +197,9 @@ class HeroEnemyLogic:
                     self.anim_timer = 0.0
             return  # Don't process movement logic during block animation
 
-        # Handle hurt animation - can be interrupted by death
-        if self.state == 'hurt':
-            self.hurt_timer += dt
-            self.anim_timer += dt
-            if self.anim_timer > 0.1:  # 100ms animation speed
-                self.anim_frame += 1
-                self.anim_timer = 0.0
-                if self.anim_frame >= HERO_FRAME_COUNTS['hurt'] or self.hurt_timer >= self.hurt_duration:
-                    # Hurt animation complete, return to appropriate state
-                    px, py = player.rect.center if hasattr(player, 'rect') else (player.x, player.y)
-                    ex, ey = self.enemy.position
-                    distance = math.hypot(px - ex, py - ey)
-                    
-                    if distance <= self.attack_range:
-                        self.state = 'idle'
-                    else:
-                        self.state = 'walk'
-                    self.anim_frame = 0
-                    self.anim_timer = 0.0
-            return  # Don't process movement logic during hurt animation
+        # Update hurt overlay timer (like Plant)
+        if self.hurt_overlay_timer > 0:
+            self.hurt_overlay_timer -= dt
 
         # Handle attack animation - cannot be interrupted by blocking
         if self.state == 'attack':
@@ -370,6 +345,17 @@ class HeroEnemyLogic:
                 frames = self.sprites[current_state][direction]
                 if frames and self.anim_frame < len(frames):
                     frame = frames[self.anim_frame]
+                    
+                    # Apply red overlay if hurt (like Plant)
+                    if self.hurt_overlay_timer > 0:
+                        # Create a red-tinted version of the frame
+                        hurt_frame = frame.copy()
+                        # Create red overlay surface
+                        red_overlay = pygame.Surface(frame.get_size(), pygame.SRCALPHA)
+                        red_overlay.fill((255, 100, 100, 128))  # Red with transparency
+                        hurt_frame.blit(red_overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+                        frame = hurt_frame
+                    
                     # Center the sprite on the enemy position
                     rect = frame.get_rect(center=(screen_x, screen_y))
                     surface.blit(frame, rect)
@@ -377,6 +363,17 @@ class HeroEnemyLogic:
                     # Fallback to first frame if animation frame is out of bounds
                     if frames:
                         frame = frames[0]
+                        
+                        # Apply red overlay if hurt (like Plant)
+                        if self.hurt_overlay_timer > 0:
+                            # Create a red-tinted version of the frame
+                            hurt_frame = frame.copy()
+                            # Create red overlay surface
+                            red_overlay = pygame.Surface(frame.get_size(), pygame.SRCALPHA)
+                            red_overlay.fill((255, 100, 100, 128))  # Red with transparency
+                            hurt_frame.blit(red_overlay, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+                            frame = hurt_frame
+                        
                         rect = frame.get_rect(center=(screen_x, screen_y))
                         surface.blit(frame, rect)
             else:
