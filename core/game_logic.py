@@ -6,6 +6,7 @@ Handles all non-rendering game state updates.
 import pygame
 import time
 import random
+import math
 from entities.spawner import EnemySpawner
 from entities.enemy import PlantType, DemonType
 from core.wave_system import WaveManager
@@ -118,8 +119,12 @@ class GameLogicManager:
                     
                     # Mark as dropped to avoid dropping again
                     enemy.logic.xp_dropped = True
+        
+        # Handle enemy-to-enemy collision (prevent stacking)
+        self._handle_enemy_collisions()
             
-            # Handle final enemy removal when death animation completes
+        # Handle final enemy removal when death animation completes
+        for enemy in self.enemies[:]:
             if hasattr(enemy, 'dead') and enemy.dead:
                 self.enemies.remove(enemy)
                 # Notify wave manager of enemy death
@@ -278,3 +283,85 @@ class GameLogicManager:
             key=lambda e: (e.rect.centerx - px) ** 2 + (e.rect.centery - py) ** 2
         )
         return closest
+
+    def _handle_enemy_collisions(self):
+        """Handle enemy-to-enemy collision to prevent stacking."""
+        # Skip collision handling for enemies in death state
+        alive_enemies = [enemy for enemy in self.enemies 
+                        if not (hasattr(enemy, 'logic') and hasattr(enemy.logic, 'state') 
+                               and enemy.logic.state == 'death')]
+        
+        # Check collisions between all pairs of alive enemies
+        for i, enemy1 in enumerate(alive_enemies):
+            for enemy2 in alive_enemies[i + 1:]:
+                # Create collision rects that are half the normal size
+                collision_rect1 = self._get_half_size_rect(enemy1)
+                collision_rect2 = self._get_half_size_rect(enemy2)
+                
+                # Check for collision
+                if collision_rect1.colliderect(collision_rect2):
+                    self._separate_enemies(enemy1, enemy2)
+    
+    def _get_half_size_rect(self, enemy):
+        """Get a collision rect that's half the size of the enemy's normal rect."""
+        normal_rect = enemy.rect
+        half_width = normal_rect.width // 2
+        half_height = normal_rect.height // 2
+        
+        # Create centered rect with half dimensions
+        half_rect = pygame.Rect(
+            normal_rect.centerx - half_width // 2,
+            normal_rect.centery - half_height // 2,
+            half_width,
+            half_height
+        )
+        return half_rect
+    
+    def _separate_enemies(self, enemy1, enemy2):
+        """Separate two colliding enemies by pushing them apart."""
+        # Calculate vector between enemy centers
+        dx = enemy2.x - enemy1.x
+        dy = enemy2.y - enemy1.y
+        
+        # Avoid division by zero
+        distance = math.hypot(dx, dy)
+        if distance < 0.1:  # Very close or identical positions
+            # Use a small random offset to break ties
+            import random
+            dx = random.uniform(-1, 1)
+            dy = random.uniform(-1, 1)
+            distance = math.hypot(dx, dy)
+        
+        # Normalize direction vector
+        if distance > 0:
+            dx /= distance
+            dy /= distance
+        
+        # Calculate minimum separation distance (sum of half-sizes)
+        half_size1 = self._get_enemy_half_size(enemy1)
+        half_size2 = self._get_enemy_half_size(enemy2)
+        min_distance = half_size1 + half_size2 + 2  # Add small buffer
+        
+        # Calculate how much to push each enemy
+        overlap = min_distance - distance
+        if overlap > 0:
+            push_distance = overlap * 0.5  # Each enemy moves half the overlap
+            
+            # Push enemies apart
+            enemy1.x -= dx * push_distance
+            enemy1.y -= dy * push_distance
+            enemy2.x += dx * push_distance
+            enemy2.y += dy * push_distance
+            
+            # Update position tuples and rects
+            enemy1.position = (enemy1.x, enemy1.y)
+            enemy2.position = (enemy2.x, enemy2.y)
+            enemy1.rect.center = (int(enemy1.x), int(enemy1.y))
+            enemy2.rect.center = (int(enemy2.x), int(enemy2.y))
+    
+    def _get_enemy_half_size(self, enemy):
+        """Get the half-size radius of an enemy for collision calculations."""
+        if isinstance(enemy.size, tuple):
+            return max(enemy.size) // 4  # Quarter of the larger dimension
+        else:
+            return enemy.size // 4  # Quarter of the size
