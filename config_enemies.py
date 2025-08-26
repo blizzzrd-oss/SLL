@@ -27,6 +27,16 @@ ENEMY_TYPE_CONFIG = {
 		'projectile_speed': 150,
 		'projectile_damage': 8,
 	},
+	'Hero': {
+		'max_health': 40,
+		'size': (32, 32),  # Width x Height - reduced hitbox for small sprite
+		'speed': 45,  # Moderate speed - between plants and demons
+		'color': (200, 100, 100),
+		'attack_range': 40,  # Melee range
+		'attack_damage': 12,
+		'attack_cooldown': 1.5,
+		'block_chance': 0.3,  # 30% chance to block attacks
+	},
 }
 
 # =============================================================================
@@ -37,12 +47,14 @@ SPAWNER_SPAWN_BUFFER = 100  # Distance outside camera view to spawn enemies
 SPAWNER_ENEMY_WEIGHTS = {
 	'Plant': 1.0,
 	'Demon': 0.3,  # Lower spawn weight - demons are more dangerous
+	'Hero': 0.8,   # Moderate spawn weight - Heroes are tankier than plants
 }
 
 # Minimum wave requirements for enemy types
 SPAWNER_ENEMY_MIN_WAVES = {
 	'Plant': 1,   # Plants can spawn from wave 1
 	'Demon': 2,   # Demons only start spawning from wave 2
+	'Hero': 1,    # Heroes can spawn from wave 1
 }
 
 # Wave-based Enemy Scaling (replaces time-based scaling)
@@ -53,6 +65,9 @@ SPAWNER_WAVE_WEIGHT_EVENTS = [
 	('Demon', 2, 0.5),   # Starting from wave 2, demons begin spawning
 	('Demon', 5, 1.0),   # Starting from wave 5, normal demon spawn rate
 	('Demon', 10, 1.5),  # Starting from wave 10, increase demon spawn rate
+	('Hero', 1, 0.8),    # Heroes start spawning from wave 1
+	('Hero', 3, 1.2),    # Starting from wave 3, increase hero spawn rate
+	('Hero', 7, 1.8),    # Starting from wave 7, increase hero spawn rate more
 ]
 
 # Spawn Rate Limits

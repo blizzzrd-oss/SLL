@@ -8,7 +8,7 @@ import time
 import random
 import math
 from entities.spawner import EnemySpawner
-from entities.enemy import PlantType, DemonType
+from entities.enemy import PlantType, DemonType, HeroType
 from core.wave_system import WaveManager
 from config import (REROLL_DICE_DROP_CHANCE, SCREEN_CLEARER_DROP_CHANCE, 
                    XP_MAGNET_DROP_CHANCE)
@@ -28,7 +28,7 @@ class GameLogicManager:
         self.enemies = []
         self.game.enemies = self.enemies
         self.spawner = EnemySpawner(
-            [PlantType, DemonType], 
+            [PlantType, DemonType, HeroType], 
             get_game_time_fn=lambda: self.game_time,
             screen=screen,
             game=game,

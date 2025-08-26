@@ -33,6 +33,15 @@ class Enemy:
         if self.dead or (self.logic and hasattr(self.logic, 'state') and self.logic.state == 'death'):
             return
 
+        # Check for blocking mechanics (Hero enemies)
+        from entities.hero_logic import HeroEnemyLogic
+        if isinstance(self.logic, HeroEnemyLogic) and hasattr(self.logic, 'trigger_hurt_animation'):
+            # Hero has blocking mechanics - check if damage is blocked
+            if self.logic.trigger_hurt_animation():
+                # Damage was blocked, don't apply damage or sound effects
+                print(f"[HERO] Blocked {amount} damage from {source}")
+                return
+
         self.health -= amount
 
         # Play hit sound when enemy takes damage (but not fatal damage)
@@ -62,12 +71,13 @@ class Enemy:
                 if hasattr(self.logic, 'fixed_draw_pos'):
                     self.logic.fixed_draw_pos = (int(self.position[0]), int(self.position[1]))
             else:
-                # Trigger hurt animation for demons, overlay for others
-                if hasattr(self.logic, 'trigger_hurt_animation'):
+                # Trigger hurt animation for demons and others (but not Hero, already handled above)
+                if hasattr(self.logic, 'trigger_hurt_animation') and not isinstance(self.logic, HeroEnemyLogic):
                     # Demon-style hurt animation
                     self.logic.trigger_hurt_animation()
                 elif hasattr(self.logic, 'hurt_overlay_timer') and hasattr(self.logic, 'hurt_overlay_duration'):
                     # Plant-style hurt overlay
+                    self.logic.hurt_overlay_timer = self.logic.hurt_overlay_duration
                     self.logic.hurt_overlay_timer = self.logic.hurt_overlay_duration
         # Don't set dead = True here, let the death animation complete first
     def __init__(self, enemy_type, position=(0, 0)):
@@ -160,4 +170,19 @@ DemonType = EnemyType(
     attack_cooldown=demon_cfg.get('attack_cooldown', 2.0),
     projectile_speed=demon_cfg.get('projectile_speed', 150),
     projectile_damage=demon_cfg.get('projectile_damage', 8)
+)
+
+# Register the Hero enemy type using config
+hero_cfg = ENEMY_TYPE_CONFIG['Hero']
+from entities.hero_logic import HeroEnemyLogic
+HeroType = EnemyType(
+    name='Hero',
+    max_health=hero_cfg['max_health'],
+    size=hero_cfg['size'],
+    speed=hero_cfg['speed'],
+    color=hero_cfg['color'],
+    logic_cls=HeroEnemyLogic,
+    attack_range=hero_cfg.get('attack_range', 40),
+    attack_damage=hero_cfg.get('attack_damage', 10),
+    attack_cooldown=hero_cfg.get('attack_cooldown', 1.5)
 )

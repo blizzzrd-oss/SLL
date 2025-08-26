@@ -8,7 +8,7 @@ from config import (
     SPAWNER_RATE_INCREASE_INTERVAL, SPAWNER_RATE_INCREASE_FACTOR, SPAWNER_MIN_INTERVAL,
     SPAWNER_WAVE_WEIGHT_EVENTS, WAVE_SCALING_ENABLED
 )
-from entities.enemy import PlantType, EnemyType, Enemy
+from entities.enemy import PlantType, DemonType, HeroType, EnemyType, Enemy
 
 
 class EnemySpawner:

@@ -178,6 +178,33 @@ PLANT_FRAME_COUNTS = {
     'attack': 7,
 }
 
+# Hero Enemy Sprites
+HERO_SPRITE_FILES = {
+    'idle': 'Hero_red_idle_6frames.png',
+    'walk': 'Hero_red_walk_8frames.png',
+    'attack': 'Hero_red_attack_8frames.png',
+    'block': 'Hero_red_block_3frames.png',
+    'hurt': 'Hero_red_hurt_4frames.png',
+    'death': 'Hero_red_death_12frames.png',
+}
+
+# Hero sprite base path
+HERO_SPRITES_BASE_PATH = "resources/images/enemies/Hero/"
+
+# Hero frame counts (tied to sprite files above)
+HERO_FRAME_COUNTS = {
+    'idle': 6,
+    'walk': 8,
+    'attack': 8,
+    'block': 3,
+    'hurt': 4,
+    'death': 12,
+}
+
+# Hero frame dimensions (estimate - may need adjustment)
+HERO_FRAME_WIDTH = 64
+HERO_FRAME_HEIGHT = 64
+
 # =============================================================================
 # UI AND MENU IMAGES
 # =============================================================================
