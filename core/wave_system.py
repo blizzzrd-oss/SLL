@@ -14,6 +14,7 @@ from config import (
 )
 
 
+
 @dataclass
 class WaveConfig:
     """Configuration for a single wave."""
@@ -50,16 +51,28 @@ class WaveManager:
         self.current_wave = 1
         self.wave_start_time = 0.0  # Use game time instead of real time
         self.total_game_time = 0.0
-        
+
         # Wave configuration - use centralized config
-        self.default_wave_interval = WAVE_DURATION  # Use centralized wave duration
+        # Use the comprehensive config dict where possible so designers can tweak values
         self.wave_config = WAVE_SYSTEM_CONFIGURATION  # Use comprehensive config
+        # Allow WAVE_DURATION to be overridden from the config dict
+        self.default_wave_interval = self.wave_config.get('WAVE_DURATION', WAVE_DURATION)
+        print(f"[WAVE DEBUG] Initialized default_wave_interval = {self.default_wave_interval}")
+
+        # Read special wave settings from the config dict if present, else fall back to module constants
+        self.boss_interval = self.wave_config.get('BOSS_WAVE_INTERVAL', BOSS_WAVE_INTERVAL)
+        self.elite_interval = self.wave_config.get('ELITE_WAVE_INTERVAL', ELITE_WAVE_INTERVAL)
+        self.boss_health_bonus = self.wave_config.get('BOSS_WAVE_HEALTH_BONUS', BOSS_WAVE_HEALTH_BONUS)
+        self.boss_damage_bonus = self.wave_config.get('BOSS_WAVE_DAMAGE_BONUS', BOSS_WAVE_DAMAGE_BONUS)
+        self.elite_health_bonus = self.wave_config.get('ELITE_WAVE_HEALTH_BONUS', ELITE_WAVE_HEALTH_BONUS)
+        self.elite_speed_bonus = self.wave_config.get('ELITE_WAVE_SPEED_BONUS', ELITE_WAVE_SPEED_BONUS)
+
         self.current_wave_config = self._generate_wave_config(1)
-        
+
         # Event tracking
         self.wave_events_triggered = []
         self.pending_events = []
-        
+
         # Statistics
         self.total_waves_completed = 0
         self.enemies_killed_this_wave = 0
@@ -100,18 +113,18 @@ class WaveManager:
         self._configure_wave_events(config)
         
         # Special wave types - use additive bonuses
-        if wave_number % BOSS_WAVE_INTERVAL == 0:  # Boss waves
+        if wave_number % self.boss_interval == 0:  # Boss waves
             config.is_boss_wave = True
             config.description = f"Boss Wave {wave_number}"
             config.spawn_rate_multiplier *= 1.5  # Special spawn rate boost for boss waves
             # Apply additive bonuses for boss waves
-            config.enemy_health_multiplier *= (1.0 + BOSS_WAVE_HEALTH_BONUS)  # Direct additive bonus
-            config.enemy_damage_multiplier *= (1.0 + BOSS_WAVE_DAMAGE_BONUS)  # Direct additive bonus
-        elif wave_number % ELITE_WAVE_INTERVAL == 0:  # Elite waves
+            config.enemy_health_multiplier *= (1.0 + self.boss_health_bonus)  # Direct additive bonus
+            config.enemy_damage_multiplier *= (1.0 + self.boss_damage_bonus)  # Direct additive bonus
+        elif wave_number % self.elite_interval == 0:  # Elite waves
             config.description = f"Elite Wave {wave_number}"
             # Apply additive bonuses for elite waves
-            config.enemy_health_multiplier *= (1.0 + ELITE_WAVE_HEALTH_BONUS)  # Direct additive bonus
-            config.enemy_speed_multiplier *= (1.0 + ELITE_WAVE_SPEED_BONUS)  # Direct additive bonus
+            config.enemy_health_multiplier *= (1.0 + self.elite_health_bonus)  # Direct additive bonus
+            config.enemy_speed_multiplier *= (1.0 + self.elite_speed_bonus)  # Direct additive bonus
         else:
             config.description = f"Wave {wave_number}"
             
@@ -195,9 +208,15 @@ class WaveManager:
         
         for event_name, chance in self.current_wave_config.event_chances.items():
             if random.random() < chance:
+                # Include multiplier (if present) so event manager can apply it
+                # Retrieve the original event config to read any configured multiplier
+                event_config = WAVE_EVENT_CHANCES.get(event_name, {})
+                multiplier = event_config.get('multiplier', 1.0)
+
                 self.pending_events.append({
                     'type': event_name,
                     'wave': self.current_wave,
+                    'multiplier': multiplier,
                     'triggered_at': self.total_game_time  # Use game time
                 })
                 self.wave_events_triggered.append(event_name)
@@ -282,7 +301,9 @@ class WaveManager:
     
     def set_wave_interval(self, interval: float):
         """Set the default wave interval."""
+        old = getattr(self, 'default_wave_interval', None)
         self.default_wave_interval = interval
+        print(f"[WAVE DEBUG] set_wave_interval called: old={old} new={self.default_wave_interval}")
         # Update current wave config if needed
         if hasattr(self.current_wave_config, 'duration'):
             self.current_wave_config.duration = interval

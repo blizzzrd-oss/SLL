@@ -10,7 +10,7 @@ All wave-related settings including progression, bonuses, and events.
 # Comprehensive Wave System Configuration (Primary) - ADDITIVE BONUSES
 WAVE_SYSTEM_CONFIGURATION = {
     # Core wave timing
-    'WAVE_DURATION': 30.0,  # Duration of each wave in seconds
+    'WAVE_DURATION': 60.0,  # Duration of each wave in seconds
     
     # Spawn rate bonuses per wave (additive percentages)
     'WAVE_SPAWN_RATE_BONUSES': {
@@ -98,16 +98,17 @@ WAVE_EVENT_CHANCES = {
             'Hard': 0.7,     # 21% chance in Hard mode
         }
     },
-    'loot_blessing': {
+    'bonus_loot_event': {
         'unlock_wave': 3,
         'base_chance': 0.25,
+    'multiplier': 2.0,  # Loot blessing doubles non-XP pickable drop chances
         'mode_multipliers': {
             'Easy': 1.2,
             'Normal': 1.0,
             'Hard': 1.3,     # More loot events in hard mode as reward
         }
     },
-    'enemy_weakness': {
+    'enemy_weakness_event': {
         'unlock_wave': 5,
         'base_chance': 0.2,
         'mode_multipliers': {
@@ -116,7 +117,7 @@ WAVE_EVENT_CHANCES = {
             'Hard': 0.8,
         }
     },
-    'boss_swarm': {
+    'boss_swarm_event': {
         'unlock_wave': 4,
         'base_chance': 0.15,
         'mode_multipliers': {

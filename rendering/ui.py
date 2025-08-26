@@ -267,8 +267,8 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
         for event in active_events:
             event_color = {
                 'healing_shrine': (100, 255, 150),    # Light green
-                'loot_blessing': (255, 215, 0),       # Gold
-                'enemy_weakness': (255, 100, 255)     # Magenta
+                'bonus_loot_event': (255, 215, 0),    # Gold
+                'enemy_weakness_event': (255, 100, 255)     # Magenta
             }.get(event['type'], (255, 255, 255))
             
             # Format remaining time
@@ -277,8 +277,8 @@ def draw_hud(screen, player, fps=None, game_mode=None, active_events=None, event
             
             event_name = {
                 'healing_shrine': 'Healing Shrine',
-                'loot_blessing': 'Loot Blessing',
-                'enemy_weakness': 'Enemy Weakness'
+                'bonus_loot_event': 'Loot Blessing',
+                'enemy_weakness_event': 'Enemy Weakness'
             }.get(event['type'], event['type'].title())
             
             event_text = font.render(f"{event_name} ({time_str})", True, event_color)

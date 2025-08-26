@@ -145,6 +145,26 @@ class GameEventManager:
         """Get recent event notifications for UI display"""
         return [text for text, _ in self.recent_notifications]
     
-    def force_event(self, event_type):
-        """Force start an event (for testing/debugging)"""
-        self._start_event(event_type)
+    def force_event(self, event_type, multiplier: float = 1.0):
+        """Force start an event (for testing/debugging).
+
+        multiplier: optional multiplier to apply to the event's effect_value
+        (e.g., loot blessing multiplier of 2.0 will double loot effect).
+        """
+        # If multiplier provided, start event and scale its effect_value
+        if event_type in GAME_EVENTS and not any(e.type == event_type for e in self.active_events):
+            config = GAME_EVENTS[event_type].copy()
+            # Scale effect_value if present
+            if 'effect_value' in config:
+                try:
+                    config['effect_value'] = config['effect_value'] * multiplier
+                except Exception:
+                    pass
+            new_event = GameEvent(event_type, config)
+            self.active_events.append(new_event)
+            notification_text = f"Event Started: {new_event.name}"
+            self.recent_notifications.append((notification_text, self.notification_duration))
+            print(f"[GAME EVENT] {notification_text} - {new_event.description}")
+        else:
+            # Fallback to original behavior
+            self._start_event(event_type)
