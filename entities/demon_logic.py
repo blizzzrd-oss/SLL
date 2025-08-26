@@ -8,18 +8,12 @@ import math
 import os
 from entities.projectiles import EnemyProjectile
 from utils.resource_path import resource_path
+from config_images import DEMON_SPRITE_FILES, DEMON_SPRITES_BASE_PATH
 
 
 class DemonEnemyLogic:
     """AI and logic for demon enemies with flying movement and projectile attacks."""
     
-    SPRITE_FILES = {
-        'idle': 'Demon_Idle_full.png',
-        'flying': 'Demon_Flying_full.png', 
-        'attack': 'Demon_Attack_full.png',
-        'hurt': 'Demon_Hurt_full.png',
-        'death': 'Demon_Death_full.png',
-    }
     FRAME_COUNTS = {
         'idle': 4,
         'flying': 4,
@@ -86,10 +80,9 @@ class DemonEnemyLogic:
     def _load_sprites(self):
         """Load all sprite sheets for demon animations."""
         sprites = {}
-        base_path = "resources/images/enemies/Deamon/"  # Note: Fixed path to match provided directory
         
-        for state, filename in self.SPRITE_FILES.items():
-            relative_path = os.path.join(base_path, filename)
+        for state, filename in DEMON_SPRITE_FILES.items():
+            relative_path = os.path.join(DEMON_SPRITES_BASE_PATH, filename)
             full_path = resource_path(relative_path)
             if os.path.exists(full_path):
                 try:

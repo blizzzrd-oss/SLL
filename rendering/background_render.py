@@ -6,7 +6,8 @@ import math
 import os
 import random
 import time
-from config import TILE_SIZE, BIOME_TILES, BIOME_FALLBACK_COLORS
+from config import TILE_SIZE
+from config_images import BIOME_TILES, BIOME_FALLBACK_COLORS
 from utils.resource_path import resource_path
 
 # Background tile patterns

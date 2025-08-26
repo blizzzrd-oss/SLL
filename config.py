@@ -6,6 +6,7 @@ from config_enemies import *
 from config_waves import *
 from config_pickables import *
 from config_sounds import *
+from config_images import *
 
 # =============================================================================
 # CAMERA AND WORLD CONFIGURATION
@@ -19,45 +20,6 @@ BACKGROUND_TILE_BUFFER = 5  # Extra tiles for background rendering
 CAMERA_FOLLOW_SPEED = 1.0  # 1.0 = instant, lower = smoother
 CAMERA_DEADZONE = 50  # Pixel deadzone around center before camera moves
 
-# Background Biome Configuration
-BIOME_TILES = {
-    'grass': [
-        ('resources/images/Tiles/bg/tile_grass1.jpg', 10),  # (path, weight%)
-        ('resources/images/Tiles/bg/tile_grass2.jpg', 60),
-        ('resources/images/Tiles/bg/tile_grass3.jpg', 10),
-        ('resources/images/Tiles/bg/tile_grass4.jpg', 18),
-        ('resources/images/Tiles/bg/grass_stone_5.jpg', 0.2),
-        ('resources/images/Tiles/bg/tile_grass_wood1.jpg', 0.2),
-        ('resources/images/Tiles/bg/tile_grass_wood2.jpg', 0.2),
-        ('resources/images/Tiles/bg/tile_grass_wood3.jpg', 0.2),
-    ],
-    'grass_plant_yellow': [
-        ('resources/images/Tiles/bg/tile_grass2.jpg', 68),
-        ('resources/images/Tiles/bg/tile_grass4.jpg', 5),
-        ('resources/images/Tiles/bg/tile_plant_y_1.jpg', 10),
-        ('resources/images/Tiles/bg/tile_plant_y_2.jpg', 10),
-        ('resources/images/Tiles/bg/tile_plant_y_3.jpg', 5),
-        ('resources/images/Tiles/bg/grass_stone_1.jpg', 0.1),
-		('resources/images/Tiles/bg/grass_stone_2.jpg', 1),
-    ],
-    'grass_plant_red': [
-        ('resources/images/Tiles/bg/tile_grass2.jpg', 66),
-        ('resources/images/Tiles/bg/tile_grass4.jpg', 5),
-        ('resources/images/Tiles/bg/tile_plant_r_1.jpg', 10),
-        ('resources/images/Tiles/bg/tile_plant_r_2.jpg', 10),
-        ('resources/images/Tiles/bg/tile_plant_r_3.jpg', 5),
-        ('resources/images/Tiles/bg/grass_stone_4.jpg', 1),
-        ('resources/images/Tiles/bg/grass_stone_3.jpg', 1),
-    ]
-}
-
-# Fallback colors if images don't exist
-BIOME_FALLBACK_COLORS = {
-    'grass': (60, 140, 40),
-    'grass_plant_yellow': (101, 67, 33),
-    'grass_plant_red': (140, 40, 40)
-}
-
 # =============================================================================
 # SKILL CONFIGURATION
 # =============================================================================
@@ -65,7 +27,6 @@ SKILL_COOLDOWN = 0.5  # Default cooldown for skills (seconds)
 
 # Slash Skill Configuration
 SLASH_FRAME_COUNT = 5
-SLASH_SHEET_PATH = 'resources/images/player_melee/slash/player_melee_slash.png'
 
 # Dash Skill Configuration
 DASH_RANGE = 100
@@ -124,19 +85,9 @@ SLASH_COOLDOWN = 1.0
 SLASH_DAMAGE = 10
 SLASH_ARC_DEGREES = 190
 SLASH_DURATION = 0.25
-SLASH_SHEET_PATH = os.path.join('resources', 'images', 'player_melee', 'slash', 'player_melee_slash.png')
 SLASH_FRAME_COUNT = 5
 
-# Player Sprite Configuration
-PLAYER_IDLE_SPRITE = 'resources/images/player/Idle/Slime1_Idle_full.png'
-PLAYER_WALK_SPRITE = 'resources/images/player/Walk/Slime1_Walk_full.png'
-PLAYER_RUN_SPRITE = 'resources/images/player/Run/Slime1_Run_full.png'
-PLAYER_HURT_HP_SPRITE = 'resources/images/player/Hurt/Slime1_Hurt_full_hp.png'
-PLAYER_HURT_BARRIER_SPRITE = 'resources/images/player/Hurt/Slime1_Hurt_full_barrier.png'
-
 # Player Animation Configuration
-PLAYER_SPRITE_FRAME_WIDTH = 64
-PLAYER_SPRITE_FRAME_HEIGHT = 64
 PLAYER_IDLE_ANIMATION_FPS = 6
 PLAYER_WALK_ANIMATION_FPS = 10
 PLAYER_RUN_ANIMATION_FPS = 14
@@ -223,7 +174,6 @@ RECEIVED_LOG_MAX_ENTRIES = 50
 # PICKABLE SYSTEM CONFIGURATION
 # =============================================================================
 # Reroll Dice Pickable
-REROLL_DICE_SPRITE = "resources/images/pickabels/reroll_dice.png"
 REROLL_DICE_FRAME_SIZE = 16  # 16x16 frames
 REROLL_DICE_FRAME_COUNT = 6  # 6 different frames
 REROLL_DICE_ANIMATION_FPS = 4  # Slow animation for visibility
@@ -232,42 +182,36 @@ REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 
 # XP Pickable Configuration
 # Green Crystal (Base)
-XP_GREEN_SPRITE = "resources/images/pickabels/crystal_green.png"
 XP_GREEN_FRAME_SIZE = (11, 16)  # Each frame is 11x16 pixels
 XP_GREEN_FRAME_COUNT = 6  # 6 frames in the animation
 XP_GREEN_ANIMATION_FPS = 8  # Animation speed
 XP_GREEN_XP_VALUE = 1  # Each green crystal gives 1 XP
 
 # Yellow Crystal
-XP_YELLOW_SPRITE = "resources/images/pickabels/crystal_yellow.png"
 XP_YELLOW_FRAME_SIZE = (11, 16)
 XP_YELLOW_FRAME_COUNT = 6
 XP_YELLOW_ANIMATION_FPS = 8
 XP_YELLOW_XP_VALUE = 2
 
 # Light Blue Crystal
-XP_LIGHT_BLUE_SPRITE = "resources/images/pickabels/crystal_lightblue.png"
 XP_LIGHT_BLUE_FRAME_SIZE = (11, 16)
 XP_LIGHT_BLUE_FRAME_COUNT = 6
 XP_LIGHT_BLUE_ANIMATION_FPS = 8
 XP_LIGHT_BLUE_XP_VALUE = 5
 
 # Blue Crystal
-XP_BLUE_SPRITE = "resources/images/pickabels/crystal_blue.png"
 XP_BLUE_FRAME_SIZE = (11, 16)
 XP_BLUE_FRAME_COUNT = 6
 XP_BLUE_ANIMATION_FPS = 8
 XP_BLUE_XP_VALUE = 10
 
 # Red Crystal
-XP_RED_SPRITE = "resources/images/pickabels/crystal_red.png"
 XP_RED_FRAME_SIZE = (11, 16)
 XP_RED_FRAME_COUNT = 6
 XP_RED_ANIMATION_FPS = 8
 XP_RED_XP_VALUE = 25
 
 # Purple Crystal
-XP_PURPLE_SPRITE = "resources/images/pickabels/crystal_purple.png"
 XP_PURPLE_FRAME_SIZE = (11, 16)
 XP_PURPLE_FRAME_COUNT = 6
 XP_PURPLE_ANIMATION_FPS = 8
@@ -301,14 +245,3 @@ PLAYER_RECEIVED_LOG_MAX_ENTRIES = 10  # Death log shows last 10 events before de
 # =============================================================================
 SAVEGAME_PATH = "savegame.sav"
 SETTINGS_FILE_NAME = "settings.json"
-
-# Grass tile directory
-GRASS_TILES_PATH = "resources/images/Tiles/grass"
-
-# Menu button images
-MENU_BUTTON_IMAGE_PATH = r'C:\Repos\SLL\resources\images\UI\menu\buttons\slime_button_292x145.png'
-MENU_BUTTON_WIDTH = 292
-MENU_BUTTON_HEIGHT = 145
-
-# Game mode selection image
-GAMEMODE_SELECT_IMAGE_PATH = r'C:\Repos\SLL\resources\images\UI\menu\buttons\slect_game_mode.png'

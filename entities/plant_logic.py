@@ -3,20 +3,13 @@ import os
 import random
 from utils.resource_path import resource_path
 from audio.sound_manager import SoundManager
+from config_images import PLANT_SPRITE_FILES, PLANT_SPRITES_BASE_PATH
 
 
 class PlantEnemyLogic:
     """
     Handles movement, animation, and attack logic for Plant enemies.
     """
-    SPRITE_PATH = os.path.join('resources', 'images', 'enemies', 'Plant')
-    ANIMATIONS = {
-        'idle': 'Plant_Idle_full.png',
-        'walk': 'Plant_Walk_full.png',
-        'run': 'Plant_Run_full.png',
-        'death': 'Plant_Death_full.png',
-        'attack': 'Plant_Attack_full.png',
-    }
     FRAME_COUNTS = {
         'idle': 8,  # 256px / 8 = 32px per frame
         'walk': 6,  # Updated: 6 frames per direction
@@ -59,8 +52,8 @@ class PlantEnemyLogic:
         STANDARD_FRAME_WIDTH = 64
         STANDARD_FRAME_HEIGHT = 64
         
-        for state, fname in self.ANIMATIONS.items():
-            path = resource_path(os.path.join(self.SPRITE_PATH, fname))
+        for state, fname in PLANT_SPRITE_FILES.items():
+            path = resource_path(os.path.join(PLANT_SPRITES_BASE_PATH, fname))
             
             if os.path.exists(path):
                 img = pygame.image.load(path).convert_alpha()
