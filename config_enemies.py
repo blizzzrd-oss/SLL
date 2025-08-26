@@ -8,7 +8,7 @@ All enemy-related settings including types, spawning, and AI behavior.
 # =============================================================================
 ENEMY_TYPE_CONFIG = {
 	'Plant': {
-		'max_health': 10,
+		'max_health': 15,
 		'size': 48,
 		'speed': 50,
 		'color': (80, 200, 80),
