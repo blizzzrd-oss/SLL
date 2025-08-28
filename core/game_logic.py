@@ -55,7 +55,11 @@ class GameLogicManager:
         # Update core game systems
         self.game.update(dt)
         
-        # Update enemy management
+        # Update player skills with auto-targeting BEFORE enemy management
+        # This ensures knockback effects are applied before pickables are dropped
+        self._update_player_skills(dt, event_handler)
+        
+        # Update enemy management (this processes status effects and drops pickables)
         self._update_enemies(dt)
         
         # Update projectile system
@@ -63,9 +67,6 @@ class GameLogicManager:
         
         # Update pickable system
         self.game.pickable_manager.update(dt, self.game.player)
-        
-        # Update player skills with auto-targeting
-        self._update_player_skills(dt, event_handler)
         
         # Update player animation timers
         if self.game.player.anim_lock:

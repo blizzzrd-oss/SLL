@@ -99,6 +99,18 @@ class KnockbackEffect(StatusEffect):
     def apply(self, enemy):
         """Apply knockback to enemy."""
         if not self.applied:
+            # Don't apply knockback to dead enemies to avoid visual mismatch
+            # between death animation position and pickup spawn position
+            if hasattr(enemy, 'health') and enemy.health <= 0:
+                self.applied = True  # Mark as applied but don't move the enemy
+                return
+            
+            # Don't apply knockback to enemies in death state
+            if (hasattr(enemy, 'logic') and hasattr(enemy.logic, 'state') and 
+                enemy.logic.state == 'death'):
+                self.applied = True  # Mark as applied but don't move the enemy
+                return
+            
             # Apply immediate position change
             enemy.x += self.direction[0] * self.force
             enemy.y += self.direction[1] * self.force

@@ -224,6 +224,13 @@ class HeroEnemyLogic:
         # Normal movement and attack logic - only when not in special states
         prev_state = self.state
         
+        # Check if stunned - if so, don't process movement or attack logic
+        if getattr(self.enemy, 'is_stunned', False):
+            # When stunned, force idle state and don't process any other logic
+            if self.state not in ['block', 'attack']:  # Don't interrupt ongoing animations
+                self.state = 'idle'
+            return  # Skip all movement and attack logic when stunned
+        
         # Calculate distance to player
         px, py = player.rect.center if hasattr(player, 'rect') else (player.x, player.y)
         ex, ey = self.enemy.position

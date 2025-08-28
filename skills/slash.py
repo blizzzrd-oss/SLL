@@ -107,6 +107,10 @@ class SlashSkill(Skill):
         for entity in filtered_entities:
             if entity in self.hit_entities:
                 continue
+            # Only process entities that can take damage (enemies)
+            # This prevents pickables and other non-enemy entities from being affected
+            if not hasattr(entity, 'take_damage'):
+                continue
             if self._in_slash_arc(entity):
                 # Apply damage with enhancements
                 damage = self._check_double_damage(self.base_damage)
@@ -319,6 +323,11 @@ class SlashSkill(Skill):
         """Apply slash-specific enhancements to hit entity."""
         import math
         from entities.status_effects import StunEffect, KnockbackEffect
+        
+        # Only apply status effects to entities that have a status manager (enemies)
+        # This prevents pickables and other non-enemy entities from being affected
+        if not hasattr(entity, 'status_manager'):
+            return
         
         # Stun enhancement
         stun_chance = self.user.get_enhancement_value('stun_chance', 'slash')

@@ -19,13 +19,13 @@ REROLL_DICE_REROLL_CHARGES = 1  # Grants 1 reroll charge
 XP_GREEN_FRAME_SIZE = (11, 16)  # Each frame is 11x16 pixels
 XP_GREEN_FRAME_COUNT = 6  # 6 frames in the animation
 XP_GREEN_ANIMATION_FPS = 8  # Animation speed
-XP_GREEN_XP_VALUE = 1 # Each green crystal gives 1 XP
+XP_GREEN_XP_VALUE = 100 # Each green crystal gives 1 XP
 
 # Yellow Crystal
 XP_YELLOW_FRAME_SIZE = (11, 16)
 XP_YELLOW_FRAME_COUNT = 6
 XP_YELLOW_ANIMATION_FPS = 8
-XP_YELLOW_XP_VALUE = 2
+XP_YELLOW_XP_VALUE = 200
 
 # Light Blue Crystal
 XP_LIGHT_BLUE_FRAME_SIZE = (11, 16)
@@ -92,7 +92,7 @@ PICKABLE_FLOAT_SPEED = 2.0  # Speed of floating animation
 # pickables. These control how many attempts to try and how far from the original
 # drop point to search (in pixels).
 PICKABLE_SPAWN_OFFSET_ATTEMPTS = 20  # How many random placement attempts to try
-PICKABLE_SPAWN_OFFSET_MAX_RADIUS = 50  # Maximum radius (pixels) to search for free spot
+PICKABLE_SPAWN_OFFSET_MAX_RADIUS = 5  # Maximum radius (pixels) to search for free spot
 
 # Enhancement System Configuration
 ENHANCEMENT_BASE_REROLL_CHARGES = 1  # Player starts with 1 reroll charge
