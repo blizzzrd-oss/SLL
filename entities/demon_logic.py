@@ -196,6 +196,13 @@ class DemonEnemyLogic:
 
         # Handle hurt animation - can be interrupted by death
         if self.state == 'hurt':
+            # Check if stunned while hurt - stun should interrupt hurt animation
+            if getattr(self.enemy, 'is_stunned', False):
+                self.state = 'idle'
+                self.anim_frame = 0
+                self.anim_timer = 0.0
+                return  # Exit immediately when stunned
+                
             self.hurt_timer += dt
             self.anim_timer += dt
             if self.anim_timer > 0.1:  # Hurt animation speed

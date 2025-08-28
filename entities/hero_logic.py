@@ -177,6 +177,14 @@ class HeroEnemyLogic:
 
         # Handle blocking animation
         if self.state == 'block':
+            # Check if stunned while blocking - stun should interrupt block
+            if getattr(self.enemy, 'is_stunned', False):
+                self.blocking = False
+                self.state = 'idle'
+                self.anim_frame = 0
+                self.anim_timer = 0.0
+                return  # Exit immediately when stunned
+                
             self.block_timer += dt
             self.anim_timer += dt
             if self.anim_timer > 0.1:  # 100ms animation speed
@@ -203,6 +211,13 @@ class HeroEnemyLogic:
 
         # Handle attack animation - cannot be interrupted by blocking
         if self.state == 'attack':
+            # Check if stunned while attacking - stun should interrupt attack
+            if getattr(self.enemy, 'is_stunned', False):
+                self.state = 'idle'
+                self.anim_frame = 0
+                self.anim_timer = 0.0
+                return  # Exit immediately when stunned
+                
             self.anim_timer += dt
             if self.anim_timer > 0.1:  # 100ms animation speed
                 self.anim_frame += 1
